@@ -32,20 +32,13 @@ public class DataSeeder {
             LOG.info("Database already seeded — skipping.");
             return;
         }
-        LOG.info("First launch detected — seeding sample data...");
-        try {
-            seedBooks();
-            seedMembers();
-            seedTransactions();
-            markSeeded();
-            LOG.info("Data seeding complete.");
-        } catch (Exception e) {
-            LOG.warning("Seeding error (non-fatal): " + e.getMessage());
-        }
+        LOG.info("First launch — fresh database ready.");
+        markSeeded();
     }
 
-    // ── Books ─────────────────────────────────────────────────────────────────
+    // ── Books (disabled) ──────────────────────────────────────────────────────
 
+    @SuppressWarnings("unused")
     private void seedBooks() {
         Object[][] data = {
             // isbn, title, author, publisher, year, edition, category, qty, shelf
@@ -100,8 +93,9 @@ public class DataSeeder {
         LOG.info("Seeded " + data.length + " books.");
     }
 
-    // ── Members ───────────────────────────────────────────────────────────────
+    // ── Members (disabled) ────────────────────────────────────────────────────
 
+    @SuppressWarnings("unused")
     private void seedMembers() {
         Object[][] data = {
             // name, fname, gender, contact, email, dept, program, semester
@@ -141,8 +135,9 @@ public class DataSeeder {
         LOG.info("Seeded " + data.length + " members.");
     }
 
-    // ── Transactions ──────────────────────────────────────────────────────────
+    // ── Transactions (disabled) ───────────────────────────────────────────────
 
+    @SuppressWarnings("unused")
     private void seedTransactions() {
         // Issue books to first 10 members (book IDs 1-10, member IDs 1-10)
         int issued = 0;
