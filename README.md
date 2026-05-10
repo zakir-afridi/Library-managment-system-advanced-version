@@ -76,17 +76,6 @@ run.bat
 > First run builds the JAR automatically. Subsequent runs skip the build and launch instantly.  
 > To force a rebuild: `run.bat --rebuild`
 
-### Run (Maven directly)
-
-```bash
-cd Library-managment-system-advanced-version/Library
-mvn clean package -DskipTests
-java --module-path "target/lib/javafx-controls-21.0.1.jar;..." \
-     --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base,javafx.swing \
-     -cp "target/library-management-system-2.0.0.jar;target/lib/*" \
-     com.library.LibraCoreApp
-```
-
 ---
 
 ## 🔑 Login
@@ -98,27 +87,6 @@ java --module-path "target/lib/javafx-controls-21.0.1.jar;..." \
 | Recovery Key | `03150315` |
 
 > Roles: `ADMIN` (full access) · `LIBRARIAN` (read/write, no admin settings)
-
----
-
-## 🗄️ Database Schema
-
-| Table | Purpose |
-|-------|---------|
-| `users` | Login accounts, BCrypt hashes, roles, failed attempts |
-| `books` | Catalogue with ISBN, category, quantity, shelf location |
-| `members` | Library members with fine balance, membership type |
-| `transactions` | Issue/return records with fine calculation |
-| `employees` | Staff records |
-| `reservations` | Book reservation queue |
-| `activity_log` | Full audit trail |
-| `archive_log` | Archive reason tracking |
-| `id_counters` | Atomic structured ID generation |
-| `settings` | Key/value config store |
-
-- **Engine:** SQLite 3.46 · WAL mode · Connection pool (size 5)
-- **File:** `library.db` (created automatically on first run)
-- **Indexes:** isbn, book_name, category, author, student_id, name, email, due_date
 
 ---
 
@@ -142,55 +110,16 @@ java --module-path "target/lib/javafx-controls-21.0.1.jar;..." \
 Library-managment-system-advanced-version/
 ├── run.bat                          ← Windows launcher (build + run)
 └── Library/
-    ├── pom.xml                      ← Maven build file
-    ├── .mvn/jvm.config              ← JVM flags
-    └── src/main/
-        ├── java/com/library/
-        │   ├── LibraCoreApp.java    ← ONLY main() in entire project
-        │   ├── auth/               ← Login, forgot password, reset
-        │   ├── books/              ← Book CRUD branch
-        │   ├── members/            ← Member CRUD branch
-        │   ├── employees/          ← Employee CRUD branch
-        │   ├── issuing/            ← Issue/Return branch
-        │   ├── dashboard/          ← Charts & stats branch
-        │   ├── reports/            ← PDF/CSV reports branch
-        │   ├── shared/             ← DB, models, utilities
-        │   ├── controller/         ← JavaFX FXML controllers
-        │   ├── service/            ← Business logic
-        │   ├── model/              ← Plain Java beans
-        │   ├── database/           ← Connection pool + DataSeeder
-        │   ├── security/           ← BCrypt, SessionManager
-        │   ├── config/             ← AppConfig, ThemeManager
-        │   └── util/               ← IdGenerator, Constants, PageRequest
-        └── resources/com/library/ui/
-            ├── *.fxml              ← UI layouts
-            ├── css/                ← light-theme.css, dark-theme.css
-            └── images/             ← Icons
+    ├── pom.xml
+    └── src/main/java/com/library/
+        ├── LibraCoreApp.java        ← ONLY main() in entire project
+        ├── auth/  books/  members/  employees/
+        ├── issuing/  dashboard/  reports/
+        ├── shared/  controller/  service/
+        ├── model/  database/  security/
+        ├── config/  util/
+        └── resources/ (FXML, CSS, images)
 ```
-
----
-
-## ⚙️ Configuration
-
-Settings are stored in `libra_config.properties` next to the JAR:
-
-| Key | Default | Description |
-|-----|---------|-------------|
-| `loan.days` | `14` | Default loan period |
-| `fine.rate` | `5.0` | Fine per day (PKR) |
-| `grace.period` | `2` | Grace days before fine |
-| `max.books` | `5` | Max books per member |
-| `currency` | `PKR` | Display currency |
-| `ui.theme` | `light` | `light` or `dark` |
-
----
-
-## 🎨 UI Design
-
-- **Primary:** `#1976d2` (blue) · **Accent:** `#d32f2f` (red) · **Success:** `#388e3c` (green)
-- **Min window:** 1024×768 · Sidebar collapses on narrow screens
-- **Forms:** Two-column grid · Inline validation · Red border on error fields
-- **Tables:** Sortable · Paginated (20 rows) · Row hover · Colour-coded status
 
 ---
 
@@ -207,15 +136,27 @@ Settings are stored in `libra_config.properties` next to the JAR:
 - [ ] Email overdue notifications via SMTP *(P1)*
 - [ ] Student CRUD UI *(in progress)*
 - [ ] Multi-language / i18n *(P2)*
-- [ ] Scheduled DB backups *(P2)*
 
 ---
 
-## 👨‍💻 Author
+## ⚙️ Configuration
 
-**Zakir Afridi**  
-University of Engineering & Technology, Peshawar  
-Data Science Student
+Settings stored in `libra_config.properties` next to the JAR:
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `loan.days` | `14` | Default loan period |
+| `fine.rate` | `5.0` | Fine per day (PKR) |
+| `grace.period` | `2` | Grace days before fine |
+| `max.books` | `5` | Max books per member |
+| `currency` | `PKR` | Display currency |
+| `ui.theme` | `light` | `light` or `dark` |
+
+---
+
+## 👨💻 Author
+
+**Zakir Afridi** — University of Engineering & Technology, Peshawar
 
 ---
 
