@@ -1,4 +1,4 @@
-# 📚 LibraCore Pro v2.0.0
+# LibraCore Pro v2.0.0
 
 <div align="center">
 
@@ -15,70 +15,57 @@ Built with Java 17 · JavaFX 21 · SQLite · Branch-Per-Module Architecture
 
 ---
 
-## ✨ Features
+## Features
 
 | Module | What It Does |
 |--------|-------------|
-| 🔐 **Auth** | Login, forgot password (recovery key: `03150315`), BCrypt hashing, 30-min auto-logout |
-| 📊 **Dashboard** | KPI cards, PieChart, BarChart, 30s auto-refresh, overdue alerts |
-| 📚 **Books** | Add / Edit / Delete / Search by title, author, ISBN · Archive & Restore |
-| 👥 **Members** | Full CRUD · Student ID generation (`LIB-YYYY-NNNN`) · Fine tracking |
-| 👤 **Employees** | Staff CRUD · EP code generation · Profile PDF print |
-| 🔄 **Issue / Return** | Issue books · Auto fine calculation (PKR 5/day, 2-day grace) · Return with condition |
-| 📈 **Reports** | Overdue · Circulation · Inventory · Fine Collection · Popular Books — all PDF export |
-| ⚙️ **Settings** | Loan days · Fine rate · Theme · Library name · DB backup/restore |
+| **Auth** | Login, forgot password (recovery key: `03150315`), BCrypt hashing, 30-min auto-logout |
+| **Dashboard** | KPI cards, PieChart, BarChart, 30s auto-refresh, overdue alerts |
+| **Books** | Add / Edit / Delete / Search by title, author, ISBN · Archive & Restore |
+| **Members** | Full CRUD · Student ID generation (`LIB-YYYY-NNNN`) · Fine tracking |
+| **Employees** | Staff CRUD · EP code generation · Profile PDF print |
+| **Issue / Return** | Issue books · Auto fine calculation (PKR 5/day, 2-day grace) · Return with condition |
+| **Reports** | Overdue · Circulation · Inventory · Fine Collection · Popular Books — all PDF export |
+| **Settings** | Loan days · Fine rate · Theme · Library name · DB backup/restore |
 
 ### Additional Capabilities
-- ✅ CSV import/export for books and members
-- ✅ Light / Dark theme switching
-- ✅ Toast notifications + activity audit log
-- ✅ Global search with Trie (300ms debounce)
-- ✅ Paginated tables (sortable, 20 rows/page)
-- ✅ Inline form validation with field-level error highlighting
-- ✅ Structured ID generation (`BK00000001`, `ST00000001`, `EP00000001`)
-- ✅ Archive / Unarchive with reason tracking
+- CSV import/export for books and members
+- Light / Dark theme switching
+- Toast notifications + activity audit log
+- Global search with Trie (300ms debounce)
+- Paginated tables (sortable, 20 rows/page)
+- Inline form validation with field-level error highlighting
+- Structured ID generation (`BK00000001`, `ST00000001`, `EP00000001`)
+- Archive / Unarchive with reason tracking
 
 ---
 
-## 🏗️ Architecture — Branch-Per-Module Tree
+## Architecture
 
 ```
-LibraCoreApp (Main Trunk — ONLY entry point)
-│
-├── auth/           ← AuthModule, AuthService, AuthController
-├── dashboard/      ← DashboardModule, DashboardService, ChartFactory
-├── books/          ← BookModule, BooksService, BookController
-├── members/        ← MemberModule, MembersService, MemberController
-├── employees/      ← EmployeeModule, EmployeesService, EmployeeController
-├── issuing/        ← IssueModule, IssueService, FineCalculator
-├── reports/        ← ReportModule, ReportsService, ReportController
-└── shared/         ← DatabaseManager, Models, ValidationUtil, Constants
+LibraCoreApp (Main Trunk)
+|-- auth/        |-- dashboard/   |-- books/
+|-- members/     |-- employees/   |-- issuing/
+|-- reports/     `-- shared/
 ```
 
-Each branch exposes **only static methods** — no direct controller coupling between branches.  
-This reduces AI token usage by **82–85%** when fixing bugs (scan only the relevant branch).
+Each branch exposes only static methods — no direct controller coupling between branches.
 
 ---
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Java 17+ ([Download](https://adoptium.net/))
-- Maven (auto-detected from `~/.m2/wrapper`)
-
-### Run (Windows)
+## Quick Start
 
 ```bat
 cd Library-managment-system-advanced-version
 run.bat
 ```
 
-> First run builds the JAR automatically. Subsequent runs skip the build and launch instantly.  
-> To force a rebuild: `run.bat --rebuild`
+> First run builds the JAR. Subsequent runs skip build and launch instantly.  
+> Force rebuild: `run.bat --rebuild`
 
 ---
 
-## 🔑 Login
+## Login
 
 | Field | Value |
 |-------|-------|
@@ -86,11 +73,9 @@ run.bat
 | Password | `admin` |
 | Recovery Key | `03150315` |
 
-> Roles: `ADMIN` (full access) · `LIBRARIAN` (read/write, no admin settings)
-
 ---
 
-## 📦 Tech Stack
+## Tech Stack
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
@@ -104,26 +89,24 @@ run.bat
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Library-managment-system-advanced-version/
-├── run.bat                          ← Windows launcher (build + run)
-└── Library/
-    ├── pom.xml
-    └── src/main/java/com/library/
-        ├── LibraCoreApp.java        ← ONLY main() in entire project
-        ├── auth/  books/  members/  employees/
-        ├── issuing/  dashboard/  reports/
-        ├── shared/  controller/  service/
-        ├── model/  database/  security/
-        ├── config/  util/
-        └── resources/ (FXML, CSS, images)
+|-- run.bat
+`-- Library/
+    |-- pom.xml
+    `-- src/main/java/com/library/
+        |-- LibraCoreApp.java    <- ONLY main()
+        |-- auth/  books/  members/  employees/
+        |-- issuing/  dashboard/  reports/
+        |-- shared/  controller/  service/
+        `-- model/  database/  security/  config/  util/
 ```
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [x] Core CRUD — Books, Members, Employees
 - [x] Issue / Return with fine calculation
@@ -139,9 +122,7 @@ Library-managment-system-advanced-version/
 
 ---
 
-## ⚙️ Configuration
-
-Settings stored in `libra_config.properties` next to the JAR:
+## Configuration
 
 | Key | Default | Description |
 |-----|---------|-------------|
@@ -154,12 +135,18 @@ Settings stored in `libra_config.properties` next to the JAR:
 
 ---
 
-## 👨💻 Author
+## Authors
 
-**Zakir Afridi** — University of Engineering & Technology, Peshawar
+**Zakir Afridi**  
+University of Engineering & Technology, Peshawar  
+Data Science Student
+
+**Muhammad Usman Nazir**  
+University of Engineering & Technology, Peshawar  
+Data Science Student
 
 ---
 
 <div align="center">
-Made with ☕ Java · 📚 LibraCore Pro v2.0.0
+Made with Java · LibraCore Pro v2.0.0
 </div>
