@@ -1,0 +1,34 @@
+# Build output
+target/
+*.class
+*.jar
+*.war
+
+# Database files (runtime data — not source)
+*.db
+*.db-shm
+*.db-wal
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# Maven wrapper cache
+.mvn/wrapper/maven-wrapper.jar
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Old MySQL connector (not needed — using SQLite)
+mysql-connector-j-9.2.0/
+
+# Old Library folder (replaced by Library-managment-system-advanced-version)
+Library/
