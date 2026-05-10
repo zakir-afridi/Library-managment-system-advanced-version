@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.BookController"
+            styleClass="main-container">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Text text="📚 Book Management" styleClass="app-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="themeBtn" text="🌙" styleClass="top-btn" onAction="#toggleTheme"/>
+        </HBox>
+    </top>
+
+    <!-- MAIN SPLIT -->
+    <center>
+        <SplitPane dividerPositions="0.65" style="-fx-background-color:transparent;">
+
+            <!-- LEFT: Table panel -->
+            <VBox spacing="12" style="-fx-background-color:transparent;">
+                <padding><Insets top="20" right="12" bottom="20" left="20"/></padding>
+
+                <!-- Search + filter bar -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="searchField" promptText="🔍 Search title, author, ISBN, category..."
+                               prefWidth="320" styleClass="search-field"
+                               onKeyReleased="#handleSearch"/>
+                    <ComboBox fx:id="categoryFilter" promptText="All Categories" prefWidth="160"
+                              onAction="#handleCategoryFilter"/>
+                    <ComboBox fx:id="statusFilter" promptText="All Status" prefWidth="130"
+                              onAction="#handleStatusFilter"/>
+                    <Button text="🔄" styleClass="top-btn" onAction="#handleRefresh"/>
+                </HBox>
+
+                <!-- Stats row -->
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <Label fx:id="totalLabel"     text="Total: 0"     style="-fx-font-weight:bold;"/>
+                    <Label fx:id="availableLabel" text="Available: 0" style="-fx-text-fill:#388e3c; -fx-font-weight:bold;"/>
+                    <Label fx:id="issuedLabel"    text="Issued: 0"    style="-fx-text-fill:#f57c00; -fx-font-weight:bold;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="📥 Import CSV"  styleClass="btn, btn-secondary" onAction="#importCsv"/>
+                    <Button text="📤 Export Excel" styleClass="btn, btn-secondary" onAction="#exportExcel"/>
+                </HBox>
+
+                <!-- Table -->
+                <TableView fx:id="bookTable" VBox.vgrow="ALWAYS"
+                           style="-fx-background-color:transparent;">
+                    <columns>
+                        <TableColumn fx:id="colId"        text="#"         prefWidth="45"/>
+                        <TableColumn fx:id="colIsbn"      text="BK Code"   prefWidth="120"/>
+                        <TableColumn fx:id="colTitle"     text="Title"     prefWidth="220"/>
+                        <TableColumn fx:id="colAuthor"    text="Author"    prefWidth="150"/>
+                        <TableColumn fx:id="colCategory"  text="Category"  prefWidth="120"/>
+                        <TableColumn fx:id="colQty"       text="Qty"       prefWidth="50"/>
+                        <TableColumn fx:id="colAvail"     text="Avail"     prefWidth="50"/>
+                        <TableColumn fx:id="colStatus"    text="Status"    prefWidth="90"/>
+                        <TableColumn fx:id="colActions"   text="Actions"   prefWidth="110"/>
+                    </columns>
+                    <placeholder><Label text="No books found. Add your first book →"/></placeholder>
+                </TableView>
+
+                <!-- Pagination -->
+                <HBox spacing="10" alignment="CENTER">
+                    <Button fx:id="prevPageBtn" text="◀ Prev" styleClass="btn, btn-secondary"
+                            onAction="#prevPage"/>
+                    <Label fx:id="pageLabel" text="Page 1 of 1"
+                           style="-fx-font-weight:bold; -fx-font-size:13px;"/>
+                    <Button fx:id="nextPageBtn" text="Next ▶" styleClass="btn, btn-secondary"
+                            onAction="#nextPage"/>
+                    <ComboBox fx:id="pageSizeCombo" prefWidth="90" onAction="#changePageSize"/>
+                </HBox>
+            </VBox>
+
+            <!-- RIGHT: Add / Edit form -->
+            <ScrollPane fitToWidth="true"
+                        style="-fx-background-color:transparent; -fx-background:transparent;">
+                <VBox spacing="14" styleClass="chart-container">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+                    <Text fx:id="formTitle" text="Add New Book" styleClass="section-title"/>
+                    <Separator/>
+
+                    <!-- Cover image -->
+                    <VBox alignment="CENTER" spacing="8">
+                        <ImageView fx:id="coverImageView" fitWidth="120" fitHeight="160"
+                                   preserveRatio="true"
+                                   style="-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.2),8,0,0,3);"/>
+                        <Button text="📷 Upload Cover" styleClass="btn, btn-secondary"
+                                onAction="#uploadCover"/>
+                    </VBox>
+
+                    <Label text="ISBN" style="-fx-font-weight:bold;"/>
+                    <TextField fx:id="isbnField" promptText="978-x-xxxx-xxxx-x"/>
+
+                    <Label text="Title *" style="-fx-font-weight:bold;"/>
+                    <TextField fx:id="titleField" promptText="Book title"/>
+
+                    <Label text="Author *" style="-fx-font-weight:bold;"/>
+                    <TextField fx:id="authorField" promptText="Author name"/>
+
+                    <Label text="Publisher" style="-fx-font-weight:bold;"/>
+                    <TextField fx:id="publisherField" promptText="Publisher"/>
+
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Year" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="yearField" promptText="2024"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Edition" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="editionField" promptText="1st"/>
+                        </VBox>
+                    </HBox>
+
+                    <Label text="Category" style="-fx-font-weight:bold;"/>
+                    <ComboBox fx:id="categoryCombo" prefWidth="10000" editable="true"
+                              promptText="Select or type category"/>
+
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Quantity *" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="quantityField" promptText="1"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Shelf Location" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="shelfField" promptText="A-1"/>
+                        </VBox>
+                    </HBox>
+
+                    <Label text="Description" style="-fx-font-weight:bold;"/>
+                    <TextArea fx:id="descriptionArea" promptText="Brief description..."
+                              prefRowCount="3" wrapText="true"/>
+
+                    <!-- Error label -->
+                    <Label fx:id="formErrorLabel" text="" wrapText="true"
+                           style="-fx-text-fill:#d32f2f; -fx-font-size:12px;"
+                           visible="false" managed="false"/>
+
+                    <!-- Buttons -->
+                    <HBox spacing="10">
+                        <Button fx:id="saveBtn" text="💾 Save Book" maxWidth="Infinity"
+                                HBox.hgrow="ALWAYS" prefHeight="40"
+                                styleClass="btn, btn-primary" onAction="#saveBook"/>
+                        <Button fx:id="clearFormBtn" text="✖ Clear" prefHeight="40"
+                                styleClass="btn, btn-secondary" onAction="#clearForm"/>
+                    </HBox>
+
+                </VBox>
+            </ScrollPane>
+
+        </SplitPane>
+    </center>
+
+</BorderPane>

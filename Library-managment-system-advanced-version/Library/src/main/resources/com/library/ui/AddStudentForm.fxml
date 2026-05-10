@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.library.ui.AddStudentController" styleClass="main-container" stylesheets="@css/ComprehensiveForms.css">
+   
+   <!-- TOP BAR -->
+   <top>
+      <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="20">
+         <padding>
+            <Insets top="15" right="25" bottom="15" left="25" />
+         </padding>
+         
+         <Button fx:id="backBtn" text="← Back to Dashboard" styleClass="back-btn" onAction="#goBackToDashboard" />
+         
+         <Region HBox.hgrow="ALWAYS" />
+         
+         <Text text="Add New Student" styleClass="page-title" />
+         
+         <Region HBox.hgrow="ALWAYS" />
+         
+         <Button fx:id="helpBtn" text="? Help" styleClass="help-btn" />
+      </HBox>
+   </top>
+   
+   <!-- MAIN CONTENT -->
+   <center>
+      <ScrollPane styleClass="content-scroll" fitToWidth="true" fitToHeight="true">
+         <VBox styleClass="form-container" spacing="30" alignment="TOP_CENTER">
+            <padding>
+               <Insets top="30" right="50" bottom="30" left="50" />
+            </padding>
+            
+            <!-- STUDENT PHOTO SECTION -->
+            <VBox styleClass="photo-section" spacing="15" alignment="CENTER">
+               <Text text="Student Photo" styleClass="section-title" />
+               
+               <VBox styleClass="photo-container" alignment="CENTER" spacing="10">
+                  <ImageView fx:id="studentPhotoView" fitWidth="150" fitHeight="180" preserveRatio="true" styleClass="photo-preview">
+                     <image>
+                        <Image url="@images/contact_book_contacts_notebook_icon_124667.png" />
+                     </image>
+                  </ImageView>
+                  
+                  <HBox spacing="10" alignment="CENTER">
+                     <Button fx:id="uploadPhotoBtn" text="📷 Upload Photo" styleClass="photo-btn" onAction="#uploadPhoto" />
+                     <Button fx:id="removePhotoBtn" text="🗑️ Remove" styleClass="photo-btn, remove-btn" onAction="#removePhoto" />
+                  </HBox>
+               </VBox>
+            </VBox>
+            
+            <!-- PERSONAL INFORMATION SECTION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Personal Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Full Name *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="fullNameField" promptText="Enter student full name" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  
+                  <Label text="Father Name *" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <TextField fx:id="fatherNameField" promptText="Enter father's name" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="Student ID *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TextField fx:id="studentIdField" promptText="Enter student ID" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="CNIC Number *" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="cnicField" promptText="00000-0000000-0" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  
+                  <!-- Row 3 -->
+                  <Label text="Date of Birth" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <DatePicker fx:id="dobPicker" promptText="Select date of birth" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  
+                  <Label text="Gender *" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="genderCombo" promptText="Select gender" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  
+                  <!-- Row 4 -->
+                  <Label text="Mobile Number *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                  <TextField fx:id="mobileField" promptText="03XX-XXXXXXX" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  
+                  <Label text="Email Address" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <TextField fx:id="emailField" promptText="student@email.com" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                  
+                  <!-- Row 5 -->
+                  <Label text="Emergency Contact" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                  <TextField fx:id="emergencyContactField" promptText="Emergency contact number" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  
+                  <Label text="Blood Group" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                  <ComboBox fx:id="bloodGroupCombo" promptText="Select blood group" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+               </GridPane>
+            </VBox>
+            
+            <!-- ADDRESS INFORMATION SECTION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Address Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Street Address" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="streetAddressField" promptText="House/Street address" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.columnSpan="3" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="City *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TextField fx:id="cityField" promptText="Enter city" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="Province" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="provinceCombo" promptText="Select province" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  
+                  <!-- Row 3 -->
+                  <Label text="Postal Code" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <TextField fx:id="postalCodeField" promptText="Enter postal code" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  
+                  <Label text="Country" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <TextField fx:id="countryField" text="Pakistan" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+               </GridPane>
+            </VBox>
+            
+            <!-- ACADEMIC INFORMATION SECTION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Academic Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Department *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <ComboBox fx:id="departmentCombo" promptText="Select department" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  
+                  <Label text="Program *" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <ComboBox fx:id="programCombo" promptText="Select program" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="Semester *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="semesterCombo" promptText="Select semester" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="Session *" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="sessionField" promptText="e.g., 2024-2025" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  
+                  <!-- Row 3 -->
+                  <Label text="Admission Date" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <DatePicker fx:id="admissionDatePicker" promptText="Select admission date" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  
+                  <Label text="Student Status" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="statusCombo" promptText="Select status" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+               </GridPane>
+            </VBox>
+            
+            <!-- LIBRARY INFORMATION SECTION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Library Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Library Card Number" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="libraryCardField" promptText="Auto-generated" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  
+                  <Label text="Book Limit" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <Spinner fx:id="bookLimitSpinner" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="Membership Type" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="membershipTypeCombo" promptText="Select membership type" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="Membership Expiry" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <DatePicker fx:id="membershipExpiryPicker" promptText="Select expiry date" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+               </GridPane>
+            </VBox>
+            
+            <!-- ADDITIONAL NOTES SECTION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Additional Information" styleClass="section-title" />
+               
+               <VBox spacing="10">
+                  <Label text="Notes / Comments" styleClass="field-label" />
+                  <TextArea fx:id="notesArea" promptText="Enter any additional notes or comments about the student..." 
+                           styleClass="form-field, text-area" prefRowCount="4" wrapText="true" />
+               </VBox>
+            </VBox>
+            
+            <!-- ACTION BUTTONS -->
+            <HBox styleClass="action-buttons" spacing="20" alignment="CENTER">
+               <Button fx:id="clearBtn" text="🗑️ Clear Form" styleClass="action-btn, clear-btn" onAction="#clearForm" />
+               <Button fx:id="previewBtn" text="👁️ Preview" styleClass="action-btn, preview-btn" onAction="#previewStudent" />
+               <Button fx:id="saveBtn" text="💾 Save Student" styleClass="action-btn, save-btn" onAction="#saveStudent" />
+               <Button fx:id="saveAndNewBtn" text="💾➕ Save & Add New" styleClass="action-btn, save-new-btn" onAction="#saveAndAddNew" />
+            </HBox>
+            
+         </VBox>
+      </ScrollPane>
+   </center>
+   
+</BorderPane>

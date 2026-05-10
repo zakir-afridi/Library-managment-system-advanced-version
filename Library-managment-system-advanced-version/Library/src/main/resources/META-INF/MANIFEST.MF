@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Main-Class: com.lib.library.LoginPage
+Class-Path: javafx-base-23.0.1-win.jar javafx-graphics-23.0.1-win.jar ja
+ vafx-fxml-23.0.1.jar controlsfx-11.2.1.jar javafx-swing-23.0.1-win.jar 
+ javafx-media-23.0.1.jar javafx-media-23.0.1-win.jar javafx-base-23.0.1.
+ jar formsfx-core-11.6.0.jar mysql-connector-j-8.4.0.jar javafx-controls
+ -23.0.1-win.jar javafx-fxml-23.0.1-win.jar protobuf-java-3.25.1.jar jav
+ afx-controls-23.0.1.jar javafx-swing-23.0.1.jar javafx-graphics-23.0.1.
+ jar
+

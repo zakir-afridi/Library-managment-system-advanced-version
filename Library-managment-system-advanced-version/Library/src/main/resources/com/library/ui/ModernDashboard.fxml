@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.DashboardController"
+            styleClass="main-container">
+
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Text fx:id="appTitleText" text="LibraCore Pro" styleClass="app-title"/>
+            <Text fx:id="moduleText" text="— Dashboard"
+                  style="-fx-font-size:14px; -fx-fill:rgba(255,255,255,0.7);"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="overdueAlertLabel" text="0 Overdue"
+                   style="-fx-background-color:#d32f2f; -fx-text-fill:white;
+                          -fx-background-radius:12; -fx-padding:4 12 4 12;
+                          -fx-font-size:12px; -fx-font-weight:bold;"
+                   visible="false" managed="false"/>
+            <Button fx:id="themeToggleBtn" text="🌙" onAction="#toggleTheme"
+                    styleClass="top-btn" style="-fx-font-size:14px;"/>
+            <Label fx:id="userLabel" text="Welcome, Admin" styleClass="user-label"/>
+            <Button fx:id="refreshBtn" text="Refresh" styleClass="top-btn" onAction="#handleRefresh"/>
+            <Button fx:id="logoutBtn" text="Logout" styleClass="logout-btn" onAction="#handleLogout"/>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox styleClass="sidebar" prefWidth="240" spacing="4">
+            <padding><Insets top="20" bottom="20"/></padding>
+            <Label text="NAVIGATION" styleClass="sidebar-header"/>
+            <Button fx:id="dashboardBtn"   text="Dashboard"     styleClass="sidebar-btn" onAction="#showDashboard"/>
+            <Button fx:id="booksBtn"       text="Books"         styleClass="sidebar-btn" onAction="#showBooks"/>
+            <Button fx:id="membersBtn"     text="Members"       styleClass="sidebar-btn" onAction="#showMembers"/>
+            <Button fx:id="issueReturnBtn" text="Issue / Return" styleClass="sidebar-btn" onAction="#showIssueReturn"/>
+            <Button fx:id="employeesBtn"   text="Employees"     styleClass="sidebar-btn" onAction="#showEmployees"/>
+            <Button fx:id="archiveBtn"     text="Archive"       styleClass="sidebar-btn" onAction="#showArchive"/>
+            <Button fx:id="reportsBtn"     text="Reports"       styleClass="sidebar-btn" onAction="#showReports"/>
+            <Button fx:id="settingsBtn"    text="Settings"      styleClass="sidebar-btn" onAction="#showSettings"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button fx:id="sidebarLogoutBtn" text="Logout" styleClass="sidebar-btn" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true"
+                    style="-fx-background-color:transparent; -fx-background:transparent;">
+            <VBox fx:id="mainContent" spacing="24" style="-fx-background-color:transparent;">
+                <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+                <VBox spacing="12">
+                    <Text text="System Overview" styleClass="section-title"/>
+                    <HBox spacing="16" alignment="CENTER_LEFT">
+
+                        <VBox styleClass="kpi-card, blue-card" spacing="8" prefWidth="190" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Text text="📚" styleClass="kpi-icon"/>
+                                <VBox>
+                                    <Text fx:id="totalBooksText" text="0" styleClass="kpi-number"/>
+                                    <Text text="Total Books" styleClass="kpi-label"/>
+                                    <Text fx:id="booksTrendText" text="→" styleClass="kpi-trend"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <VBox styleClass="kpi-card, green-card" spacing="8" prefWidth="190" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Text text="👥" styleClass="kpi-icon"/>
+                                <VBox>
+                                    <Text fx:id="totalMembersText" text="0" styleClass="kpi-number"/>
+                                    <Text text="Active Members" styleClass="kpi-label"/>
+                                    <Text fx:id="membersTrendText" text="→" styleClass="kpi-trend"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <VBox styleClass="kpi-card, orange-card" spacing="8" prefWidth="190" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Text text="📖" styleClass="kpi-icon"/>
+                                <VBox>
+                                    <Text fx:id="issuedBooksText" text="0" styleClass="kpi-number"/>
+                                    <Text text="Books Issued" styleClass="kpi-label"/>
+                                    <Text fx:id="issuedTodayText" text="0 today" styleClass="kpi-label"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <VBox styleClass="kpi-card, red-card" spacing="8" prefWidth="190" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Text text="⚠" styleClass="kpi-icon"/>
+                                <VBox>
+                                    <Text fx:id="overdueBooksText" text="0" styleClass="kpi-number"/>
+                                    <Text text="Overdue Books" styleClass="kpi-label"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <VBox styleClass="kpi-card, purple-card" spacing="8" prefWidth="190" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Text text="✓" styleClass="kpi-icon"/>
+                                <VBox>
+                                    <Text fx:id="availableBooksText" text="0" styleClass="kpi-number"/>
+                                    <Text text="Available Books" styleClass="kpi-label"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                    </HBox>
+                </VBox>
+
+                <HBox spacing="20">
+                    <VBox styleClass="chart-container" HBox.hgrow="ALWAYS" spacing="8">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Text text="Book Status Distribution" styleClass="chart-title"/>
+                        <PieChart fx:id="bookStatusChart" prefHeight="280" animated="true" labelsVisible="true"/>
+                    </VBox>
+                    <VBox styleClass="chart-container" HBox.hgrow="ALWAYS" spacing="8">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Text text="Monthly Borrowing Trend" styleClass="chart-title"/>
+                        <BarChart fx:id="monthlyBarChart" prefHeight="280" animated="true" legendVisible="false">
+                            <xAxis><CategoryAxis fx:id="barMonthAxis" label="Month"/></xAxis>
+                            <yAxis><NumberAxis fx:id="barCountAxis" label="Books"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="20" alignment="TOP_LEFT">
+                    <VBox styleClass="table-container" HBox.hgrow="ALWAYS" spacing="10">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Text text="Recent Activity" styleClass="section-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <TextField fx:id="searchField" promptText="Search..."
+                                       styleClass="search-field" prefWidth="200"/>
+                        </HBox>
+                        <TableView fx:id="activityTable" prefHeight="280"
+                                   style="-fx-background-color:transparent;">
+                            <columns>
+                                <TableColumn fx:id="memberColumn"  text="Member"  prefWidth="160"/>
+                                <TableColumn fx:id="bookColumn"    text="Book"    prefWidth="200"/>
+                                <TableColumn fx:id="actionColumn"  text="Action"  prefWidth="90"/>
+                                <TableColumn fx:id="dateColumn"    text="Date"    prefWidth="120"/>
+                                <TableColumn fx:id="statusColumn"  text="Status"  prefWidth="100"/>
+                            </columns>
+                            <placeholder><Label text="No recent activity"/></placeholder>
+                        </TableView>
+                    </VBox>
+
+                    <VBox styleClass="chart-container" prefWidth="220" spacing="12">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Text text="Quick Actions" styleClass="card-title"/>
+                        <Button text="Add New Book"   maxWidth="Infinity" prefHeight="40"
+                                styleClass="action-btn, primary-btn"   onAction="#addNewBook"/>
+                        <Button text="Add New Member" maxWidth="Infinity" prefHeight="40"
+                                styleClass="action-btn, secondary-btn" onAction="#addNewMember"/>
+                        <Button text="Issue Book"     maxWidth="Infinity" prefHeight="40"
+                                styleClass="action-btn, success-btn"   onAction="#issueBook"/>
+                        <Button text="Return Book"    maxWidth="Infinity" prefHeight="40"
+                                styleClass="action-btn, accent-btn"    onAction="#returnBook"/>
+                        <Button text="Reports"        maxWidth="Infinity" prefHeight="40"
+                                styleClass="action-btn, primary-btn"   onAction="#showReports"/>
+                        <Separator/>
+                        <VBox spacing="4">
+                            <Text text="Fines Collected" styleClass="kpi-label"/>
+                            <Text fx:id="finesCollectedText" text="PKR 0.00"
+                                  style="-fx-font-size:16px; -fx-font-weight:bold; -fx-fill:#388e3c;"/>
+                        </VBox>
+                        <VBox spacing="4">
+                            <Text text="Pending Fines" styleClass="kpi-label"/>
+                            <Text fx:id="pendingFinesText" text="PKR 0.00"
+                                  style="-fx-font-size:16px; -fx-font-weight:bold; -fx-fill:#d32f2f;"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

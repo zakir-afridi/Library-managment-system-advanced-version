@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.ArchiveController"
+            styleClass="main-container">
+
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Text text="📦 Archive" styleClass="app-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="themeBtn" text="🌙" styleClass="top-btn" onAction="#toggleTheme"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="16" style="-fx-background-color:transparent;">
+            <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+
+            <!-- Global search -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="globalSearchField"
+                           promptText="🔍 Search across all archives (name, ID, code)..."
+                           prefWidth="400" styleClass="search-field"
+                           onKeyReleased="#handleGlobalSearch"/>
+                <CheckBox fx:id="includeActiveCheck" text="Include Active Records"/>
+                <Button text="🔍 Search" styleClass="btn, btn-primary" onAction="#handleGlobalSearch"/>
+                <Button text="✖ Clear"  styleClass="btn, btn-secondary" onAction="#clearSearch"/>
+            </HBox>
+
+            <!-- Global search results (hidden until search) -->
+            <VBox fx:id="globalResultsPane" spacing="8" visible="false" managed="false"
+                  styleClass="chart-container">
+                <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+                <Text text="Search Results" styleClass="section-title"/>
+                <TableView fx:id="globalResultsTable" prefHeight="200">
+                    <columns>
+                        <TableColumn fx:id="grType"   text="Type"   prefWidth="90"/>
+                        <TableColumn fx:id="grCode"   text="Code"   prefWidth="120"/>
+                        <TableColumn fx:id="grName"   text="Name"   prefWidth="220"/>
+                        <TableColumn fx:id="grStatus" text="Status" prefWidth="90"/>
+                        <TableColumn fx:id="grExtra"  text="Info"   prefWidth="180"/>
+                    </columns>
+                    <placeholder><Label text="No results found."/></placeholder>
+                </TableView>
+            </VBox>
+
+            <!-- Tabbed archive views -->
+            <TabPane fx:id="archiveTabs" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+
+                <!-- Archived Members -->
+                <Tab text="👥 Archived Members">
+                    <VBox spacing="10">
+                        <padding><Insets top="12" right="0" bottom="0" left="0"/></padding>
+                        <TableView fx:id="memberArchiveTable" prefHeight="350">
+                            <columns>
+                                <TableColumn fx:id="amId"     text="ID"         prefWidth="55"/>
+                                <TableColumn fx:id="amCode"   text="Student ID" prefWidth="120"/>
+                                <TableColumn fx:id="amName"   text="Name"       prefWidth="180"/>
+                                <TableColumn fx:id="amDept"   text="Department" prefWidth="140"/>
+                                <TableColumn fx:id="amDate"   text="Archived"   prefWidth="110"/>
+                                <TableColumn fx:id="amAction" text="Action"     prefWidth="100"/>
+                            </columns>
+                            <placeholder><Label text="No archived members."/></placeholder>
+                        </TableView>
+                    </VBox>
+                </Tab>
+
+                <!-- Archived Books -->
+                <Tab text="📚 Archived Books">
+                    <VBox spacing="10">
+                        <padding><Insets top="12" right="0" bottom="0" left="0"/></padding>
+                        <TableView fx:id="bookArchiveTable" prefHeight="350">
+                            <columns>
+                                <TableColumn fx:id="abId"     text="ID"       prefWidth="55"/>
+                                <TableColumn fx:id="abCode"   text="Book Code" prefWidth="110"/>
+                                <TableColumn fx:id="abTitle"  text="Title"    prefWidth="220"/>
+                                <TableColumn fx:id="abAuthor" text="Author"   prefWidth="150"/>
+                                <TableColumn fx:id="abDate"   text="Archived" prefWidth="110"/>
+                                <TableColumn fx:id="abAction" text="Action"   prefWidth="100"/>
+                            </columns>
+                            <placeholder><Label text="No archived books."/></placeholder>
+                        </TableView>
+                    </VBox>
+                </Tab>
+
+                <!-- Archived Employees -->
+                <Tab text="👤 Archived Employees">
+                    <VBox spacing="10">
+                        <padding><Insets top="12" right="0" bottom="0" left="0"/></padding>
+                        <TableView fx:id="empArchiveTable" prefHeight="350">
+                            <columns>
+                                <TableColumn fx:id="aeId"     text="ID"       prefWidth="55"/>
+                                <TableColumn fx:id="aeCode"   text="Emp Code" prefWidth="110"/>
+                                <TableColumn fx:id="aeName"   text="Name"     prefWidth="180"/>
+                                <TableColumn fx:id="aeDesig"  text="Designation" prefWidth="140"/>
+                                <TableColumn fx:id="aeDate"   text="Archived" prefWidth="110"/>
+                                <TableColumn fx:id="aeAction" text="Action"   prefWidth="100"/>
+                            </columns>
+                            <placeholder><Label text="No archived employees."/></placeholder>
+                        </TableView>
+                    </VBox>
+                </Tab>
+
+            </TabPane>
+        </VBox>
+    </center>
+
+</BorderPane>

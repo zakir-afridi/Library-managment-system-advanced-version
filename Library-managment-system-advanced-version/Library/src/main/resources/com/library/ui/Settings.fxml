@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.SettingsController"
+            styleClass="main-container">
+
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Button fx:id="backBtn" text="Back" styleClass="top-btn" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Text text="Settings" styleClass="app-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="saveBtn" text="Save All" styleClass="logout-btn"
+                    style="-fx-background-color:#388e3c;" onAction="#saveSettings"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true"
+                    style="-fx-background-color:transparent;">
+            <VBox spacing="20" style="-fx-background-color:transparent;">
+                <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+                <!-- GENERAL SETTINGS -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Text text="General Settings" styleClass="section-title"/>
+                    <Separator/>
+                    <GridPane hgap="16" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="180" prefWidth="200"/>
+                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="Library Name" GridPane.rowIndex="0"/>
+                        <TextField fx:id="libraryNameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Address" GridPane.rowIndex="1"/>
+                        <TextField fx:id="libraryAddressField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="Phone" GridPane.rowIndex="2"/>
+                        <TextField fx:id="libraryPhoneField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label text="Email" GridPane.rowIndex="3"/>
+                        <TextField fx:id="libraryEmailField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Label text="Currency" GridPane.rowIndex="4"/>
+                        <ComboBox fx:id="currencyCombo" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="200"/>
+                        <Label text="Date Format" GridPane.rowIndex="5"/>
+                        <ComboBox fx:id="dateFormatCombo" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="200"/>
+                        <Label text="Items Per Page" GridPane.rowIndex="6"/>
+                        <ComboBox fx:id="itemsPerPageCombo" GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="200"/>
+                        <Label text="Default Query Limit" GridPane.rowIndex="7"/>
+                        <ComboBox fx:id="defaultLimitCombo" GridPane.columnIndex="1" GridPane.rowIndex="7" prefWidth="200"/>
+                    </GridPane>
+                </VBox>
+
+                <!-- BOOK SETTINGS -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Text text="Book Settings" styleClass="section-title"/>
+                    <Separator/>
+                    <GridPane hgap="16" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="180" prefWidth="200"/>
+                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="Default Loan Period (days)" GridPane.rowIndex="0"/>
+                        <Spinner fx:id="loanDaysSpinner" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="150"/>
+                        <Label text="Fine Rate (per day)" GridPane.rowIndex="1"/>
+                        <Spinner fx:id="fineRateSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="150"/>
+                        <Label text="Grace Period (days)" GridPane.rowIndex="2"/>
+                        <Spinner fx:id="gracePeriodSpinner" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="150"/>
+                        <Label text="Max Books Per Student" GridPane.rowIndex="3"/>
+                        <Spinner fx:id="maxBooksSpinner" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="150"/>
+                    </GridPane>
+                </VBox>
+
+                <!-- APPEARANCE -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Text text="Appearance" styleClass="section-title"/>
+                    <Separator/>
+                    <HBox spacing="16" alignment="CENTER_LEFT">
+                        <Label text="Theme:"/>
+                        <ToggleButton fx:id="themeToggle" text="Dark Mode"
+                                      onAction="#toggleTheme"
+                                      style="-fx-background-color:#1976d2; -fx-text-fill:white; -fx-background-radius:20; -fx-padding:8 20 8 20; -fx-cursor:hand;"/>
+                        <Label fx:id="themeStatusLabel" text="Current: Light Mode"
+                               style="-fx-text-fill:#757575; -fx-font-size:12px;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- NOTIFICATIONS -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Text text="Notifications" styleClass="section-title"/>
+                    <Separator/>
+                    <CheckBox fx:id="overdueAlertCheck" text="Enable overdue reminders"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label text="Due soon alert (days before):"/>
+                        <Spinner fx:id="dueSoonDaysSpinner" prefWidth="100"/>
+                    </HBox>
+                </VBox>
+
+                <!-- BACKUP AND RESTORE -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Text text="Backup and Restore" styleClass="section-title"/>
+                    <Separator/>
+                    <HBox spacing="12">
+                        <Button text="Backup Database" styleClass="btn btn-primary" onAction="#backupDatabase"/>
+                        <Button text="Restore Database" styleClass="btn btn-secondary" onAction="#restoreDatabase"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="backupStatusLabel" text=""
+                               style="-fx-text-fill:#388e3c; -fx-font-size:12px;"/>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

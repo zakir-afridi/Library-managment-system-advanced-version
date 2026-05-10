@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.IssueReturnController"
+            styleClass="main-container">
+
+   <!-- TOP BAR -->
+   <top>
+      <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="20">
+         <padding><Insets top="15" right="25" bottom="15" left="25"/></padding>
+         <Button fx:id="backBtn" text="Back to Dashboard" styleClass="back-btn" onAction="#goBackToDashboard"/>
+         <Region HBox.hgrow="ALWAYS"/>
+         <Text text="Issue / Return Books" styleClass="page-title"/>
+         <Region HBox.hgrow="ALWAYS"/>
+         <HBox spacing="10">
+            <Button fx:id="refreshBtn" text="Refresh" styleClass="top-btn" onAction="#refreshData"/>
+            <Button fx:id="helpBtn" text="Help" styleClass="help-btn"/>
+         </HBox>
+      </HBox>
+   </top>
+
+   <!-- MAIN CONTENT -->
+   <center>
+      <ScrollPane styleClass="content-scroll" fitToWidth="true" fitToHeight="true">
+         <VBox styleClass="form-container" spacing="25">
+            <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+
+            <!-- OPERATION SELECTION -->
+            <HBox styleClass="operation-selector" spacing="20" alignment="CENTER">
+               <Text text="Select Operation:" styleClass="section-title"/>
+               <RadioButton fx:id="issueRadio" text="Issue Book" styleClass="operation-radio" selected="true">
+                  <toggleGroup><ToggleGroup fx:id="operationToggleGroup"/></toggleGroup>
+               </RadioButton>
+               <RadioButton fx:id="returnRadio" text="Return Book" styleClass="operation-radio" toggleGroup="$operationToggleGroup"/>
+               <RadioButton fx:id="renewRadio"  text="Renew Book"  styleClass="operation-radio" toggleGroup="$operationToggleGroup"/>
+            </HBox>
+
+            <!-- STUDENT SEARCH -->
+            <VBox styleClass="form-section" spacing="15">
+               <Text text="Student Information" styleClass="section-title"/>
+               <HBox spacing="15" alignment="CENTER_LEFT">
+                  <Label text="Search Student:" styleClass="field-label"/>
+                  <TextField fx:id="studentSearchField" promptText="Enter Student ID, Name, or ST Code"
+                             styleClass="search-field" prefWidth="400" onKeyReleased="#searchStudent"/>
+                  <Button fx:id="searchStudentBtn" text="Search" styleClass="search-btn" onAction="#searchStudent"/>
+                  <Button fx:id="clearStudentBtn"  text="Clear"  styleClass="clear-btn"  onAction="#clearStudent"/>
+               </HBox>
+
+               <!-- STUDENT DETAILS CARD -->
+               <VBox fx:id="studentDetailsCard" styleClass="details-card" spacing="10" visible="false">
+                  <HBox styleClass="card-header" alignment="CENTER_LEFT" spacing="15">
+                     <ImageView fx:id="studentPhotoView" fitWidth="60" fitHeight="75" preserveRatio="true"/>
+                     <VBox spacing="5">
+                        <Text fx:id="studentNameText" text="Student Name" styleClass="student-name"/>
+                        <Text fx:id="studentIdText"   text="Student ID: "  styleClass="student-detail"/>
+                        <Text fx:id="libraryCardText" text="Library Card: " styleClass="student-detail"/>
+                     </VBox>
+                     <Region HBox.hgrow="ALWAYS"/>
+                     <VBox spacing="5" alignment="CENTER_RIGHT">
+                        <Text fx:id="booksIssuedText"  text="Books Issued: 0" styleClass="book-count"/>
+                        <Text fx:id="booksLimitText"   text="Limit: 5"        styleClass="book-limit"/>
+                        <Text fx:id="overdueCountText" text="Overdue: 0"      styleClass="overdue-count"/>
+                     </VBox>
+                  </HBox>
+                  <Separator/>
+                  <VBox fx:id="issuedBooksSection" spacing="10">
+                     <Text text="Currently Issued Books" styleClass="subsection-title"/>
+                     <TableView fx:id="issuedBooksTable" styleClass="issued-books-table" prefHeight="150">
+                        <columns>
+                           <TableColumn fx:id="issuedBookIdColumn" text="Book ID"    prefWidth="100"/>
+                           <TableColumn fx:id="issuedTitleColumn"  text="Title"      prefWidth="250"/>
+                           <TableColumn fx:id="issuedAuthorColumn" text="Author"     prefWidth="150"/>
+                           <TableColumn fx:id="issueDateColumn"    text="Issue Date" prefWidth="100"/>
+                           <TableColumn fx:id="dueDateColumn"      text="Due Date"   prefWidth="100"/>
+                           <TableColumn fx:id="statusColumn"       text="Status"     prefWidth="80"/>
+                           <TableColumn fx:id="actionColumn"       text="Action"     prefWidth="100"/>
+                        </columns>
+                     </TableView>
+                  </VBox>
+               </VBox>
+            </VBox>
+
+            <!-- BOOK SEARCH -->
+            <VBox fx:id="bookSearchSection" styleClass="form-section" spacing="15">
+               <Text text="Book Information" styleClass="section-title"/>
+               <HBox spacing="15" alignment="CENTER_LEFT">
+                  <Label text="Search Book:" styleClass="field-label"/>
+                  <TextField fx:id="bookSearchField" promptText="Enter BK Code, Title, Author, or ISBN"
+                             styleClass="search-field" prefWidth="400" onKeyReleased="#searchBook"/>
+                  <Button fx:id="searchBookBtn"  text="Search"       styleClass="search-btn" onAction="#searchBook"/>
+                  <Button fx:id="scanBarcodeBtn" text="Scan Barcode" styleClass="scan-btn"   onAction="#scanBarcode"/>
+               </HBox>
+
+               <!-- BOOK SEARCH RESULTS -->
+               <VBox fx:id="bookSearchResults" spacing="10" visible="false">
+                  <Text text="Search Results" styleClass="subsection-title"/>
+                  <TableView fx:id="bookSearchTable" styleClass="book-search-table" prefHeight="200">
+                     <columns>
+                        <TableColumn fx:id="bookIdColumn"    text="BK Code"  prefWidth="110"/>
+                        <TableColumn fx:id="titleColumn"     text="Title"    prefWidth="280"/>
+                        <TableColumn fx:id="authorColumn"    text="Author"   prefWidth="150"/>
+                        <TableColumn fx:id="categoryColumn"  text="Category" prefWidth="120"/>
+                        <TableColumn fx:id="availableColumn" text="Avail"    prefWidth="60"/>
+                        <TableColumn fx:id="locationColumn"  text="Location" prefWidth="90"/>
+                        <TableColumn fx:id="selectColumn"    text="Select"   prefWidth="80"/>
+                     </columns>
+                  </TableView>
+               </VBox>
+
+               <!-- SELECTED BOOK CARD -->
+               <VBox fx:id="selectedBookCard" styleClass="details-card" spacing="10" visible="false">
+                  <HBox styleClass="card-header" alignment="CENTER_LEFT" spacing="15">
+                     <ImageView fx:id="bookCoverView" fitWidth="80" fitHeight="100" preserveRatio="true"/>
+                     <VBox spacing="5" HBox.hgrow="ALWAYS">
+                        <Text fx:id="selectedBookTitle"    text="Book Title" styleClass="book-title"/>
+                        <Text fx:id="selectedBookAuthor"   text="Author: "   styleClass="book-detail"/>
+                        <Text fx:id="selectedBookId"       text="BK Code: "  styleClass="book-detail"/>
+                        <Text fx:id="selectedBookISBN"     text="ISBN: "     styleClass="book-detail"/>
+                     </VBox>
+                     <VBox spacing="5" alignment="CENTER_RIGHT">
+                        <Text fx:id="selectedBookCategory"  text="Category"    styleClass="book-category"/>
+                        <Text fx:id="selectedBookLocation"  text="Location: "  styleClass="book-location"/>
+                        <Text fx:id="selectedBookAvailable" text="Available: 0" styleClass="book-available"/>
+                     </VBox>
+                  </HBox>
+               </VBox>
+            </VBox>
+
+            <!-- TRANSACTION DETAILS -->
+            <VBox fx:id="transactionSection" styleClass="form-section" spacing="15" visible="false">
+               <Text text="Transaction Details" styleClass="section-title"/>
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200"/>
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS"/>
+                     <ColumnConstraints minWidth="150" prefWidth="200"/>
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS"/>
+                  </columnConstraints>
+                  <Label text="Issue Date" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                  <DatePicker fx:id="issueDatePicker" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                  <Label text="Due Date" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                  <DatePicker fx:id="dueDatePicker" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                  <Label text="Issue Period (Days)" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                  <Spinner fx:id="issuePeriodSpinner" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                  <Label text="Fine Amount" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                  <TextField fx:id="fineAmountField" promptText="0.00" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                  <Label text="Issued By" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                  <TextField fx:id="issuedByField" text="Admin" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                  <Label text="Transaction Type" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                  <ComboBox fx:id="transactionTypeCombo" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+               </GridPane>
+               <VBox spacing="5">
+                  <Label text="Notes / Comments" styleClass="field-label"/>
+                  <TextArea fx:id="transactionNotesArea" promptText="Enter any notes..."
+                            styleClass="form-field, text-area" prefRowCount="3" wrapText="true"/>
+               </VBox>
+            </VBox>
+
+            <!-- QUICK ACTIONS -->
+            <VBox styleClass="form-section" spacing="15">
+               <Text text="Quick Actions" styleClass="section-title"/>
+               <HBox spacing="15" alignment="CENTER_LEFT">
+                  <Button fx:id="viewHistoryBtn"      text="View History"      styleClass="action-btn, info-btn"   onAction="#viewHistory"/>
+                  <Button fx:id="printReceiptBtn"     text="Print Receipt"     styleClass="action-btn, print-btn"  onAction="#printReceipt"/>
+                  <Button fx:id="sendNotificationBtn" text="Send Notification" styleClass="action-btn, notify-btn" onAction="#sendNotification"/>
+                  <Button fx:id="generateReportBtn"   text="Generate Report"   styleClass="action-btn, report-btn" onAction="#generateReport"/>
+               </HBox>
+            </VBox>
+
+            <!-- ACTION BUTTONS -->
+            <HBox styleClass="action-buttons" spacing="20" alignment="CENTER">
+               <Button fx:id="clearAllBtn"     text="Clear All"           styleClass="action-btn, clear-btn"       onAction="#clearAll"/>
+               <Button fx:id="previewBtn"      text="Preview Transaction" styleClass="action-btn, preview-btn"     onAction="#previewTransaction"/>
+               <Button fx:id="processBtn"      text="Process Transaction" styleClass="action-btn, process-btn"     onAction="#processTransaction"/>
+               <Button fx:id="processAndNewBtn" text="Process and New"    styleClass="action-btn, process-new-btn" onAction="#processAndNew"/>
+            </HBox>
+
+         </VBox>
+      </ScrollPane>
+   </center>
+
+</BorderPane>

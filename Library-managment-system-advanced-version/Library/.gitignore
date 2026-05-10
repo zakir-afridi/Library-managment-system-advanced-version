@@ -1,0 +1,47 @@
+# ── Build output ──────────────────────────────────────────────────────────────
+target/
+*.class
+*.jar
+!lib/*.jar
+
+# ── Database (auto-created on first run) ──────────────────────────────────────
+library.db
+library.db-shm
+library.db-wal
+*.db
+
+# ── Config (contains user preferences, not source) ────────────────────────────
+libra_config.properties
+
+# ── IDE files ─────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+*.eclipse
+nbproject/
+nb-configuration.xml
+
+# ── VS Code ───────────────────────────────────────────────────────────────────
+.vscode/
+*.code-workspace
+
+# ── OS junk ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+compile_errors.log
+
+# ── Maven wrapper cache (keep wrapper scripts, not downloaded binaries) ────────
+.mvn/wrapper/maven-wrapper.jar
+
+# ── Backup files ──────────────────────────────────────────────────────────────
+*.bak
+*.tmp
+*~

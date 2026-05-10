@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.library.ui.AddBookController" styleClass="main-container" stylesheets="@css/ComprehensiveForms.css">
+   
+   <!-- TOP BAR -->
+   <top>
+      <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="20">
+         <padding>
+            <Insets top="15" right="25" bottom="15" left="25" />
+         </padding>
+         
+         <Button fx:id="backBtn" text="← Back to Dashboard" styleClass="back-btn" onAction="#goBackToDashboard" />
+         
+         <Region HBox.hgrow="ALWAYS" />
+         
+         <Text text="Add New Book" styleClass="page-title" />
+         
+         <Region HBox.hgrow="ALWAYS" />
+         
+         <Button fx:id="helpBtn" text="? Help" styleClass="help-btn" />
+      </HBox>
+   </top>
+   
+   <!-- MAIN CONTENT -->
+   <center>
+      <ScrollPane styleClass="content-scroll" fitToWidth="true" fitToHeight="true">
+         <VBox styleClass="form-container" spacing="30" alignment="TOP_CENTER">
+            <padding>
+               <Insets top="30" right="50" bottom="30" left="50" />
+            </padding>
+            
+            <!-- BOOK COVER SECTION -->
+            <VBox styleClass="photo-section" spacing="15" alignment="CENTER">
+               <Text text="Book Cover" styleClass="section-title" />
+               
+               <VBox styleClass="photo-container" alignment="CENTER" spacing="10">
+                  <ImageView fx:id="bookCoverView" fitWidth="120" fitHeight="160" preserveRatio="true" styleClass="photo-preview">
+                     <image>
+                        <Image url="@images/Books_icon.png" />
+                     </image>
+                  </ImageView>
+                  
+                  <HBox spacing="10" alignment="CENTER">
+                     <Button fx:id="uploadCoverBtn" text="📷 Upload Cover" styleClass="photo-btn" onAction="#uploadCover" />
+                     <Button fx:id="removeCoverBtn" text="🗑️ Remove" styleClass="photo-btn, remove-btn" onAction="#removeCover" />
+                  </HBox>
+               </VBox>
+            </VBox>
+            
+            <!-- BASIC BOOK INFORMATION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Basic Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Book Title *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="titleField" promptText="Enter book title" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.columnSpan="3" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="Author *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TextField fx:id="authorField" promptText="Enter author name" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="Co-Author" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="coAuthorField" promptText="Enter co-author name" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  
+                  <!-- Row 3 -->
+                  <Label text="ISBN *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <TextField fx:id="isbnField" promptText="978-0-000-00000-0" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  
+                  <Label text="Book ID *" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <TextField fx:id="bookIdField" promptText="Auto-generated" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  
+                  <!-- Row 4 -->
+                  <Label text="Category *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                  <ComboBox fx:id="categoryCombo" promptText="Select category" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  
+                  <Label text="Sub-Category" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <ComboBox fx:id="subCategoryCombo" promptText="Select sub-category" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                  
+                  <!-- Row 5 -->
+                  <Label text="Language *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                  <ComboBox fx:id="languageCombo" promptText="Select language" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  
+                  <Label text="Reading Level" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                  <ComboBox fx:id="readingLevelCombo" promptText="Select reading level" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+               </GridPane>
+            </VBox>
+            
+            <!-- PUBLICATION INFORMATION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Publication Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Publisher *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="publisherField" promptText="Enter publisher name" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  
+                  <Label text="Publication Date" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <DatePicker fx:id="publicationDatePicker" promptText="Select publication date" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="Edition" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TextField fx:id="editionField" promptText="e.g., 1st, 2nd, 3rd" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="Volume" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="volumeField" promptText="Enter volume number" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  
+                  <!-- Row 3 -->
+                  <Label text="Pages" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <Spinner fx:id="pagesSpinner" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  
+                  <Label text="Format" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="formatCombo" promptText="Select format" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  
+                  <!-- Row 4 -->
+                  <Label text="Series" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                  <TextField fx:id="seriesField" promptText="Enter series name" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  
+                  <Label text="Series Number" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <Spinner fx:id="seriesNumberSpinner" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+               </GridPane>
+            </VBox>
+            
+            <!-- PHYSICAL INFORMATION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Physical Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Shelf Location *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="shelfLocationField" promptText="e.g., A-1-001" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  
+                  <Label text="Rack Number" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <TextField fx:id="rackNumberField" promptText="Enter rack number" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="Total Copies *" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <Spinner fx:id="totalCopiesSpinner" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="Available Copies" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <Spinner fx:id="availableCopiesSpinner" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  
+                  <!-- Row 3 -->
+                  <Label text="Condition" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="conditionCombo" promptText="Select condition" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  
+                  <Label text="Binding Type" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="bindingTypeCombo" promptText="Select binding type" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+               </GridPane>
+            </VBox>
+            
+            <!-- ACQUISITION INFORMATION -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Acquisition Information" styleClass="section-title" />
+               
+               <GridPane styleClass="form-grid" hgap="20" vgap="15">
+                  <columnConstraints>
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                     <ColumnConstraints minWidth="150" prefWidth="200" />
+                     <ColumnConstraints minWidth="250" prefWidth="300" hgrow="ALWAYS" />
+                  </columnConstraints>
+                  
+                  <!-- Row 1 -->
+                  <Label text="Purchase Date" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <DatePicker fx:id="purchaseDatePicker" promptText="Select purchase date" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  
+                  <Label text="Purchase Price" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <TextField fx:id="purchasePriceField" promptText="Enter price (PKR)" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                  
+                  <!-- Row 2 -->
+                  <Label text="Vendor/Supplier" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TextField fx:id="vendorField" promptText="Enter vendor name" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  
+                  <Label text="Invoice Number" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="invoiceNumberField" promptText="Enter invoice number" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  
+                  <!-- Row 3 -->
+                  <Label text="Acquisition Type" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="acquisitionTypeCombo" promptText="Select acquisition type" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  
+                  <Label text="Budget Code" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <TextField fx:id="budgetCodeField" promptText="Enter budget code" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+               </GridPane>
+            </VBox>
+            
+            <!-- DESCRIPTION AND KEYWORDS -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Description and Keywords" styleClass="section-title" />
+               
+               <VBox spacing="15">
+                  <VBox spacing="5">
+                     <Label text="Book Description" styleClass="field-label" />
+                     <TextArea fx:id="descriptionArea" promptText="Enter book description, summary, or abstract..." 
+                              styleClass="form-field, text-area" prefRowCount="4" wrapText="true" />
+                  </VBox>
+                  
+                  <HBox spacing="20">
+                     <VBox spacing="5" HBox.hgrow="ALWAYS">
+                        <Label text="Keywords/Tags" styleClass="field-label" />
+                        <TextField fx:id="keywordsField" promptText="Enter keywords separated by commas" styleClass="form-field" />
+                     </VBox>
+                     
+                     <VBox spacing="5">
+                        <Label text="Dewey Decimal" styleClass="field-label" />
+                        <TextField fx:id="deweyDecimalField" promptText="000.000" styleClass="form-field" />
+                     </VBox>
+                  </HBox>
+               </VBox>
+            </VBox>
+            
+            <!-- ADDITIONAL NOTES -->
+            <VBox styleClass="form-section" spacing="20">
+               <Text text="Additional Information" styleClass="section-title" />
+               
+               <VBox spacing="10">
+                  <Label text="Notes / Comments" styleClass="field-label" />
+                  <TextArea fx:id="notesArea" promptText="Enter any additional notes, special instructions, or comments about the book..." 
+                           styleClass="form-field, text-area" prefRowCount="3" wrapText="true" />
+               </VBox>
+            </VBox>
+            
+            <!-- ACTION BUTTONS -->
+            <HBox styleClass="action-buttons" spacing="20" alignment="CENTER">
+               <Button fx:id="clearBtn" text="🗑️ Clear Form" styleClass="action-btn, clear-btn" onAction="#clearForm" />
+               <Button fx:id="previewBtn" text="👁️ Preview" styleClass="action-btn, preview-btn" onAction="#previewBook" />
+               <Button fx:id="saveBtn" text="💾 Save Book" styleClass="action-btn, save-btn" onAction="#saveBook" />
+               <Button fx:id="saveAndNewBtn" text="💾➕ Save & Add New" styleClass="action-btn, save-new-btn" onAction="#saveAndAddNew" />
+            </HBox>
+            
+         </VBox>
+      </ScrollPane>
+   </center>
+   
+</BorderPane>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="771.0" stylesheets="@CSS/AddMember.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lib.Controller.IssueBookController">
+    <children>
+
+        <!-- Background Image -->
+        <ImageView fx:id="backgroundImage" fitHeight="600.0" fitWidth="773.0">
+         <image>
+            <Image url="@Photo/newdark.jpg" />
+         </image></ImageView>
+
+        <!-- Overlay -->
+        <StackPane fx:id="backgroundOverlay" prefHeight="600.0" prefWidth="950.0" styleClass="background-overlay" />
+
+        <!-- Form Container -->
+        <VBox alignment="CENTER" maxWidth="500.0" prefHeight="600.0" prefWidth="500.0" spacing="20" styleClass="form-container">
+            <padding>
+                <Insets bottom="30" left="30" right="30" top="30" />
+            </padding>
+         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="150.0">
+            <children>
+               <ImageView fx:id="memberImageView" fitHeight="118.0" fitWidth="123.0" preserveRatio="true" smooth="true">
+                  <image>
+                     <Image url="@Photo/new_icon/account_username.png" />
+                  </image>
+               </ImageView>
+                      <ImageView fx:id="bookImageView" fitHeight="142.0" fitWidth="118.0" preserveRatio="true" smooth="true">
+                  <image>
+                     <Image url="@Photo/new_icon/book.png" />
+                  </image>
+               </ImageView>
+            </children>
+         </HBox>
+         <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="54.0" prefWidth="377.0" spacing="50.0">
+            <children>
+               <TextField fx:id="memberNameField" disable="true" editable="false" prefHeight="27.0" prefWidth="180.0" promptText="Member Name wiil be show here " />
+               <TextField fx:id="bookNameField" disable="true" editable="false" prefHeight="27.0" prefWidth="181.0" promptText="Enter the id  of the book to issue" />
+            </children>
+         </HBox>
+
+            <!-- Grid Form -->
+            <GridPane alignment="CENTER" hgap="10" vgap="15">
+                <children>
+
+                    <!-- Book ID -->
+                    <Label text="Book ID:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <TextField fx:id="bookIdField" promptText="Enter the id  of the book to issue" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                    <!-- Book Title -->
+                    <Label text="Member ID:" GridPane.rowIndex="1" />
+                    <TextField fx:id="memberIdField" promptText="Enter the id of member" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                    <!-- Author Name -->
+                    <Label text="Issue Date" GridPane.rowIndex="2" />
+                    <TextField fx:id="issueDateField" disable="true" editable="false" promptText="Auto Genrated" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                    <!-- Edition -->
+                    <Label text="Return Date" GridPane.rowIndex="3" />
+
+                    <DatePicker fx:id="returnDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                </children>
+            <columnConstraints>
+               <ColumnConstraints />
+               <ColumnConstraints />
+            </columnConstraints>
+            <rowConstraints>
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+            </rowConstraints>
+            </GridPane>
+
+            <!-- Buttons -->
+            <HBox alignment="CENTER" spacing="160">
+                <children>
+                    <Button fx:id="issueButton" contentDisplay="LEFT" styleClass="save-button" text="Issue" />
+                    <Button fx:id="clearButton" contentDisplay="LEFT" styleClass="clear-button" text="Clear Form" />
+                </children>
+            </HBox>
+
+        </VBox>
+    </children>
+</StackPane>

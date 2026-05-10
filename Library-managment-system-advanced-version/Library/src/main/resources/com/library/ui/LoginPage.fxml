@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.library.controller.LoginController"
+           prefWidth="1000" prefHeight="650">
+
+    <!-- Background gradient -->
+    <StackPane style="-fx-background-color: linear-gradient(to bottom right, #1a237e, #283593, #1565c0);" />
+
+    <!-- Decorative circles -->
+    <StackPane prefWidth="300" prefHeight="300"
+               style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 150;"
+               translateX="-320" translateY="-200" />
+    <StackPane prefWidth="200" prefHeight="200"
+               style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 100;"
+               translateX="350" translateY="220" />
+
+    <!-- Login Card -->
+    <VBox alignment="CENTER" spacing="0" maxWidth="420"
+          style="-fx-background-color: rgba(255,255,255,0.97); -fx-background-radius: 18;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 30, 0, 0, 10);">
+
+        <!-- Header band -->
+        <VBox alignment="CENTER" spacing="8"
+              style="-fx-background-color: linear-gradient(to right, #1565c0, #1976d2);
+                     -fx-background-radius: 18 18 0 0; -fx-padding: 28 36 24 36;">
+            <Text text="📚" style="-fx-font-size: 40px;" />
+            <Text text="LibraCore Pro" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-fill: white;" />
+            <Text text="Library Management System v2.0.0"
+                  style="-fx-font-size: 11px; -fx-fill: rgba(255,255,255,0.75);" />
+        </VBox>
+
+        <!-- Form body -->
+        <VBox spacing="16" style="-fx-padding: 30 36 30 36;">
+
+            <!-- Error label (hidden by default) -->
+            <Label fx:id="errorLabel" text="" wrapText="true" maxWidth="348"
+                   style="-fx-text-fill: #d32f2f; -fx-font-size: 12px;
+                          -fx-background-color: #ffebee; -fx-background-radius: 6;
+                          -fx-padding: 8 12 8 12;" visible="false" managed="false" />
+
+            <!-- Username -->
+            <VBox spacing="5">
+                <Label text="Username" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #424242;" />
+                <TextField fx:id="usernameField" promptText="Enter your username"
+                           style="-fx-pref-height: 42px; -fx-font-size: 13px;
+                                  -fx-background-color: #f5f5f5; -fx-background-radius: 8;
+                                  -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-border-width: 1.5;
+                                  -fx-padding: 0 12 0 12;" />
+            </VBox>
+
+            <!-- Password -->
+            <VBox spacing="5">
+                <Label text="Password" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #424242;" />
+                <PasswordField fx:id="passwordField" promptText="Enter your password"
+                               style="-fx-pref-height: 42px; -fx-font-size: 13px;
+                                      -fx-background-color: #f5f5f5; -fx-background-radius: 8;
+                                      -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-border-width: 1.5;
+                                      -fx-padding: 0 12 0 12;" />
+            </VBox>
+
+            <!-- Login button -->
+            <Button fx:id="loginButton" text="🔐  LOGIN" onAction="#handleLogin"
+                    maxWidth="Infinity" prefHeight="44"
+                    style="-fx-background-color: #1976d2; -fx-text-fill: white;
+                           -fx-font-size: 14px; -fx-font-weight: bold;
+                           -fx-background-radius: 8; -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, rgba(25,118,210,0.4), 8, 0, 0, 3);" />
+
+            <!-- Footer row -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label fx:id="attemptsLabel" text="" style="-fx-text-fill: #f57c00; -fx-font-size: 11px;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="Forgot Password?" onAction="#handleForgotPassword"
+                        style="-fx-background-color: transparent; -fx-text-fill: #1976d2;
+                               -fx-font-size: 11px; -fx-cursor: hand; -fx-underline: true;
+                               -fx-padding: 4 6 4 6;" />
+                <Button fx:id="themeToggleBtn" text="🌙 Dark Mode" onAction="#toggleTheme"
+                        style="-fx-background-color: transparent; -fx-text-fill: #1976d2;
+                               -fx-font-size: 11px; -fx-cursor: hand; -fx-border-color: #1976d2;
+                               -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 4 10 4 10;" />
+            </HBox>
+
+        </VBox>
+    </VBox>
+
+</StackPane>

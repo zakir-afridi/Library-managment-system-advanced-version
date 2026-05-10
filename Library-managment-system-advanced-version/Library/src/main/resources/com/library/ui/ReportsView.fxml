@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.ReportsController"
+            styleClass="main-container">
+
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Text text="📈 Reports" styleClass="app-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="themeBtn" text="🌙" styleClass="top-btn" onAction="#toggleTheme"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color:transparent;">
+            <VBox spacing="20" style="-fx-background-color:transparent;">
+                <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+                <!-- Date range -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Text text="Date Range (for Circulation Report)" styleClass="section-title"/>
+                    <HBox spacing="16" alignment="CENTER_LEFT">
+                        <Label text="From:" style="-fx-font-weight:bold;"/>
+                        <DatePicker fx:id="fromDate"/>
+                        <Label text="To:" style="-fx-font-weight:bold;"/>
+                        <DatePicker fx:id="toDate"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Report buttons -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Text text="Generate Reports" styleClass="section-title"/>
+                    <Separator/>
+
+                    <GridPane hgap="16" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+
+                        <Button text="⚠ Overdue Books Report"
+                                maxWidth="Infinity" prefHeight="50"
+                                styleClass="btn, btn-danger"
+                                onAction="#generateOverdueReport"
+                                GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+
+                        <Button text="📋 Circulation Report"
+                                maxWidth="Infinity" prefHeight="50"
+                                styleClass="btn, btn-primary"
+                                onAction="#generateCirculationReport"
+                                GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Button text="📚 Inventory Report"
+                                maxWidth="Infinity" prefHeight="50"
+                                styleClass="btn, btn-secondary"
+                                onAction="#generateInventoryReport"
+                                GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+
+                        <Button text="💰 Fine Collection Report"
+                                maxWidth="Infinity" prefHeight="50"
+                                styleClass="btn, btn-warning"
+                                onAction="#generateFineReport"
+                                GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+                        <Button text="🏆 Popular Books (Top 20)"
+                                maxWidth="Infinity" prefHeight="50"
+                                styleClass="btn, btn-success"
+                                onAction="#generatePopularReport"
+                                GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Button text="👤 Member Activity Report"
+                                maxWidth="Infinity" prefHeight="50"
+                                styleClass="btn, btn-primary"
+                                onAction="#generateMemberReport"
+                                GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                    </GridPane>
+                </VBox>
+
+                <!-- Status label -->
+                <Label fx:id="statusLabel" text="" wrapText="true"
+                       style="-fx-font-size:13px; -fx-text-fill:#388e3c;"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

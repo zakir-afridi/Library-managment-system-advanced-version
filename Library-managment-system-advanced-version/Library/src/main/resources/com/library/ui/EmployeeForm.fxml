@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.EmployeeController"
+            styleClass="main-container">
+
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Text text="👤 Employee Management" styleClass="app-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="themeBtn" text="🌙" styleClass="top-btn" onAction="#toggleTheme"/>
+        </HBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.62" style="-fx-background-color:transparent;">
+
+            <!-- LEFT: Table -->
+            <VBox spacing="12" style="-fx-background-color:transparent;">
+                <padding><Insets top="20" right="12" bottom="20" left="20"/></padding>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="searchField" promptText="🔍 Search name, code, email..."
+                               prefWidth="300" styleClass="search-field" onKeyReleased="#handleSearch"/>
+                    <ComboBox fx:id="statusFilter" promptText="All Status" prefWidth="130"
+                              onAction="#handleStatusFilter"/>
+                    <Button text="🔄" styleClass="top-btn" onAction="#handleRefresh"/>
+                </HBox>
+
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <Label fx:id="totalLabel"  text="Total: 0"  style="-fx-font-weight:bold;"/>
+                    <Label fx:id="activeLabel" text="Active: 0" style="-fx-text-fill:#388e3c; -fx-font-weight:bold;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="🖨 Print List" styleClass="btn, btn-secondary" onAction="#printList"/>
+                </HBox>
+
+                <TableView fx:id="empTable" VBox.vgrow="ALWAYS" style="-fx-background-color:transparent;">
+                    <columns>
+                        <TableColumn fx:id="colId"    text="#"        prefWidth="45"/>
+                        <TableColumn fx:id="colCode"  text="EP Code"  prefWidth="110"/>
+                        <TableColumn fx:id="colName"  text="Name"        prefWidth="160"/>
+                        <TableColumn fx:id="colDesig" text="Designation" prefWidth="130"/>
+                        <TableColumn fx:id="colDept"  text="Department"  prefWidth="120"/>
+                        <TableColumn fx:id="colStatus" text="Status"     prefWidth="80"/>
+                        <TableColumn fx:id="colActions" text="Actions"   prefWidth="130"/>
+                    </columns>
+                    <placeholder><Label text="No employees found. Add your first employee →"/></placeholder>
+                </TableView>
+
+                <HBox spacing="10" alignment="CENTER">
+                    <Button fx:id="prevPageBtn" text="◀ Prev" styleClass="btn, btn-secondary" onAction="#prevPage"/>
+                    <Label fx:id="pageLabel" text="Page 1 of 1" style="-fx-font-weight:bold;"/>
+                    <Button fx:id="nextPageBtn" text="Next ▶" styleClass="btn, btn-secondary" onAction="#nextPage"/>
+                    <ComboBox fx:id="pageSizeCombo" prefWidth="90" onAction="#changePageSize"/>
+                </HBox>
+            </VBox>
+
+            <!-- RIGHT: Form -->
+            <ScrollPane fitToWidth="true" style="-fx-background-color:transparent; -fx-background:transparent;">
+                <VBox spacing="12" styleClass="chart-container">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+                    <Text fx:id="formTitle" text="Add New Employee" styleClass="section-title"/>
+                    <Separator/>
+
+                    <VBox alignment="CENTER" spacing="8">
+                        <ImageView fx:id="photoView" fitWidth="90" fitHeight="110" preserveRatio="true"
+                                   style="-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.2),8,0,0,3);"/>
+                        <Button text="📷 Upload Photo" styleClass="btn, btn-secondary" onAction="#uploadPhoto"/>
+                    </VBox>
+
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Employee Code (auto)" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="codeField" editable="false"
+                                       style="-fx-background-color:#f5f5f5;"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Full Name *" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="nameField" promptText="Full name"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Designation" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="designationField" promptText="e.g. Librarian"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Department" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="departmentField" promptText="Department"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Status" style="-fx-font-weight:bold;"/>
+                            <ComboBox fx:id="statusCombo" prefWidth="10000"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Contact *" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="contactField" promptText="03xxxxxxxxx"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Email" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="emailField" promptText="email@domain.com"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="CNIC" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="cnicField" promptText="xxxxx-xxxxxxx-x"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Salary" style="-fx-font-weight:bold;"/>
+                            <TextField fx:id="salaryField" promptText="0.00"/>
+                        </VBox>
+                    </HBox>
+
+                    <Label text="Address" style="-fx-font-weight:bold;"/>
+                    <TextField fx:id="addressField" promptText="Street address"/>
+
+                    <Label text="Notes" style="-fx-font-weight:bold;"/>
+                    <TextArea fx:id="notesArea" promptText="Notes..." prefRowCount="2" wrapText="true"/>
+
+                    <Label fx:id="formErrorLabel" text="" wrapText="true"
+                           style="-fx-text-fill:#d32f2f; -fx-font-size:12px;"
+                           visible="false" managed="false"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="saveBtn" text="💾 Save Employee" maxWidth="Infinity"
+                                HBox.hgrow="ALWAYS" prefHeight="40"
+                                styleClass="btn, btn-primary" onAction="#saveEmployee"/>
+                        <Button text="🖨 Print" prefHeight="40"
+                                styleClass="btn, btn-secondary" onAction="#printEmployee"/>
+                        <Button fx:id="clearFormBtn" text="✖ Clear" prefHeight="40"
+                                styleClass="btn, btn-secondary" onAction="#clearForm"/>
+                    </HBox>
+
+                </VBox>
+            </ScrollPane>
+
+        </SplitPane>
+    </center>
+
+</BorderPane>

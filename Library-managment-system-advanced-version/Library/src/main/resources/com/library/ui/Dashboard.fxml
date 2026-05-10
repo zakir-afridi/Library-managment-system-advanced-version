@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.library.ui.DashboardController">
+   <top>
+      <VBox alignment="CENTER" spacing="20" style="-fx-padding: 20; -fx-background-color: #2c3e50;">
+         <Text text="Library Management System" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-fill: white;" />
+         <Text fx:id="welcomeText" text="Welcome Admin!" style="-fx-font-size: 16px; -fx-fill: #ecf0f1;" />
+      </VBox>
+   </top>
+   <center>
+      <VBox alignment="CENTER" spacing="20" style="-fx-padding: 40;">
+         <HBox spacing="20" alignment="CENTER">
+            <VBox spacing="10" alignment="CENTER" style="-fx-padding: 20; -fx-background-color: #3498db; -fx-background-radius: 10;">
+               <Text fx:id="totalBooksText" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-fill: white;" />
+               <Text text="Total Books" style="-fx-font-size: 14px; -fx-fill: white;" />
+            </VBox>
+            <VBox spacing="10" alignment="CENTER" style="-fx-padding: 20; -fx-background-color: #e74c3c; -fx-background-radius: 10;">
+               <Text fx:id="totalMembersText" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-fill: white;" />
+               <Text text="Total Students" style="-fx-font-size: 14px; -fx-fill: white;" />
+            </VBox>
+            <VBox spacing="10" alignment="CENTER" style="-fx-padding: 20; -fx-background-color: #f39c12; -fx-background-radius: 10;">
+               <Text fx:id="issuedBooksText" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-fill: white;" />
+               <Text text="Issued Books" style="-fx-font-size: 14px; -fx-fill: white;" />
+            </VBox>
+         </HBox>
+         
+         <VBox spacing="15" alignment="CENTER" style="-fx-padding: 20;">
+            <Text text="Quick Actions" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+            <HBox spacing="15" alignment="CENTER">
+               <Button fx:id="manageBooksBtn" text="Add Books" prefWidth="150" prefHeight="40" style="-fx-font-size: 14px; -fx-background-color: #3498db; -fx-text-fill: white;" onAction="#handleManageBooks" />
+               <Button fx:id="manageMembersBtn" text="Add Students" prefWidth="150" prefHeight="40" style="-fx-font-size: 14px; -fx-background-color: #e74c3c; -fx-text-fill: white;" onAction="#handleManageMembers" />
+            </HBox>
+            <HBox spacing="15" alignment="CENTER">
+               <Button fx:id="issueBookBtn" text="Issue Book" prefWidth="150" prefHeight="40" style="-fx-font-size: 14px; -fx-background-color: #27ae60; -fx-text-fill: white;" onAction="#handleIssueBook" />
+               <Button fx:id="returnBookBtn" text="Return Book" prefWidth="150" prefHeight="40" style="-fx-font-size: 14px; -fx-background-color: #f39c12; -fx-text-fill: white;" onAction="#handleReturnBook" />
+            </HBox>
+            <Button fx:id="viewReportsBtn" text="View Reports" prefWidth="200" prefHeight="40" style="-fx-font-size: 14px; -fx-background-color: #9b59b6; -fx-text-fill: white;" onAction="#handleViewReports" />
+         </VBox>
+      </VBox>
+   </center>
+   <bottom>
+      <HBox alignment="CENTER" style="-fx-padding: 20; -fx-background-color: #34495e;">
+         <Button fx:id="logoutBtn" text="Logout" style="-fx-font-size: 12px; -fx-background-color: #e74c3c; -fx-text-fill: white;" onAction="#handleLogout" />
+      </HBox>
+   </bottom>
+</BorderPane>

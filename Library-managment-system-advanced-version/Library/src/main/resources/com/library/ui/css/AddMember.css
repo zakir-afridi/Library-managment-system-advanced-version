@@ -1,0 +1,79 @@
+.root {
+    -fx-background-color: #222020;
+}
+
+.background-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+}
+
+.form-container {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);
+    -fx-padding: 20px;
+}
+
+
+
+.label {
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-text-fill: #ffffff;
+}
+
+.form-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #a2a4a7;
+}
+
+.text-field, .text-area, .combo-box {
+    -fx-pref-width: 250px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #61707c;
+    -fx-border-radius: 5px;
+    
+}
+
+.text-area {
+    -fx-pref-height: 80px;
+}
+
+
+.save-button {
+    -fx-background-color: linear-gradient(to bottom right, #4CAF50, #2e7d32);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-pref-width: 130px;
+    -fx-pref-height: 30px;
+    -fx-cursor: hand;
+}
+
+.save-button:hover {
+    -fx-background-color: linear-gradient(to bottom right, #66bb6a, #388e3c);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 20, 0.4, 0, 4);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.save-button:pressed {
+    -fx-background-color: linear-gradient(to bottom right, #1b5e20, #004d40);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+
+}.clear-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 5px;
+   
+    
+}
+
+.clear-button:hover {
+    -fx-background-color: #c0392b;
+}

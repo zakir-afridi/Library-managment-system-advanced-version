@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LibraCore Pro — Data Entry</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px;
+    color: #1a1a2e;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    width: 100%;
+    max-width: 860px;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .card-header {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 60%, #1e88e5 100%);
+    padding: 28px 32px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .card-header .icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+  .card-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .card-header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    margin-top: 2px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    background: #f8f9fb;
+    border-bottom: 1px solid #e8eaed;
+    padding: 0 32px;
+    gap: 4px;
+  }
+  .tab {
+    padding: 14px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: color .18s, border-color .18s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  .tab:hover { color: #1976d2; }
+  .tab.active { color: #1565c0; border-bottom-color: #1565c0; }
+  .tab .tab-icon { font-size: 15px; }
+
+  /* ── Body ── */
+  .card-body { padding: 28px 32px 32px; }
+
+  /* ── Photo + ID row ── */
+  .top-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+
+  .photo-upload {
+    flex-shrink: 0;
+    width: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .photo-preview {
+    width: 100px;
+    height: 120px;
+    border-radius: 10px;
+    border: 2px dashed #d1d5db;
+    background: #f8f9fb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color .18s, background .18s;
+    position: relative;
+  }
+  .photo-preview:hover { border-color: #1976d2; background: #e3f2fd; }
+  .photo-preview img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: none;
+    border-radius: 8px;
+  }
+  .photo-preview .upload-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+  }
+  .photo-preview .upload-hint .cam { font-size: 26px; }
+  .photo-preview .upload-hint span {
+    font-size: 10px;
+    color: #9ca3af;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .photo-upload label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1976d2;
+    cursor: pointer;
+    text-align: center;
+  }
+  #photoInput { display: none; }
+
+  .id-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .id-section .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 0.3px;
+  }
+  .id-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .id-field {
+    flex: 1;
+    height: 42px;
+    padding: 0 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1565c0;
+    background: #f0f7ff;
+    letter-spacing: 0.5px;
+    cursor: not-allowed;
+    outline: none;
+  }
+  .btn-generate {
+    height: 42px;
+    padding: 0 16px;
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1.5px solid #bbdefb;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-generate:hover { background: #bbdefb; border-color: #90caf9; }
+
+  .id-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+    width: fit-content;
+  }
+  .id-badge::before { content: '✓'; font-size: 11px; }
+
+  /* ── Section title ── */
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #f3f4f6;
+  }
+
+  /* ── Grid ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 0.3px;
+  }
+  .field-label .req { color: #e53935; margin-left: 2px; }
+
+  .field input,
+  .field select,
+  .field textarea {
+    height: 42px;
+    padding: 0 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1a1a2e;
+    background: #fff;
+    outline: none;
+    transition: border-color .18s, box-shadow .18s;
+    font-family: inherit;
+    width: 100%;
+  }
+  .field textarea {
+    height: 80px;
+    padding: 10px 14px;
+    resize: vertical;
+  }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .field input::placeholder { color: #c4c9d4; font-size: 12.5px; }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25,118,210,0.1);
+  }
+  .field input.error { border-color: #e53935; box-shadow: 0 0 0 3px rgba(229,57,53,0.08); }
+  .field .error-msg { font-size: 11px; color: #e53935; display: none; }
+  .field.has-error .error-msg { display: block; }
+  .field.has-error input,
+  .field.has-error select { border-color: #e53935; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: #f3f4f6; margin: 8px 0 20px; }
+
+  /* ── Actions ── */
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    height: 42px;
+    padding: 0 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: transform .12s, box-shadow .12s, background .15s;
+    font-family: inherit;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .btn:active { transform: translateY(0); }
+  .btn-clear {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1.5px solid #e5e7eb;
+  }
+  .btn-clear:hover { background: #e5e7eb; }
+  .btn-save {
+    background: linear-gradient(135deg, #1565c0, #1976d2);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(25,118,210,0.3);
+  }
+  .btn-save:hover { background: linear-gradient(135deg, #0d47a1, #1565c0); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #1a1a2e;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+    z-index: 999;
+    max-width: 340px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: #2e7d32; }
+  .toast.error   { background: #c62828; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    body { padding: 16px 8px; }
+    .card-header { padding: 20px 20px 18px; }
+    .tabs { padding: 0 16px; overflow-x: auto; }
+    .card-body { padding: 20px 16px 24px; }
+    .top-row { flex-direction: column; align-items: center; }
+    .photo-upload { width: 100%; flex-direction: row; align-items: center; gap: 16px; }
+    .photo-preview { width: 80px; height: 96px; }
+    .id-section { width: 100%; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .full { grid-column: 1; }
+    .form-actions { justify-content: stretch; }
+    .btn { flex: 1; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="icon" id="headerIcon">📚</div>
+    <div>
+      <h1 id="headerTitle">Book Entry</h1>
+      <p id="headerSub">Add a new book to the library catalogue</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('book', this)">
+      <span class="tab-icon">📚</span> Books
+    </button>
+    <button class="tab" onclick="switchTab('student', this)">
+      <span class="tab-icon">🎓</span> Students
+    </button>
+    <button class="tab" onclick="switchTab('employee', this)">
+      <span class="tab-icon">👤</span> Employees
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+
+    <!-- Photo + ID -->
+    <div class="top-row">
+      <div class="photo-upload">
+        <div class="photo-preview" onclick="document.getElementById('photoInput').click()" id="photoPreview">
+          <div class="upload-hint">
+            <span class="cam">📷</span>
+            <span id="photoHintText">Upload<br>Cover</span>
+          </div>
+          <img id="photoImg" alt="Preview">
+        </div>
+        <label for="photoInput" id="photoLabel">Upload Cover</label>
+        <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(this)">
+      </div>
+
+      <div class="id-section">
+        <label class="field-label">Auto-Generated ID</label>
+        <div class="id-row">
+          <input type="text" class="id-field" id="idField" readonly value="BK-2026-0001">
+          <button class="btn-generate" onclick="generateId()">⟳ Generate</button>
+        </div>
+        <div class="id-badge" id="idBadge">ID ready — non-editable</div>
+      </div>
+    </div>
+
+    <!-- Primary Info -->
+    <div class="section-title" id="sectionPrimary">Primary Information</div>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label" id="label1">Book Title <span class="req">*</span></label>
+        <input type="text" id="field1" placeholder="e.g. Introduction to Algorithms">
+        <span class="error-msg">This field is required</span>
+      </div>
+      <div class="field">
+        <label class="field-label" id="label2">Author <span class="req">*</span></label>
+        <input type="text" id="field2" placeholder="e.g. Thomas H. Cormen">
+        <span class="error-msg">This field is required</span>
+      </div>
+      <div class="field">
+        <label class="field-label" id="label3">ISBN</label>
+        <input type="text" id="field3" placeholder="e.g. 978-0-262-03384-8">
+        <span class="error-msg">Enter a valid value</span>
+      </div>
+      <div class="field">
+        <label class="field-label" id="label4">Publisher</label>
+        <input type="text" id="field4" placeholder="e.g. MIT Press">
+        <span class="error-msg">Enter a valid value</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Secondary Info -->
+    <div class="section-title" id="sectionSecondary">Classification & Status</div>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label" id="label5">Category</label>
+        <select id="field5">
+          <option value="">— Select Category —</option>
+        </select>
+        <span class="error-msg">Please select a category</span>
+      </div>
+      <div class="field">
+        <label class="field-label" id="label6">Status <span class="req">*</span></label>
+        <select id="field6">
+          <option value="">— Select Status —</option>
+        </select>
+        <span class="error-msg">Please select a status</span>
+      </div>
+      <div class="field">
+        <label class="field-label" id="label7">Quantity / Year</label>
+        <input type="text" id="field7" placeholder="e.g. 5">
+        <span class="error-msg">Enter a valid value</span>
+      </div>
+      <div class="field">
+        <label class="field-label" id="label8">Shelf / Location</label>
+        <input type="text" id="field8" placeholder="e.g. A-12">
+        <span class="error-msg">Enter a valid value</span>
+      </div>
+      <div class="field full">
+        <label class="field-label" id="label9">Description / Notes</label>
+        <textarea id="field9" placeholder="Optional notes or description..."></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button class="btn btn-clear" onclick="clearForm()">✖ Clear</button>
+      <button class="btn btn-save" onclick="saveForm()">💾 Save Record</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Config per tab ──────────────────────────────────────────────────────────
+  const CONFIG = {
+    book: {
+      prefix:      'BK',
+      icon:        '📚',
+      title:       'Book Entry',
+      sub:         'Add a new book to the library catalogue',
+      photoHint:   'Upload\nCover',
+      photoLabel:  'Upload Cover',
+      section1:    'Primary Information',
+      section2:    'Classification & Status',
+      labels:      ['Book Title', 'Author', 'ISBN', 'Publisher',
+                    'Category', 'Status', 'Quantity', 'Shelf Location', 'Description'],
+      placeholders:['e.g. Introduction to Algorithms', 'e.g. Thomas H. Cormen',
+                    'e.g. 978-0-262-03384-8', 'e.g. MIT Press',
+                    '', '', 'e.g. 5', 'e.g. A-12', 'Optional notes...'],
+      required:    [true, true, false, false, false, true, false, false, false],
+      categories:  ['Fiction','Non-Fiction','Science','Technology','History',
+                    'Mathematics','Literature','Reference','Biography','Other'],
+      statuses:    ['Available','Issued','Reserved','Lost','Damaged','Archived'],
+    },
+    student: {
+      prefix:      'STD',
+      icon:        '🎓',
+      title:       'Student Entry',
+      sub:         'Register a new student member',
+      photoHint:   'Upload\nPhoto',
+      photoLabel:  'Upload Photo',
+      section1:    'Personal Information',
+      section2:    'Academic & Status',
+      labels:      ['Full Name', "Father's Name", 'Contact No.', 'Email Address',
+                    'Department', 'Status', 'Year / Semester', 'Student Roll No.', 'Notes'],
+      placeholders:['e.g. Muhammad Ali', 'e.g. Muhammad Akbar',
+                    'e.g. 03001234567', 'e.g. student@uni.edu.pk',
+                    '', '', 'e.g. 3rd Year', 'e.g. 2024-CS-001', 'Optional notes...'],
+      required:    [true, false, true, false, false, true, false, false, false],
+      categories:  ['Computer Science','Electrical Engineering','Mechanical Engineering',
+                    'Business Administration','Mathematics','Physics','Chemistry',
+                    'Literature','Law','Medicine'],
+      statuses:    ['Active','Suspended','Expired','Graduated','Archived'],
+    },
+    employee: {
+      prefix:      'EMP',
+      icon:        '👤',
+      title:       'Employee Entry',
+      sub:         'Add a new staff or employee record',
+      photoHint:   'Upload\nPhoto',
+      photoLabel:  'Upload Photo',
+      section1:    'Personal Information',
+      section2:    'Role & Status',
+      labels:      ['Full Name', 'CNIC / ID No.', 'Contact No.', 'Email Address',
+                    'Designation', 'Status', 'Salary', 'Department', 'Notes'],
+      placeholders:['e.g. Ahmed Hassan', 'e.g. 35202-1234567-1',
+                    'e.g. 03001234567', 'e.g. staff@library.pk',
+                    '', '', 'e.g. 45000', 'e.g. Administration', 'Optional notes...'],
+      required:    [true, false, true, false, false, true, false, false, false],
+      categories:  ['Librarian','Senior Librarian','Assistant','IT Staff',
+                    'Administration','Security','Cleaner','Manager','Other'],
+      statuses:    ['Active','Inactive','On Leave','Terminated','Archived'],
+    }
+  };
+
+  // ── State ───────────────────────────────────────────────────────────────────
+  let currentTab = 'book';
+  let counters   = { BK: 1, STD: 1, EMP: 1 };
+
+  // ── Tab switch ──────────────────────────────────────────────────────────────
+  function switchTab(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    applyConfig();
+    clearForm(true);
+  }
+
+  function applyConfig() {
+    const c = CONFIG[currentTab];
+
+    // Header
+    document.getElementById('headerIcon').textContent  = c.icon;
+    document.getElementById('headerTitle').textContent = c.title;
+    document.getElementById('headerSub').textContent   = c.sub;
+
+    // Photo hint
+    document.getElementById('photoHintText').innerHTML = c.photoHint.replace('\n','<br>');
+    document.getElementById('photoLabel').textContent  = c.photoLabel;
+
+    // ID
+    generateId(false);
+
+    // Section titles
+    document.getElementById('sectionPrimary').textContent   = c.section1;
+    document.getElementById('sectionSecondary').textContent = c.section2;
+
+    // Labels + placeholders + required markers
+    for (let i = 1; i <= 9; i++) {
+      const lbl = document.getElementById('label' + i);
+      const inp = document.getElementById('field' + i);
+      const req = c.required[i-1];
+      lbl.innerHTML = c.labels[i-1] + (req ? ' <span class="req">*</span>' : '');
+      if (inp.tagName !== 'SELECT') inp.placeholder = c.placeholders[i-1];
+    }
+
+    // Dropdowns
+    populateSelect('field5', c.categories, '— Select ' + (currentTab === 'book' ? 'Category' : 'Department') + ' —');
+    populateSelect('field6', c.statuses,   '— Select Status —');
+  }
+
+  function populateSelect(id, options, placeholder) {
+    const sel = document.getElementById(id);
+    sel.innerHTML = `<option value="">${placeholder}</option>`;
+    options.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      sel.appendChild(opt);
+    });
+  }
+
+  // ── ID generation ───────────────────────────────────────────────────────────
+  function generateId(animate = true) {
+    const c      = CONFIG[currentTab];
+    const prefix = c.prefix;
+    const year   = new Date().getFullYear();
+    const num    = String(counters[prefix]).padStart(4, '0');
+    const id     = `${prefix}-${year}-${num}`;
+    document.getElementById('idField').value = id;
+    if (animate) {
+      counters[prefix]++;
+      const badge = document.getElementById('idBadge');
+      badge.style.background = '#fff3e0';
+      badge.style.color      = '#e65100';
+      badge.textContent      = '⟳ New ID generated';
+      setTimeout(() => {
+        badge.style.background = '#e8f5e9';
+        badge.style.color      = '#2e7d32';
+        badge.textContent      = '✓ ID ready — non-editable';
+      }, 1200);
+    }
+  }
+
+  // ── Photo preview ───────────────────────────────────────────────────────────
+  function previewPhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img  = document.getElementById('photoImg');
+      const hint = document.querySelector('.upload-hint');
+      img.src    = e.target.result;
+      img.style.display   = 'block';
+      hint.style.display  = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  // ── Validation ──────────────────────────────────────────────────────────────
+  function validate() {
+    const c = CONFIG[currentTab];
+    let valid = true;
+    for (let i = 1; i <= 9; i++) {
+      if (!c.required[i-1]) continue;
+      const field  = document.getElementById('field' + i);
+      const parent = field.closest('.field');
+      const val    = field.value.trim();
+      if (!val) {
+        parent.classList.add('has-error');
+        valid = false;
+        field.addEventListener('input', () => parent.classList.remove('has-error'), { once: true });
+        field.addEventListener('change', () => parent.classList.remove('has-error'), { once: true });
+      } else {
+        parent.classList.remove('has-error');
+      }
+    }
+    return valid;
+  }
+
+  // ── Save ────────────────────────────────────────────────────────────────────
+  function saveForm() {
+    if (!validate()) {
+      showToast('⚠ Please fill all required fields.', 'error');
+      return;
+    }
+    const id   = document.getElementById('idField').value;
+    const name = document.getElementById('field1').value.trim();
+    showToast(`✓ ${CONFIG[currentTab].title.split(' ')[0]} saved: ${name} (${id})`, 'success');
+    // Advance counter and reset form after save
+    const prefix = CONFIG[currentTab].prefix;
+    counters[prefix]++;
+    clearForm(true);
+  }
+
+  // ── Clear ───────────────────────────────────────────────────────────────────
+  function clearForm(silent = false) {
+    for (let i = 1; i <= 9; i++) {
+      const f = document.getElementById('field' + i);
+      if (f.tagName === 'SELECT') f.selectedIndex = 0;
+      else f.value = '';
+      f.closest('.field').classList.remove('has-error');
+    }
+    // Reset photo
+    const img  = document.getElementById('photoImg');
+    const hint = document.querySelector('.upload-hint');
+    img.style.display  = 'none';
+    hint.style.display = 'flex';
+    document.getElementById('photoInput').value = '';
+    // Refresh ID display
+    generateId(false);
+    if (!silent) showToast('Form cleared.', '');
+  }
+
+  // ── Toast ───────────────────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = 'toast ' + type;
+    clearTimeout(toastTimer);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => t.classList.add('show'));
+    });
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Init ────────────────────────────────────────────────────────────────────
+  applyConfig();
+</script>
+</body>
+</html>
