@@ -1,29 +1,34 @@
 # Active Context
 
 ## Current State
-- Architecture: Branch-Per-Module Tree — each feature is an independent branch with Module/Service/Controller
-- Core CRUD for books, members, students, employees is implemented
-- Issue/Return with fine calculation working (PKR 5/day, 2-day grace period)
-- Dashboard with `DashboardCache` (5-min TTL), charts auto-refresh every 30s
-- Archive/Unarchive for books, members, students, employees with reason tracking (`archive_log`)
-- Reservation system (`ReservationService`) exists
-- Reports (PDF/Excel) via `ReportService` + `PrintService`
-- Global search via `GlobalSearchService` + `SearchTrie` (300ms debounce, case-insensitive)
-- Settings UI (`SettingsController`) persists to `AppConfig` → `libra_config.properties`
-- Theme switching (light/dark) via `ThemeManager`
-- Session management with 30-min auto-logout
-- Password recovery: Login → key `03150315` → `ForgotPasswordController` → `ResetPasswordController`
-- Data seeder populates sample data on first launch
-- Toast notifications + activity log (audit trail)
+- Branch-Per-Module architecture fully established; all 8 branches wired through `LibraCoreApp`
+- `SharedModule.initDatabase()` → `DatabaseConnection.initialise()` → `DataSeeder.seedIfNeeded()` runs on every startup
+- `SharedModule.saveConfig()` → `AppConfig.save()` runs on shutdown
+- Auth: BCrypt login, 30-min session timeout (`SessionManager` + JavaFX `Timeline`)
+- Book CRUD, Member CRUD, Employee CRUD — all working with paginated tables
+- Issue/Return with `FineCalculator.calculate(dueDate, checkDate)` — reads grace + rate from `AppConfig`
+- Dashboard: `DashboardCache` (5-min TTL), 30s auto-refresh, PieChart + BarChart + LineChart
+- Archive/Unarchive for books, members, employees with `archive_log` tracking
+- Reservation queue via `ReservationService`
+- Reports PDF/Excel via `ReportService` + `PrintService`
+- Global search: `GlobalSearchService` + `SearchTrie`, 300ms debounce
+- Settings UI → `AppConfig` → `libra_config.properties`
+- Theme: `ThemeManager.applyTheme(scene)`, CSS: `light-theme.css` / `dark-theme.css`
+- Toast notifications: `ToastNotification`
+- Audit trail: `activity_log` table
+- ID generation: `BK`, `ST`, `EP` prefixes via `id_counters` table
 
-## Known Issues / Incomplete Areas
+## Known Issues / Incomplete
+- `students/StudentController.java` is an **empty stub** — real impl is `ui/AddStudentController`
 - Forgot/Reset password FXML not yet wired to controllers
-- `students/StudentController` is an empty stub — real impl in `ui/AddStudentController`
-- Legacy `ui/LoginController` duplicates `controller/LoginController` (harmless, not wired)
+- Student CRUD UI exists (`AddStudentForm.fxml` + `ui/AddStudentController`) but not wired from dashboard nav
+- Archive students/employees not exposed from UI
+- Legacy entry points (`LibraryApp`, `ModernLibraryApp`, `ProfessionalLibraryApp`) are dead code
+- `ui/LoginController` duplicates `controller/LoginController` (harmless, not wired)
 
 ## Next Steps (Planned)
-1. Wire forgot/reset password FXML + controllers
-2. Student CRUD UI (FXML + StudentService confirmed)
-3. Archive students/employees from UI
+1. Wire `AddStudentForm.fxml` to `StudentModule` + dashboard nav
+2. Wire forgot/reset password FXML to controllers
+3. Archive students and employees from UI
 4. Barcode scanner integration (P1)
 5. Email overdue notifications via SMTP (P1)

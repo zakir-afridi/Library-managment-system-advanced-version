@@ -1,47 +1,51 @@
 # Progress
 
 ## What Works
-- [x] Branch-Per-Module tree architecture established
-- [x] Database schema creation + migrations (idempotent)
-- [x] Connection pool (size 5, WAL mode)
-- [x] User authentication with BCrypt + session timeout (30 min)
-- [x] Book CRUD (add, update, delete, search, paginate, filter by category/status)
-- [x] Member CRUD (add, update, search, paginate)
-- [x] Employee CRUD
-- [x] Issue book (validates member status, fine balance, book limit)
-- [x] Return book (auto fine calculation, fine added to member balance)
-- [x] Overdue detection + priority queue sorting (max-heap by days overdue)
-- [x] Reservation queue
-- [x] Archive / Unarchive (books, members, employees) with reason tracking (`archive_log`)
-- [x] Structured ID generation (BK, ST, EP prefixes via `id_counters`)
-- [x] Serial number resequencing on add/remove
-- [x] Dashboard stats with caching (5-min TTL) + 30s auto-refresh
-- [x] Monthly/daily transaction charts (PieChart, BarChart, LineChart)
-- [x] PDF report export (OpenPDF)
-- [x] Excel report export (Apache POI)
-- [x] Global search with Trie (300ms debounce, case-insensitive)
-- [x] Settings persistence (AppConfig → libra_config.properties)
-- [x] Theme switching (light/dark)
-- [x] Toast notifications
-- [x] Activity log (audit trail)
-- [x] Data seeder for sample data on first launch
-- [x] Password recovery flow (key: 03150315, SHA-256)
+- [x] Branch-Per-Module tree architecture (8 branches + shared)
+- [x] `LibraCoreApp` as sole entry point; `SharedModule` initialises DB + seeds data
+- [x] SQLite connection pool (size 5, WAL mode, FK ON) via `PooledConnection`
+- [x] Schema creation + additive migrations (idempotent, safe to re-run)
+- [x] BCrypt auth (`PasswordUtil`) + 30-min session timeout (`SessionManager`)
+- [x] Roles: ADMIN / LIBRARIAN with `canWrite()` check
+- [x] Recovery key `03150315` via `Constants.isValidRecoveryKey()` (SHA-256)
+- [x] Book CRUD — add, edit, delete, search (title/author/ISBN), paginate, filter
+- [x] Member CRUD — add, edit, search, paginate, membership types
+- [x] Employee CRUD — add, edit, search, archive, EP code generation
+- [x] Issue book (validates member status, fine balance, book limit from `AppConfig`)
+- [x] Return book — `FineCalculator.calculate(dueDate, checkDate)`, fine added to member balance
+- [x] Overdue detection + `PriorityQueue` sorted by days overdue
+- [x] Reservation queue (`ReservationService`)
+- [x] Archive / Unarchive (books, members, employees) with `archive_log` reason tracking
+- [x] Structured ID generation (`BK`, `ST`, `EP` via `id_counters` + `IdGenerator`)
+- [x] Serial number resequencing (`SerialNumberService`)
+- [x] Dashboard stats — `DashboardCache` (5-min TTL), 30s auto-refresh
+- [x] Charts — PieChart (categories), BarChart (monthly issues), LineChart (trends)
+- [x] PDF export (OpenPDF via `ReportService` + `PrintService`)
+- [x] Excel export (Apache POI via `ReportService`)
+- [x] Global search — `GlobalSearchService` + `SearchTrie`, 300ms debounce
+- [x] Settings persistence — `AppConfig` ↔ `libra_config.properties`
+- [x] Theme switching — `ThemeManager`, `light-theme.css` / `dark-theme.css`
+- [x] Toast notifications (`ToastNotification`)
+- [x] Audit trail (`activity_log` table)
+- [x] Sample data seeder (`DataSeeder.seedIfNeeded()`)
 
-## What's Incomplete / Planned
-- [ ] Wire forgot/reset password FXML to controllers
-- [ ] Student CRUD UI (FXML + StudentService)
-- [ ] Archive students and employees from UI
+## Incomplete / Planned
+- [ ] Student CRUD UI — `AddStudentForm.fxml` exists but not wired to dashboard nav
+- [ ] Forgot/Reset password FXML not wired to controllers
+- [ ] Archive students/employees from UI
 - [ ] Barcode scanner integration (P1)
 - [ ] Email overdue notifications via SMTP (P1)
-- [ ] Multi-language / i18n support (P2)
+- [ ] Multi-language / i18n (P2)
 - [ ] Scheduled database backups (P2)
+- [ ] Remove legacy dead-code entry points (`LibraryApp`, `ModernLibraryApp`, etc.)
 - [ ] Full test coverage
 
-## Token Optimization (Branch-First Search)
-| Task | Tokens Used | Savings vs Flat |
-|------|------------|-----------------|
-| Fix book search | ~8,000 | 82% |
-| Add student feature | ~9,000 | 82% |
-| Debug login issue | ~6,000 | 85% |
-| Update dashboard charts | ~7,000 | 85% |
-| Add new branch | ~10,000 | 83% |
+## Token Optimization — Branch-First Scan
+| Task | Branches to Scan |
+|------|-----------------|
+| Fix book search | `books/`, `service/BookService`, `model/Book`, `repository/BookRepository` |
+| Fix login | `auth/`, `service/UserService`, `security/` |
+| Fix fine calc | `issuing/FineCalculator`, `service/TransactionService` |
+| Fix dashboard | `dashboard/`, `cache/DashboardCache` |
+| Fix report export | `reports/`, `service/ReportService`, `service/PrintService` |
+| Add student CRUD | `students/`, `ui/AddStudentController`, `service/StudentService` |

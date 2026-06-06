@@ -1,149 +1,33 @@
 # System Patterns
 
 ## Architecture — Branch-Per-Module Tree
-Single entry point (`LibraCoreApp`) is the **Main Trunk**. Every feature is an independent **Branch** that exposes a static Module API. Branches only import from `shared/`.
+Single entry point (`LibraCoreApp`) is the **Main Trunk**. Each feature is an independent **Branch** exposing only static Module methods. Branches import only from `shared/`.
 
-```
-LIBRARY-TREE/
-│
-├── MAIN TRUNK
-│   └── com/library/LibraCoreApp.java   ← ONLY main() in entire project
-│
-├── BRANCH: auth/
-│   ├── AuthModule.java       ← static showLogin(), getCurrentUser(), logout()
-│   ├── AuthController.java
-│   ├── AuthService.java
-│   └── resources/auth/
-│       ├── login.fxml
-│       ├── forgot_password.fxml
-│       └── reset_password.fxml
-│
-├── BRANCH: dashboard/
-│   ├── DashboardModule.java  ← static showDashboard(), updateStats()
-│   ├── DashboardController.java
-│   ├── DashboardService.java
-│   ├── ChartFactory.java
-│   └── resources/dashboard/dashboard.fxml
-│
-├── BRANCH: books/
-│   ├── BookModule.java       ← static showBookList(), showAddBook(), searchBooks(), getTotalBookCount()
-│   ├── BookController.java
-│   ├── BookService.java
-│   ├── BookRepository.java
-│   └── resources/books/
-│       ├── book_list.fxml
-│       ├── book_form.fxml
-│       └── book_archive.fxml
-│
-├── BRANCH: members/
-│   ├── MemberModule.java
-│   ├── MemberController.java
-│   ├── MemberService.java
-│   └── resources/members/
-│       ├── member_list.fxml
-│       └── member_form.fxml
-│
-├── BRANCH: students/
-│   ├── StudentModule.java
-│   ├── StudentController.java
-│   ├── StudentService.java
-│   └── resources/students/
-│       ├── student_list.fxml
-│       └── student_form.fxml
-│
-├── BRANCH: employees/
-│   ├── EmployeeModule.java
-│   ├── EmployeeController.java
-│   ├── EmployeeService.java
-│   └── resources/employees/
-│       ├── employee_list.fxml
-│       └── employee_form.fxml
-│
-├── BRANCH: issuing/
-│   ├── IssueModule.java
-│   ├── IssueController.java
-│   ├── IssueService.java
-│   ├── FineCalculator.java
-│   └── resources/issuing/
-│       ├── issue_book.fxml
-│       ├── return_book.fxml
-│       └── issue_history.fxml
-│
-├── BRANCH: reports/
-│   ├── ReportModule.java
-│   ├── ReportController.java
-│   ├── ReportService.java
-│   └── resources/reports/reports.fxml
-│
-├── BRANCH: shared/             ← CONNECTS ALL BRANCHES
-│   ├── SharedModule.java       ← static initDatabase()
-│   ├── DatabaseManager.java    ← SQLite connection pool
-│   ├── Constants.java          ← Recovery key 03150315 (SHA-256)
-│   ├── ValidationUtil.java
-│   ├── AlertUtil.java
-│   ├── DateUtil.java
-│   ├── ChartUtil.java
-│   ├── model/
-│   │   ├── User.java
-│   │   ├── Book.java
-│   │   ├── Member.java
-│   │   ├── Student.java
-│   │   ├── Employee.java
-│   │   ├── IssueRecord.java
-│   │   └── ArchiveLog.java
-│   └── resources/shared/css/
-│       ├── main.css
-│       ├── forms.css
-│       ├── tables.css
-│       └── charts.css
-│
-├── controller/   ← Real JavaFX FXML controllers (UI logic)
-├── ui/           ← Add/Update dialog controllers
-├── service/      ← Business logic (called by branch *Service delegates)
-├── model/        ← Plain Java beans
-├── database/     ← DatabaseConnection (pool) + DataSeeder
-├── config/       ← AppConfig, ThemeManager
-├── security/     ← PasswordUtil (BCrypt), SessionManager
-├── cache/        ← DashboardCache, DashboardStats
-└── util/         ← IdGenerator, PageRequest, Constants, …
-```
-
-## Main Trunk Pattern (LibraCoreApp.java)
+## Startup Sequence
 ```java
-public class LibraCoreApp extends Application {
-    @Override public void init() {
-        SharedModule.initDatabase();   // shared/ first
-    }
-    @Override public void start(Stage stage) {
-        AuthModule.showLogin(stage);   // auth/ branch launches everything
-    }
-    @Override public void stop() {
-        DatabaseManager.close();
-    }
-    public static void main(String[] args) { launch(args); }
-}
+// LibraCoreApp.java
+init()  → SharedModule.initDatabase()   // DB schema + DataSeeder
+start() → AuthModule.showLogin(stage)   // loads LoginPage.fxml
+stop()  → SharedModule.saveConfig()     // persists AppConfig → libra_config.properties
 ```
 
 ## Branch Static API Pattern
-Each branch exposes ONLY static methods. Other branches never touch controllers directly.
 ```java
-// BookModule.java — example
+// Example: BookModule.java
 public class BookModule {
-    private static BookController controller;
-    public static void showBookList(Pane container) { /* FXMLLoader → container */ }
-    public static void showAddBook() { /* modal dialog */ }
-    public static void refreshBookData() { if (controller != null) controller.loadBooks(); }
-    public static List<Book> searchBooks(String query) { return BookService.search(query); }
-    public static int getTotalBookCount() { return BookService.getCount(); }
-    public static int getAvailableBookCount() { return BookService.getAvailableCount(); }
+    public static void showBookList(Pane container) { /* FXMLLoader */ }
+    public static void showAddBook()                { /* modal */ }
+    public static void refreshBookData()            { controller.loadBooks(); }
+    public static List<Book> searchBooks(String q)  { return BookService.search(q); }
+    public static int getTotalBookCount()           { return BookService.getCount(); }
 }
 ```
 
-## Navigation Tree (Scene Switching)
+## Navigation Tree
 ```
-LibraCoreApp (Root)
-└── AuthModule
-    └── DashboardModule
+LibraCoreApp
+└── AuthModule → LoginPage.fxml
+    └── DashboardModule → ModernDashboard.fxml
         ├── BookModule
         ├── MemberModule
         ├── StudentModule
@@ -154,110 +38,110 @@ LibraCoreApp (Root)
 
 ## Branch Dependency Map
 ```
-auth/       → shared/ (UserService, security/, config/)
-dashboard/  → shared/ (DashboardCache, TransactionService)
-books/      → shared/ (BookService)
-members/    → shared/ (MemberService)
-students/   → shared/ (DatabaseConnection direct)
-employees/  → shared/ (EmployeeService)
-issuing/    → shared/ (TransactionService, AppConfig) + books/ + members/ + students/
+auth/       → shared/, service/UserService, security/, config/
+dashboard/  → shared/, cache/DashboardCache, service/TransactionService
+books/      → shared/, service/BookService, repository/BookRepository
+members/    → shared/, service/MemberService, repository/MemberRepository
+students/   → shared/, database/ (direct)
+employees/  → shared/, service/EmployeeService
+issuing/    → shared/, FineCalculator, service/TransactionService, config/AppConfig
 reports/    → shared/ + ALL other branches
 ```
 
 ## Branch File Map
-| Branch | Module | Service | Controller | Notes |
-|--------|--------|---------|------------|-------|
-| auth/ | AuthModule | AuthService | AuthController | Real: controller/LoginController |
-| books/ | BookModule | BooksService | BookController | Real: controller/BookController |
-| members/ | MemberModule | MembersService | MemberController | Real: controller/MemberController |
-| students/ | StudentModule | StudentService | StudentController | Full impl (no legacy service) |
-| employees/ | EmployeeModule | EmployeesService | EmployeeController | Real: controller/EmployeeController |
-| issuing/ | IssueModule | IssueService | IssueController | + FineCalculator |
-| dashboard/ | DashboardModule | DashboardService | DashboardController | + ChartFactory |
-| reports/ | ReportModule | ReportsService | ReportController | Real: controller/ReportsController |
-| shared/ | SharedModule | — | — | + DatabaseManager, ValidationUtil, AlertUtil, DateUtil, ChartUtil |
+| Branch | Module | Service (branch) | Controller (branch) | Real Controller |
+|--------|--------|-----------------|--------------------|--------------------|
+| `auth/` | `AuthModule` | `AuthService` | `AuthController` | `controller/LoginController` |
+| `books/` | `BookModule` | `BooksService` | `BookController` | `controller/BookController` |
+| `members/` | `MemberModule` | `MembersService` | `MemberController` | `controller/MemberController` |
+| `students/` | `StudentModule` | `StudentService` | `StudentController` *(stub)* | `ui/AddStudentController` |
+| `employees/` | `EmployeeModule` | `EmployeesService` | `EmployeeController` | `controller/EmployeeController` |
+| `issuing/` | `IssueModule` | `IssueService` | `IssueController` | `controller/IssueReturnController` |
+| `dashboard/` | `DashboardModule` | `DashboardService` | `DashboardController` | `controller/ModernDashboardController` |
+| `reports/` | `ReportModule` | `ReportsService` | `ReportController` | `controller/ReportsController` |
 
-## AI Scanning Rule — Branch-First Search
-When fixing a bug, ONLY scan the relevant branch + `service/` + `model/`. IGNORE all other branches.
+## FXML ↔ Controller Mapping (Actual)
+| FXML | Controller |
+|------|-----------|
+| `LoginPage.fxml` | `controller/LoginController` |
+| `ModernDashboard.fxml` | `controller/ModernDashboardController` |
+| `Dashboard.fxml` | `controller/DashboardController` |
+| `AddBookForm.fxml` | `ui/AddBookController` |
+| `AddBook.fxml` / `ComprehensiveAddBookForm.fxml` | `ui/AddBookController` |
+| `UpdateBook.fxml` | `controller/BookController` |
+| `AddMemberForm.fxml` / `AddMember.fxml` | `ui/AddMemberController` |
+| `UpdateMember.fxml` | `controller/MemberController` |
+| `AddStudentForm.fxml` | `ui/AddStudentController` |
+| `IssueReturnBooksForm.fxml` | `controller/IssueReturnController` |
+| `IssueBook.fxml` / `ReturnBook.fxml` | `controller/IssueReturnController` |
+| `ReportsView.fxml` | `controller/ReportsController` |
+| `ArchiveView.fxml` | `controller/ArchiveController` |
+| `Settings.fxml` | `controller/SettingsController` |
+| `EmployeeForm.fxml` | `controller/EmployeeController` |
 
-| Issue | Scan | Ignore |
-|-------|------|--------|
-| Book search broken | books/, service/BookService, model/Book | members/, students/, employees/, reports/ |
-| Login fails | auth/, service/UserService, security/ | All other branches |
-| Dashboard charts wrong | dashboard/, cache/DashboardCache | All other branches |
-| Fine calculation wrong | issuing/, service/TransactionService | All other branches |
+## Database Design
+- Single SQLite file `library.db`, WAL mode, FK constraints ON, pool size 5
+- `DatabaseConnection.getConnection()` → `PooledConnection` (close() returns to pool)
+- Schema via `applySchema()` at startup; additive migrations via `runMigrations()` (safe to re-run)
 
-Token savings vs flat scan: ~82–85% reduction per task.
+### Tables
+| Table | Key Columns |
+|-------|------------|
+| `users` | `username`, `password_hash`, `role`, `status`, `failed_attempts`, `force_password_change` |
+| `books` | `isbn`, `book_name`, `author`, `category`, `quantity`, `available_qty`, `status`, `book_code`, `serial_no` |
+| `members` | `student_id`, `name`, `department`, `program`, `status`, `fine_balance`, `member_code`, `serial_no`, `membership_type` |
+| `students` | `student_id`, `full_name`, `department`, `year`, `email`, `phone` |
+| `transactions` | `book_id`, `member_id`, `issue_date`, `due_date`, `return_date`, `fine_amount`, `fine_paid`, `status`, `return_condition` |
+| `reservations` | `book_id`, `member_id`, `queue_position`, `status` |
+| `employees` | `employee_code`, `name`, `designation`, `salary`, `status`, `serial_no` |
+| `settings` | `key`, `value` |
+| `activity_log` | `user_id`, `action`, `details`, `timestamp` |
+| `id_counters` | `entity` (BK/ST/MB/EP), `last_id` |
+| `admin`, `librarydetails` | legacy (backward compat) |
 
-## AI Prompt Templates
-
-### Fix a Branch Bug
-```
-BRANCH: books/
-ISSUE: Search not filtering by ISBN
-SCAN ONLY: BookController.java, BookService.java, BookRepository.java, model/Book.java, DatabaseManager.java
-DO NOT SCAN: members/, students/, employees/, reports/, issuing/
-```
-
-### Add Feature to Branch
-```
-BRANCH: issuing/
-FEATURE: Overdue email notification
-SCAN ONLY: IssueModule.java, IssueController.java, IssueService.java, FineCalculator.java, model/IssueRecord.java
-DO NOT MODIFY: Other branches
-```
+### Migrations (additive, idempotent)
+- `members.archived_date`, `books.archived_date`
+- `books.book_code`, `members.member_code`
+- `books.serial_no`, `members.serial_no`, `employees.serial_no`
 
 ## Key Design Decisions
 
-### Database
-- Single SQLite file `library.db`, WAL mode, connection pool size 5
-- `DatabaseConnection.getConnection()` → `PooledConnection` wrapper; `close()` returns to pool
-- Schema via `applySchema()` at startup; additive migrations via `runMigrations()` (safe to re-run)
-- Foreign key constraints enabled on every connection
-
-### Password Recovery
-- Universal key: `03150315` in `Constants.java`, compared via SHA-256
-- Flow: Login → ForgotPasswordController → key check → ResetPasswordController → DB update
-
 ### ID Generation
-- `BK00000001` (books), `ST00000001` (members), `EP00000001` (employees)
-- Counter in `id_counters` table, managed by `IdGenerator` + `SerialNumberService`
+- `BK00000001` (books), `ST00000001` (students/members), `EP00000001` (employees)
+- Counter in `id_counters` table; managed by `IdGenerator` + `SerialNumberService`
 - Member display ID: `LIB-YYYY-NNNN`
 
-### Pagination
-- `PageRequest.of(page, pageSize)` — LIMIT/OFFSET on all list queries
-- Default: 20 rows/page (tables), 10 (config)
+### Fine Calculation
+- `FineCalculator.calculate(dueDate, checkDate)` — reads grace + rate from `AppConfig`
+- Default: PKR 5/day, 2-day grace
+- `isOverdue(dueDate)` — checks against `LocalDate.now()`
 
 ### Caching
-- `BookService`: in-memory ISBN → Book map, TTL 5 min
-- `DashboardCache` singleton; invalidated on any write; 30s auto-refresh
-
-### Transaction Data Structures
-- `PriorityQueue<Transaction>` — overdue sorted by days overdue (max-heap)
-- `Deque<Transaction>` — last 50 activities, supports undo
-- `HashMap<memberId, List<Transaction>>` — active borrowings per member (O(1))
+- `DashboardCache` singleton — invalidated on writes, 30s auto-refresh
+- `BookService` — in-memory ISBN → Book map, TTL 5 min
 
 ### Security
-- BCrypt via `PasswordUtil`; `SessionManager` auto-logout 30 min
+- BCrypt via `PasswordUtil.hash()` / `PasswordUtil.check()`
+- `SessionManager` — JavaFX `Timeline`, 30-min timeout, `resetTimer()` on interaction
 - Roles: `ADMIN` (full), `LIBRARIAN` (read/write, no admin settings)
-- `PreparedStatement` everywhere — no SQL injection
+- All DB access via `PreparedStatement` — no SQL injection
+
+### Search
+- `GlobalSearchService` + `SearchTrie` — 300ms debounce, case-insensitive
+- SQL fallback: `LIKE '%query%'` on indexed columns
 
 ### Theme
-- `ThemeManager` loads CSS from `src/main/resources/com/library/ui/css/`
+- `ThemeManager.applyTheme(scene)` loads CSS from `src/main/resources/com/library/ui/css/`
 - Persisted in `AppConfig` (`ui.theme` = `light` | `dark`)
+- CSS files: `light-theme.css`, `dark-theme.css`
 
-## FXML ↔ Controller Mapping
-| FXML | Controller |
-|------|-----------|
-| LoginPage.fxml | controller/LoginController |
-| forgot_password.fxml | ui/login/ForgotPasswordController |
-| reset_password.fxml | ui/login/ResetPasswordController |
-| ModernDashboard.fxml | controller/ModernDashboardController |
-| Dashboard.fxml | controller/DashboardController |
-| AddBookForm.fxml | ui/AddBookController |
-| AddMemberForm.fxml | ui/AddMemberController |
-| IssueReturnBooksForm.fxml | controller/IssueReturnController |
-| ReportsView.fxml | controller/ReportsController |
-| ArchiveView.fxml | controller/ArchiveController |
-| Settings.fxml | controller/SettingsController |
-| EmployeeForm.fxml | controller/EmployeeController |
+## AI Scanning Rule — Branch-First Search
+When fixing a bug, scan ONLY the relevant branch + `service/` + `model/`.
+
+| Issue | Scan | Ignore |
+|-------|------|--------|
+| Book search broken | `books/`, `service/BookService`, `model/Book` | all other branches |
+| Login fails | `auth/`, `service/UserService`, `security/` | all other branches |
+| Dashboard charts wrong | `dashboard/`, `cache/DashboardCache` | all other branches |
+| Fine calculation wrong | `issuing/FineCalculator`, `service/TransactionService` | all other branches |
+| Report export broken | `reports/`, `service/ReportService`, `service/PrintService` | all other branches |

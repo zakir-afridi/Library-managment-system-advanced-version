@@ -2,79 +2,86 @@
 
 ## Stack
 | Layer | Technology | Version |
-|-------|-----------|---------|
+|-------|-----------|---------||
 | Language | Java | 17 |
 | UI Framework | JavaFX | 21.0.1 |
-| Database | SQLite (via sqlite-jdbc) | 3.46.1.3 |
+| Database | SQLite (sqlite-jdbc) | 3.46.1.3 |
 | Password Hashing | jBCrypt | 0.4 |
 | Excel Export | Apache POI (poi-ooxml) | 5.2.5 |
 | PDF Export | OpenPDF (librepdf) | 1.3.43 |
 | Build | Maven | 3.x |
 
-## Build
-- `pom.xml` at `Library-managment-system-advanced-version/Library/pom.xml`
-- Artifact: `library-management-system-2.0.0.jar`
-- Main class: `com.library.LibraCoreApp`
-- Run scripts: `run.bat`, `run.ps1`, `run-production.bat`
-- JavaFX SDK bundled at `Library/javafx-sdk/` (for non-Maven runs)
-- Build: `mvn clean package` | Run: `mvn javafx:run`
-
-## pom.xml Key Dependencies
+## Key Maven Dependencies
 ```xml
-<!-- JavaFX -->
 <dependency><groupId>org.openjfx</groupId><artifactId>javafx-controls</artifactId><version>21</version></dependency>
 <dependency><groupId>org.openjfx</groupId><artifactId>javafx-fxml</artifactId><version>21</version></dependency>
-<!-- SQLite -->
 <dependency><groupId>org.xerial</groupId><artifactId>sqlite-jdbc</artifactId><version>3.46.1.3</version></dependency>
-<!-- BCrypt -->
 <dependency><groupId>org.mindrot</groupId><artifactId>jbcrypt</artifactId><version>0.4</version></dependency>
-<!-- Excel -->
 <dependency><groupId>org.apache.poi</groupId><artifactId>poi-ooxml</artifactId><version>5.2.5</version></dependency>
-<!-- PDF -->
 <dependency><groupId>com.github.librepdf</groupId><artifactId>openpdf</artifactId><version>1.3.43</version></dependency>
 ```
+
+## Build & Run
+- `pom.xml`: `Library-managment-system-advanced-version/Library/pom.xml`
+- Artifact: `library-management-system-2.0.0.jar`
+- Main class: `com.library.LibraCoreApp`
+- Build: `mvn clean package` | Run: `mvn javafx:run` or `run.bat`
+- JavaFX SDK also bundled at `Library/javafx-sdk/` (for non-Maven runs)
+- JVM config: `Library/.mvn/jvm.config`
+
+## Resource Paths
+- All FXML, CSS, images: `src/main/resources/com/library/ui/`
+- FXML loaded via: `getClass().getResource("/com/library/ui/<file>.fxml")`
+- CSS files: `light-theme.css`, `dark-theme.css`, `Login.css`, `Dashboard.css`, `ModernDashboard.css`, `ProfessionalDashboard.css`, `ComprehensiveForms.css`, `AddMember.css`
+- Images: `src/main/resources/com/library/ui/images/` (login icon: `login.png`)
+
+## Database
+- File: `library.db` (next to JAR), WAL mode, FK constraints ON
+- Connection pool: `ArrayBlockingQueue<Connection>` size 5 in `DatabaseConnection`
+- `PooledConnection` wraps real connection — `close()` returns to pool, never closes
+- DB URL: `jdbc:sqlite:library.db`
 
 ## Performance Targets
 - App startup: < 3 seconds
 - DB query: < 500ms for 10,000 records
-- Search response: < 200ms (with 300ms debounce)
+- Search response: < 200ms (300ms debounce on UI side)
 - Chart rendering: < 1 second
-
-## Database Schema (tables)
-- `users` — login accounts (username, password_hash, role, status, failed_attempts)
-- `books` — catalogue (isbn, book_name, author, category, quantity, available_qty, status, book_code, serial_no, is_archived)
-- `members` — library members (student_id, name, department, program, status, fine_balance, member_code, serial_no, is_archived)
-- `students` — student records (student_id, full_name, department, year, email, phone, is_archived)
-- `transactions` / `issue_records` — issue/return (book_id, member_id, issue_date, due_date, return_date, fine_amount, status)
-- `reservations` — queue (book_id, member_id, queue_position, status)
-- `employees` — staff (employee_code, name, designation, salary, status, serial_no, is_archived)
-- `settings` — key/value store
-- `activity_log` — audit trail (user_id, action, details, timestamp)
-- `archive_log` — archive reasons (record_type, record_id, reason, archived_at, archived_by)
-- `id_counters` — structured ID counters (BK, ST, MB, EP)
-- `admin`, `librarydetails` — legacy tables (backward compatibility)
-
-## Indexes
-- books: isbn, book_name, category, author, status
-- members: student_id, name, email, status
-- transactions: member_id+status, due_date, book_id
-- reservations: book_id+status
-- employees: employee_code, name, status
 
 ## Config File
 `libra_config.properties` — next to JAR, loaded/saved by `AppConfig` singleton.
-- Loan days (14), fine rate (PKR 5/day), grace period (2 days)
-- Max books per member (5), items per page (10), currency (PKR)
-- Theme (light/dark), overdue alerts, due-soon threshold
+Keys: `library.loanDays` (14), `library.fineRate` (5.0), `library.gracePeriod` (2), `library.maxBooks` (5), `library.itemsPerPage` (10), `library.currency` (PKR), `ui.theme` (light), `notify.overdueAlert` (true), `notify.dueSoonDays` (2)
 
-## Resource Paths
-All FXML, CSS, images under: `src/main/resources/com/library/ui/`
-Loaded via: `getClass().getResource("/com/library/ui/<file>.fxml")`
+## Package Structure
+```
+com.library/
+├── LibraCoreApp.java          ← ONLY main()
+├── auth/                      ← AuthModule, AuthController, AuthService
+├── books/                     ← BookModule, BookController, BooksService
+├── members/                   ← MemberModule, MemberController, MembersService
+├── students/                  ← StudentModule, StudentController (stub), StudentService
+├── employees/                 ← EmployeeModule, EmployeeController, EmployeesService
+├── issuing/                   ← IssueModule, IssueController, IssueService, FineCalculator
+├── dashboard/                 ← DashboardModule, DashboardController, DashboardService, ChartFactory
+├── reports/                   ← ReportModule, ReportController, ReportsService
+├── shared/                    ← SharedModule, DatabaseManager, ValidationUtil, AlertUtil, DateUtil, ChartUtil
+├── controller/                ← Real JavaFX FXML controllers
+├── ui/                        ← AddBookController, AddMemberController, AddStudentController, LoginController
+├── service/                   ← BookService, MemberService, EmployeeService, TransactionService,
+│                                 ReportService, PrintService, UserService, LibraryService,
+│                                 ReservationService, GlobalSearchService, SearchService,
+│                                 SearchTrie, SerialNumberService
+├── model/                     ← Book, Member, Employee, User, IssueRecord, Transaction,
+│                                 Reservation, ActivityRecord
+├── repository/                ← BookRepository, MemberRepository
+├── database/                  ← DatabaseConnection (pool + schema), DataSeeder
+├── config/                    ← AppConfig (singleton), ThemeManager
+├── security/                  ← PasswordUtil (BCrypt), SessionManager (30-min timeout)
+├── cache/                     ← DashboardCache, DashboardStats
+└── util/                      ← Constants (recovery key SHA-256), IdGenerator, PageRequest,
+                                  SerialNumberService, ToastNotification, SampleDataGenerator
+```
 
-## CSS Files
-- `main.css` — main theme (primary `#2c3e50`, secondary `#3498db`, accent `#e74c3c`)
-- `login.css` — login page
-- `dashboard.css` — cards/charts
-- `forms.css` — form inputs
-- `tables.css` — data tables
-- `charts.css` — chart styling
+## Legacy / Unused Files
+- `LibraryApp.java`, `LibraryManagementSystem.java`, `ModernLibraryApp.java`, `ProfessionalLibraryApp.java` — old entry points, not wired
+- `ui/LoginController.java` — duplicates `controller/LoginController`, not wired
+- `students/StudentController.java` — empty stub; real impl in `ui/AddStudentController`
