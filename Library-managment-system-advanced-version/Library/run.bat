@@ -11,13 +11,28 @@ echo  ============================================================
 echo.
 
 :: ── Java check ────────────────────────────────────────────────────────────────
-where java >nul 2>&1
-if %errorlevel% neq 0 (
-    echo  [ERROR] Java not found on PATH.
+set "JAVA_EXE="
+
+:: 1. Known JDK-24 location
+if exist "C:\Program Files\Java\jdk-24\bin\java.exe" (
+    set "JAVA_EXE=C:\Program Files\Java\jdk-24\bin\java.exe"
+)
+
+:: 2. Scan all JDKs under C:\Program Files\Java\ as fallback
+if not defined JAVA_EXE (
+    for /d %%J in ("C:\Program Files\Java\jdk*") do (
+        if not defined JAVA_EXE (
+            if exist "%%J\bin\java.exe" set "JAVA_EXE=%%J\bin\java.exe"
+        )
+    )
+)
+
+if not defined JAVA_EXE (
+    echo  [ERROR] Java not found.
     echo  Install Java 17+ from: https://adoptium.net/
     pause & exit /b 1
 )
-echo  [OK] Java detected.
+echo  [OK] Java: !JAVA_EXE!
 
 :: ── Skip build if JAR already exists ─────────────────────────────────────────
 set "JAR=target\library-management-system-2.0.0.jar"
@@ -90,7 +105,7 @@ set "FX_MODS=!FX!\javafx-controls-21.0.1.jar;!FX!\javafx-controls-21.0.1-win.jar
 set "CP=%JAR%"
 for %%F in (target\lib\*.jar) do set "CP=!CP!;%%F"
 
-java ^
+"!JAVA_EXE!" ^
   --module-path "!FX_MODS!" ^
   --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base,javafx.swing ^
   --enable-native-access=ALL-UNNAMED,javafx.graphics ^
