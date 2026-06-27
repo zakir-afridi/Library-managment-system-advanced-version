@@ -5,9 +5,13 @@ import com.library.cache.DashboardCache;
 import com.library.config.AppConfig;
 import com.library.config.ThemeManager;
 import com.library.model.Book;
+import com.library.model.BookMetadata;
+import com.library.scanner.BarcodeScanner;
 import com.library.security.SessionManager;
+import com.library.service.BookMetadataCacheService;
 import com.library.service.BookService;
 import com.library.service.SearchService;
+import com.library.util.AsyncRunner;
 import com.library.util.ToastNotification;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -23,12 +27,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.util.List;
 
 public class BookController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BookController.class);
 
     // ── Top ───────────────────────────────────────────────────────────────────
     @FXML private Button backBtn;
@@ -75,8 +83,9 @@ public class BookController {
     @FXML private Button    saveBtn;
 
     // ── State ─────────────────────────────────────────────────────────────────
-    private final BookService   bookService   = new BookService();
-    private final SearchService searchService = SearchService.getInstance();
+    private final BookService               bookService   = new BookService();
+    private final SearchService             searchService = SearchService.getInstance();
+    private final BookMetadataCacheService  metaCache     = BookMetadataCacheService.getInstance();
 
     private final ObservableList<Book> allBooks    = FXCollections.observableArrayList();
     private FilteredList<Book>         filteredBooks;
@@ -99,6 +108,80 @@ public class BookController {
         titleField   .textProperty().addListener((o,v,n) -> com.library.shared.ValidationUtil.clearError(titleField));
         authorField  .textProperty().addListener((o,v,n) -> com.library.shared.ValidationUtil.clearError(authorField));
         quantityField.textProperty().addListener((o,v,n) -> com.library.shared.ValidationUtil.clearError(quantityField));
+        // v3: Auto-fill form when ISBN changes (on focus lost)
+        isbnField.setOnAction(e -> lookupIsbn());
+        isbnField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && editingBook == null) lookupIsbn(); // only for new books
+        });
+    }
+
+    // ── v3: ISBN auto-fill from Open Library ─────────────────────────────────
+
+    /**
+     * Triggered when the ISBN field loses focus or Enter is pressed.
+     * Fetches metadata from Open Library (cached) and auto-fills the form.
+     */
+    @FXML
+    private void lookupIsbn() {
+        String isbn = isbnField.getText().trim();
+        if (isbn.isBlank() || isbn.length() < 10) return;
+        if (editingBook != null) return; // don't overwrite existing book data
+
+        ToastNotification.info(backBtn.getScene(), "Looking up ISBN " + isbn + "...");
+        AsyncRunner.run(
+            () -> metaCache.getMetadata(isbn),
+            optMeta -> {
+                if (optMeta.isEmpty()) {
+                    ToastNotification.warning(backBtn.getScene(),
+                        "No metadata found for ISBN " + isbn + ". Fill in manually.");
+                    return;
+                }
+                BookMetadata m = optMeta.get();
+                if (titleField.getText().isBlank() && m.getTitle() != null)
+                    titleField.setText(m.getTitle());
+                if (authorField.getText().isBlank() && m.getAuthor() != null)
+                    authorField.setText(m.getAuthor());
+                if (publisherField.getText().isBlank() && m.getPublisher() != null)
+                    publisherField.setText(m.getPublisher());
+                if (yearField.getText().isBlank() && m.extractYear() > 0)
+                    yearField.setText(String.valueOf(m.extractYear()));
+                if (descriptionArea.getText().isBlank() && m.getDescription() != null)
+                    descriptionArea.setText(m.getDescription());
+                if (categoryCombo.getValue() == null && m.getCategory() != null)
+                    categoryCombo.setValue(m.getCategory());
+                ToastNotification.success(backBtn.getScene(),
+                    "Auto-filled: " + m.getTitle());
+                LOG.info("ISBN auto-fill: {}", m.getTitle());
+            },
+            err -> {
+                LOG.warn("ISBN lookup failed: {}", err.getMessage());
+                ToastNotification.warning(backBtn.getScene(), "ISBN lookup failed — fill in manually.");
+            }
+        );
+    }
+
+    /** Decode a barcode/QR from an image file (user selects the file). */
+    @FXML
+    private void scanBarcodeFromFile() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Select Barcode / QR Image");
+        fc.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg"));
+        File f = fc.showOpenDialog(backBtn.getScene().getWindow());
+        if (f == null) return;
+        try {
+            byte[] imageBytes = Files.readAllBytes(f.toPath());
+            BarcodeScanner.decodeFromImageBytes(imageBytes).ifPresentOrElse(
+                code -> {
+                    isbnField.setText(code);
+                    lookupIsbn();
+                },
+                () -> ToastNotification.warning(backBtn.getScene(),
+                    "No barcode found in image.")
+            );
+        } catch (IOException e) {
+            ToastNotification.error(backBtn.getScene(), "Could not read image: " + e.getMessage());
+        }
     }
 
     private void setupTable() {
@@ -479,12 +562,17 @@ public class BookController {
 
     @FXML
     private void goBack() {
+        Scene scene = backBtn.getScene();
+        if (scene != null && scene.getUserData() instanceof DashboardController dc) {
+            dc.goBackToDashboard();
+            return;
+        }
+        // Fallback: load dashboard fresh
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/library/ui/ProfessionalDashboard.fxml"));
             Stage stage = (Stage) backBtn.getScene().getWindow();
             boolean wasMaximized = stage.isMaximized();
-            Scene scene = backBtn.getScene();
             scene.setRoot(loader.load());
             ThemeManager.getInstance().applyTheme(scene);
             DashboardController dc = loader.getController();
@@ -496,11 +584,3 @@ public class BookController {
             ToastNotification.error(backBtn.getScene(), "Navigation error: " + e.getMessage());
         }
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-    private String nvl(String s)    { return s != null ? s : ""; }
-    private String esc(String s)    { return s != null ? "\"" + s.replace("\"", "\"\"") + "\"" : ""; }
-    private int    parseIntSafe(String s) {
-        try { return Integer.parseInt(s.trim()); } catch (Exception e) { return 0; }
-    }
-}

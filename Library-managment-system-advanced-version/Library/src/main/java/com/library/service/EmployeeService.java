@@ -1,4 +1,6 @@
 package com.library.service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.library.config.AppConfig;
 import com.library.database.DatabaseConnection;
@@ -11,8 +13,9 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class EmployeeService {
+    private static final Logger LOG = LoggerFactory.getLogger(EmployeeService.class);
 
-    // ── CRUD ──────────────────────────────────────────────────────────────────
+    // â”€â”€ CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public boolean addEmployee(Employee e) {
         // Auto-assign structured ID: EP00000001
@@ -43,7 +46,7 @@ public class EmployeeService {
             if (ok) SerialNumberService.getInstance().resequenceEmployees();
             return ok;
         } catch (SQLException ex) {
-            System.err.println("Error adding employee: " + ex.getMessage());
+            LOG.error("Error adding employee: " + ex.getMessage());
             return false;
         }
     }
@@ -70,7 +73,7 @@ public class EmployeeService {
             ps.setInt(12, e.getEmpId());
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
-            System.err.println("Error updating employee: " + ex.getMessage());
+            LOG.error("Error updating employee: " + ex.getMessage());
             return false;
         }
     }
@@ -84,7 +87,7 @@ public class EmployeeService {
             if (ok) SerialNumberService.getInstance().resequenceEmployees();
             return ok;
         } catch (SQLException e) {
-            System.err.println("Error deleting employee: " + e.getMessage());
+            LOG.error("Error deleting employee: " + e.getMessage());
             return false;
         }
     }
@@ -98,7 +101,7 @@ public class EmployeeService {
                 if (rs.next()) return map(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching employee: " + e.getMessage());
+            LOG.error("Error fetching employee: " + e.getMessage());
         }
         return null;
     }
@@ -113,12 +116,12 @@ public class EmployeeService {
                 if (rs.next()) return map(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching employee by code: " + e.getMessage());
+            LOG.error("Error fetching employee by code: " + e.getMessage());
         }
         return null;
     }
 
-    // ── Pagination — ordered by serial_no ────────────────────────────────────
+    // â”€â”€ Pagination â€” ordered by serial_no â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public List<Employee> getAllEmployees(int page, int pageSize) {
         PageRequest pr = PageRequest.of(page, pageSize);
@@ -132,7 +135,7 @@ public class EmployeeService {
                 while (rs.next()) list.add(map(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching employees: " + e.getMessage());
+            LOG.error("Error fetching employees: " + e.getMessage());
         }
         return list;
     }
@@ -144,12 +147,12 @@ public class EmployeeService {
              ResultSet rs = s.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);
         } catch (SQLException e) {
-            System.err.println("Error counting employees: " + e.getMessage());
+            LOG.error("Error counting employees: " + e.getMessage());
         }
         return 0;
     }
 
-    // ── Archive — resequences both lists ─────────────────────────────────────
+    // â”€â”€ Archive â€” resequences both lists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public boolean archiveEmployee(int empId) {
         String sql = "UPDATE employees SET status='Archived', archived_date=? WHERE emp_id=?";
@@ -164,7 +167,7 @@ public class EmployeeService {
             }
             return ok;
         } catch (SQLException e) {
-            System.err.println("Error archiving employee: " + e.getMessage());
+            LOG.error("Error archiving employee: " + e.getMessage());
             return false;
         }
     }
@@ -181,7 +184,7 @@ public class EmployeeService {
             }
             return ok;
         } catch (SQLException e) {
-            System.err.println("Error unarchiving employee: " + e.getMessage());
+            LOG.error("Error unarchiving employee: " + e.getMessage());
             return false;
         }
     }
@@ -198,12 +201,12 @@ public class EmployeeService {
                 while (rs.next()) list.add(map(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching archived employees: " + e.getMessage());
+            LOG.error("Error fetching archived employees: " + e.getMessage());
         }
         return list;
     }
 
-    // ── Search — includes employee_code ──────────────────────────────────────
+    // â”€â”€ Search â€” includes employee_code â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public List<Employee> searchEmployees(String query) {
         return searchEmployees(query, false);
@@ -227,12 +230,12 @@ public class EmployeeService {
                 while (rs.next()) list.add(map(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error searching employees: " + e.getMessage());
+            LOG.error("Error searching employees: " + e.getMessage());
         }
         return list;
     }
 
-    // ── Mapping ───────────────────────────────────────────────────────────────
+    // â”€â”€ Mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private Employee map(ResultSet rs) throws SQLException {
         Employee e = new Employee();
@@ -257,3 +260,5 @@ public class EmployeeService {
         return e;
     }
 }
+
+

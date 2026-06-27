@@ -1,4 +1,6 @@
 package com.library.service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.library.database.DatabaseConnection;
 
@@ -8,7 +10,7 @@ import java.sql.*;
  * Manages the serial_no column for Books, Members, and Employees.
  *
  * Serial numbers are display-order positions (1, 2, 3 ...).
- * They are NOT the permanent ID — they shift when items are added or removed.
+ * They are NOT the permanent ID â€” they shift when items are added or removed.
  *
  * Rules:
  *  - Active list: sequential 1..N ordered by primary key
@@ -18,6 +20,7 @@ import java.sql.*;
  * Call resequence*() after every add, delete, or archive operation.
  */
 public class SerialNumberService {
+    private static final Logger LOG = LoggerFactory.getLogger(SerialNumberService.class);
 
     private static SerialNumberService instance;
 
@@ -28,7 +31,7 @@ public class SerialNumberService {
         return instance;
     }
 
-    // ── Books ─────────────────────────────────────────────────────────────────
+    // â”€â”€ Books â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /** Resequences serial_no for all active (non-archived) books. */
     public void resequenceBooks() {
@@ -46,7 +49,7 @@ public class SerialNumberService {
         );
     }
 
-    // ── Members ───────────────────────────────────────────────────────────────
+    // â”€â”€ Members â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void resequenceMembers() {
         resequence(
@@ -62,7 +65,7 @@ public class SerialNumberService {
         );
     }
 
-    // ── Employees ─────────────────────────────────────────────────────────────
+    // â”€â”€ Employees â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void resequenceEmployees() {
         resequence(
@@ -78,7 +81,7 @@ public class SerialNumberService {
         );
     }
 
-    // ── Convenience: resequence both active + archived ────────────────────────
+    // â”€â”€ Convenience: resequence both active + archived â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void resequenceAll() {
         resequenceBooks();
@@ -89,7 +92,7 @@ public class SerialNumberService {
         resequenceArchivedEmployees();
     }
 
-    // ── Core algorithm ────────────────────────────────────────────────────────
+    // â”€â”€ Core algorithm â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
      * Fetches IDs in the given order, then assigns serial_no = 1, 2, 3 ...
@@ -113,12 +116,15 @@ public class SerialNumberService {
                 c.commit();
             } catch (SQLException e) {
                 c.rollback();
-                System.err.println("SerialNumberService resequence error: " + e.getMessage());
+                LOG.error("SerialNumberService resequence error: " + e.getMessage());
             } finally {
                 c.setAutoCommit(true);
             }
         } catch (SQLException e) {
-            System.err.println("SerialNumberService connection error: " + e.getMessage());
+            LOG.error("SerialNumberService connection error: " + e.getMessage());
         }
     }
 }
+
+
+

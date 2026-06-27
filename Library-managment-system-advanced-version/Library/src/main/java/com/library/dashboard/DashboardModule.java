@@ -39,7 +39,7 @@ public class DashboardModule {
             com.library.controller.DashboardController dc = loader.getController();
             dc.initSession(user);
             stage.setScene(scene);
-            stage.setTitle("LibraCore Pro v2.0.0 — Dashboard");
+            stage.setTitle("LibraCore Pro v3.0.0 — Dashboard");
             stage.setMaximized(true);
         } catch (Exception e) {
             System.err.println("DashboardModule.showDashboard(stage): " + e.getMessage());

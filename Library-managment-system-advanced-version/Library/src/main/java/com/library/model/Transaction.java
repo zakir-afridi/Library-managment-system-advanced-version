@@ -5,8 +5,6 @@ import java.time.temporal.ChronoUnit;
 
 import com.library.config.AppConfig;
 
-import com.library.config.AppConfig;
-
 /**
  * Represents a book issue/return transaction.
  * Replaces the old IssueRecord with fine calculation and status tracking.

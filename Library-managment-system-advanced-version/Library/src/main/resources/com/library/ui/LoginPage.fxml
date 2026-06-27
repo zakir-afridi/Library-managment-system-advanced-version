@@ -22,9 +22,7 @@
                translateX="350" translateY="220" />
 
     <!-- Login Card -->
-    <VBox alignment="CENTER" spacing="0" maxWidth="420"
-          style="-fx-background-color: rgba(255,255,255,0.97); -fx-background-radius: 18;
-                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 30, 0, 0, 10);">
+    <VBox alignment="CENTER" spacing="0" maxWidth="420" styleClass="login-card">
 
         <!-- Header band -->
         <VBox alignment="CENTER" spacing="8"
@@ -32,7 +30,7 @@
                      -fx-background-radius: 18 18 0 0; -fx-padding: 28 36 24 36;">
             <Text text="📚" style="-fx-font-size: 40px;" />
             <Text text="LibraCore Pro" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-fill: white;" />
-            <Text text="Library Management System v2.0.0"
+            <Text text="Library Management System v3.0.0"
                   style="-fx-font-size: 11px; -fx-fill: rgba(255,255,255,0.75);" />
         </VBox>
 
@@ -47,22 +45,16 @@
 
             <!-- Username -->
             <VBox spacing="5">
-                <Label text="Username" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #424242;" />
+                <Label text="Username" style="-fx-font-size: 12px; -fx-font-weight: bold;" />
                 <TextField fx:id="usernameField" promptText="Enter your username"
-                           style="-fx-pref-height: 42px; -fx-font-size: 13px;
-                                  -fx-background-color: #f5f5f5; -fx-background-radius: 8;
-                                  -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-border-width: 1.5;
-                                  -fx-padding: 0 12 0 12;" />
+                           style="-fx-pref-height: 42px; -fx-font-size: 13px; -fx-padding: 0 12 0 12;" />
             </VBox>
 
             <!-- Password -->
             <VBox spacing="5">
-                <Label text="Password" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #424242;" />
+                <Label text="Password" style="-fx-font-size: 12px; -fx-font-weight: bold;" />
                 <PasswordField fx:id="passwordField" promptText="Enter your password"
-                               style="-fx-pref-height: 42px; -fx-font-size: 13px;
-                                      -fx-background-color: #f5f5f5; -fx-background-radius: 8;
-                                      -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-border-width: 1.5;
-                                      -fx-padding: 0 12 0 12;" />
+                               style="-fx-pref-height: 42px; -fx-font-size: 13px; -fx-padding: 0 12 0 12;" />
             </VBox>
 
             <!-- Login button -->

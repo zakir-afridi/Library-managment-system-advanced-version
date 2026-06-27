@@ -98,8 +98,8 @@ A modern, production-ready Library Management System with professional UI/UX des
 
 ### **Quick Start**
 ```bash
-cd "d:\LMS_UPGRADE\Library-managment-system-advanced-version\Library"
-run-professional.bat
+cd Library-managment-system-advanced-version
+LaunchLibraCore.bat
 ```
 
 ### **Manual Compilation**

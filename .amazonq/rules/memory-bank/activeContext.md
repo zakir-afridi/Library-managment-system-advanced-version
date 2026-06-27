@@ -1,34 +1,49 @@
 # Active Context
 
-## Current State
-- Branch-Per-Module architecture fully established; all 8 branches wired through `LibraCoreApp`
-- `SharedModule.initDatabase()` → `DatabaseConnection.initialise()` → `DataSeeder.seedIfNeeded()` runs on every startup
-- `SharedModule.saveConfig()` → `AppConfig.save()` runs on shutdown
-- Auth: BCrypt login, 30-min session timeout (`SessionManager` + JavaFX `Timeline`)
-- Book CRUD, Member CRUD, Employee CRUD — all working with paginated tables
-- Issue/Return with `FineCalculator.calculate(dueDate, checkDate)` — reads grace + rate from `AppConfig`
-- Dashboard: `DashboardCache` (5-min TTL), 30s auto-refresh, PieChart + BarChart + LineChart
-- Archive/Unarchive for books, members, employees with `archive_log` tracking
-- Reservation queue via `ReservationService`
-- Reports PDF/Excel via `ReportService` + `PrintService`
-- Global search: `GlobalSearchService` + `SearchTrie`, 300ms debounce
-- Settings UI → `AppConfig` → `libra_config.properties`
-- Theme: `ThemeManager.applyTheme(scene)`, CSS: `light-theme.css` / `dark-theme.css`
-- Toast notifications: `ToastNotification`
-- Audit trail: `activity_log` table
-- ID generation: `BK`, `ST`, `EP` prefixes via `id_counters` table
+## Current State — LibraCore Pro v3.0.0 ✅ BUILT
+
+- **JAR:** `target/LibraCore-Pro-3.0.0.jar` (845 KB) — 103 source files, 44 dependency JARs
+- **JDK:** Java 24 (`C:\Program Files\Java\jdk-24`)
+- **Maven:** `D:\maven\apache-maven-3.9.6\bin\mvn.cmd`
+- **Build command:** `set "JAVA_HOME=C:\Program Files\Java\jdk-24" && "D:\maven\apache-maven-3.9.6\bin\mvn.cmd" clean package -DskipTests`
+- **Launch:** `run.bat` (auto-detects Java + Maven, searches `D:\maven` first)
+
+## v3 Upgrades Completed
+- Java 24 + `--enable-preview` (pom.xml release updated from 21 → 24)
+- HikariCP 5.1.0 connection pool replacing hand-rolled ArrayBlockingQueue
+- SQLite 3.49.1.0 (upgraded from 3.46)
+- Jackson 2.18.2 for API JSON parsing
+- SLF4J + Logback structured logging (replaces System.out.println)
+- GlobalExceptionHandler — no silent crashes
+- AsyncRunner — virtual threads (Executors.newVirtualThreadPerTaskExecutor)
+- OpenLibraryClient — free ISBN metadata fetch with 30-day DB cache
+- ExchangeRateClient — Frankfurter free currency rates (24h cache)
+- WeatherClient — Open-Meteo free weather, no API key (30min cache)
+- BarcodeScanner (ZXing 3.5.3) — decode EAN/QR from image, generate QR codes
+- EmailService (Jakarta Mail 2.0.1) — Gmail SMTP, email_queue table, 3 retries
+- BackupScheduler — daily auto-backup to ~/.libracore/backups/, keeps last 30
+- OverdueNotificationService — hourly overdue email reminders
+- BookController — ISBN auto-fill from Open Library on focus-lost
+- SettingsController — email/weather/backup UI panels added
+
+## Bugs Fixed During Build
+1. `pom.xml` — `--enable-preview` requires release matching JDK; changed 21 → 24
+2. BOM (`\ufeff`) stripped from 9 files: BookService, EmployeeService, GlobalSearchService,
+   MemberService, ReportService, ReservationService, SerialNumberService,
+   TransactionService, SettingsController
+3. `SettingsController.java` — duplicate class body removed (v2 appended after v3)
+4. `BarcodeScanner.java` — missing `import com.google.zxing.common.BitMatrix` added
 
 ## Known Issues / Incomplete
-- `students/StudentController.java` is an **empty stub** — real impl is `ui/AddStudentController`
-- Forgot/Reset password FXML not yet wired to controllers
-- Student CRUD UI exists (`AddStudentForm.fxml` + `ui/AddStudentController`) but not wired from dashboard nav
-- Archive students/employees not exposed from UI
-- Legacy entry points (`LibraryApp`, `ModernLibraryApp`, `ProfessionalLibraryApp`) are dead code
-- `ui/LoginController` duplicates `controller/LoginController` (harmless, not wired)
+- Weather widget FXML nodes (weatherCityLabel etc.) not present in ProfessionalDashboard.fxml
+  — DashboardController checks for null before updating, so no crash
+- Email + Weather sections in Settings.fxml not yet added (backend ready)
+- Student CRUD UI (`AddStudentForm.fxml`) not wired from dashboard nav
+- Forgot/Reset password FXML not wired (LoginController has inline dialogs as workaround)
+- Legacy dead-code entry points (LibraryApp, ModernLibraryApp, etc.) still present
 
-## Next Steps (Planned)
-1. Wire `AddStudentForm.fxml` to `StudentModule` + dashboard nav
-2. Wire forgot/reset password FXML to controllers
-3. Archive students and employees from UI
-4. Barcode scanner integration (P1)
-5. Email overdue notifications via SMTP (P1)
+## Next Steps
+1. Add weather widget nodes to ProfessionalDashboard.fxml
+2. Add Email + Weather sections to Settings.fxml
+3. Wire AddStudentForm.fxml to dashboard nav (StudentModule)
+4. Remove legacy entry-point files

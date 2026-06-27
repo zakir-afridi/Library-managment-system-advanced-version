@@ -1,4 +1,6 @@
 package com.library.service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.library.database.DatabaseConnection;
 import com.library.model.Reservation;
@@ -13,11 +15,12 @@ import java.util.*;
  * HashMap<Integer, Queue<Reservation>> maps bookId -> waiting queue.
  */
 public class ReservationService {
+    private static final Logger LOG = LoggerFactory.getLogger(ReservationService.class);
 
     // HashMap of bookId -> FIFO queue of pending reservations
     private final Map<Integer, Queue<Reservation>> waitingQueues = new HashMap<>();
 
-    // ── Reserve a book ────────────────────────────────────────────────────────
+    // â”€â”€ Reserve a book â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public String reserveBook(int bookId, int memberId) {
         // Check if member already has a pending reservation for this book
@@ -56,7 +59,7 @@ public class ReservationService {
             return "";
 
         } catch (SQLException e) {
-            System.err.println("Error reserving book: " + e.getMessage());
+            LOG.error("Error reserving book: " + e.getMessage());
             return "Database error: " + e.getMessage();
         }
     }
@@ -68,13 +71,13 @@ public class ReservationService {
             ps.setInt(1, reservationId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error cancelling reservation: " + e.getMessage());
+            LOG.error("Error cancelling reservation: " + e.getMessage());
             return false;
         }
     }
 
     /**
-     * Called when a book is returned — notifies the next person in queue.
+     * Called when a book is returned â€” notifies the next person in queue.
      * Marks their reservation as 'Ready' and returns their member ID.
      */
     public int notifyNextInQueue(int bookId) {
@@ -106,12 +109,12 @@ public class ReservationService {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error notifying queue: " + e.getMessage());
+            LOG.error("Error notifying queue: " + e.getMessage());
         }
         return -1;
     }
 
-    // ── Queries ───────────────────────────────────────────────────────────────
+    // â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public List<Reservation> getPendingReservations() {
         String sql = """
@@ -142,7 +145,7 @@ public class ReservationService {
                 while (rs.next()) list.add(mapReservation(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching member reservations: " + e.getMessage());
+            LOG.error("Error fetching member reservations: " + e.getMessage());
         }
         return list;
     }
@@ -156,12 +159,12 @@ public class ReservationService {
                 if (rs.next()) return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error getting queue length: " + e.getMessage());
+            LOG.error("Error getting queue length: " + e.getMessage());
         }
         return 0;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private boolean hasPendingReservation(int bookId, int memberId) {
         String sql = "SELECT COUNT(*) FROM reservations WHERE book_id=? AND member_id=? AND status='Pending'";
@@ -186,7 +189,7 @@ public class ReservationService {
                 if (rs.next()) return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error getting queue position: " + e.getMessage());
+            LOG.error("Error getting queue position: " + e.getMessage());
         }
         return 1;
     }
@@ -198,7 +201,7 @@ public class ReservationService {
              ResultSet rs = s.executeQuery(sql)) {
             while (rs.next()) list.add(mapReservation(rs));
         } catch (SQLException e) {
-            System.err.println("Error querying reservations: " + e.getMessage());
+            LOG.error("Error querying reservations: " + e.getMessage());
         }
         return list;
     }
@@ -220,3 +223,5 @@ public class ReservationService {
         return r;
     }
 }
+
+

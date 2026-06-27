@@ -1,6 +1,7 @@
 package com.library.controller;
 
 import com.library.LibraCoreApp;
+import com.library.api.WeatherClient;
 import com.library.cache.DashboardCache;
 import com.library.cache.DashboardStats;
 import com.library.config.AppConfig;
@@ -8,21 +9,27 @@ import com.library.config.ThemeManager;
 import com.library.model.ActivityRecord;
 import com.library.model.Transaction;
 import com.library.model.User;
+import com.library.model.WeatherInfo;
 import com.library.security.SessionManager;
 import com.library.service.TransactionService;
+import com.library.util.AsyncRunner;
+import com.library.util.ToastNotification;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +37,12 @@ import java.util.List;
 import java.util.Map;
 
 public class DashboardController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DashboardController.class);
+
+    // ── Root for center-swap navigation ──────────────────────────────────────
+    @FXML private BorderPane rootPane;  // fx:id on the root BorderPane
+    private Node dashboardCenter;       // cached dashboard content
 
     // ── Top bar ───────────────────────────────────────────────────────────────
     @FXML private Text   appTitleText;
@@ -50,6 +63,12 @@ public class DashboardController {
     @FXML private Button reportsBtn;
     @FXML private Button settingsBtn;
     @FXML private Button sidebarLogoutBtn;
+
+    // ── Weather widget (v3) ───────────────────────────────────────────────────
+    @FXML private Label weatherCityLabel;
+    @FXML private Label weatherTempLabel;
+    @FXML private Label weatherDescLabel;
+    @FXML private Label weatherIconLabel;
 
     // ── KPI cards ─────────────────────────────────────────────────────────────
     @FXML private Text totalBooksText;
@@ -83,10 +102,7 @@ public class DashboardController {
     private FilteredList<ActivityRecord> filteredActivity;
 
     private static final DateTimeFormatter DATE_FMT =
-            DateTimeFormatter.ofPattern(AppConfig.getInstance().getDateFormat()
-                    .replace("DD","dd").replace("MM","MM").replace("YYYY","yyyy"));
-
-    // ── Init ──────────────────────────────────────────────────────────────────
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
     public void initialize() {
@@ -94,6 +110,11 @@ public class DashboardController {
         setupSearch();
         setActiveButton(dashboardBtn);
         loadDashboardAsync();
+        if (AppConfig.getInstance().getBoolean(AppConfig.KEY_WEATHER_ENABLED, true)) {
+            loadWeatherAsync();
+        }
+        // cache the dashboard center so we can restore it on showDashboard()
+        if (rootPane != null) dashboardCenter = rootPane.getCenter();
     }
 
     /** Called by LoginController after successful auth. */
@@ -160,29 +181,49 @@ public class DashboardController {
         refreshBtn.setDisable(true);
         refreshBtn.setText("⏳");
         loadDashboardAsync();
+        if (AppConfig.getInstance().getBoolean(AppConfig.KEY_WEATHER_ENABLED, true)) {
+            loadWeatherAsync();
+        }
     }
 
     private void loadDashboardAsync() {
-        Task<DashboardStats> task = new Task<>() {
-            @Override protected DashboardStats call() {
-                return DashboardCache.getInstance().getStats();
+        AsyncRunner.run(
+            () -> DashboardCache.getInstance().getStats(),
+            s -> {
+                updateKpiCards(s);
+                loadCharts(s);
+                loadActivityTable();
+                refreshBtn.setDisable(false);
+                refreshBtn.setText("🔄 Refresh");
+            },
+            err -> {
+                LOG.error("Dashboard load error", err);
+                refreshBtn.setDisable(false);
+                refreshBtn.setText("🔄 Refresh");
+                ToastNotification.error(dashboardBtn.getScene(),
+                    "Dashboard refresh failed: " + err.getMessage());
             }
-        };
-        task.setOnSucceeded(e -> {
-            DashboardStats s = task.getValue();
-            updateKpiCards(s);
-            loadCharts(s);
-            loadActivityTable();
-            refreshBtn.setDisable(false);
-            refreshBtn.setText("🔄 Refresh");
-        });
-        task.setOnFailed(e -> {
-            refreshBtn.setDisable(false);
-            refreshBtn.setText("🔄 Refresh");
-        });
-        Thread t = new Thread(task, "dashboard-loader");
-        t.setDaemon(true);
-        t.start();
+        );
+    }
+
+    /** Load weather data asynchronously using virtual threads. */
+    private void loadWeatherAsync() {
+        String city = AppConfig.getInstance().get(AppConfig.KEY_WEATHER_CITY);
+        if (city == null || city.isBlank()) city = "Peshawar";
+        final String finalCity = city;
+        AsyncRunner.run(
+            () -> WeatherClient.getWeather(finalCity),
+            optInfo -> optInfo.ifPresent(this::updateWeatherWidget),
+            err -> LOG.warn("Weather load failed: {}", err.getMessage())
+        );
+    }
+
+    private void updateWeatherWidget(WeatherInfo info) {
+        if (weatherCityLabel != null) weatherCityLabel.setText(info.getCity());
+        if (weatherTempLabel != null) weatherTempLabel.setText(
+            String.format("%.0f°C", info.getTemperature()));
+        if (weatherDescLabel != null) weatherDescLabel.setText(info.getDescription());
+        if (weatherIconLabel != null) weatherIconLabel.setText(info.getIcon());
     }
 
     // ── KPI cards ─────────────────────────────────────────────────────────────
@@ -280,22 +321,35 @@ public class DashboardController {
 
     // ── Navigation ────────────────────────────────────────────────────────────
 
-    @FXML private void showDashboard()   { setActiveButton(dashboardBtn);  moduleText.setText("— Dashboard"); }
-    @FXML private void showBooks()       { setActiveButton(booksBtn);       navigate("/com/library/ui/AddBookForm.fxml",   "— Books",   booksBtn); }
-    @FXML private void showMembers()     { setActiveButton(membersBtn);     navigate("/com/library/ui/AddMemberForm.fxml", "— Members", membersBtn); }
-    @FXML private void showIssueReturn() { setActiveButton(issueReturnBtn); navigate("/com/library/ui/IssueReturnBooksForm.fxml", "— Issue/Return", issueReturnBtn); }
-    @FXML private void showEmployees()   { setActiveButton(employeesBtn);   navigate("/com/library/ui/EmployeeForm.fxml", "— Employees", employeesBtn); }
-    @FXML private void showArchive()     { setActiveButton(archiveBtn);     navigate("/com/library/ui/ArchiveView.fxml", "— Archive", archiveBtn); }
-    @FXML private void showReports()     { setActiveButton(reportsBtn);     navigate("/com/library/ui/ReportsView.fxml", "— Reports", reportsBtn); }
-    @FXML private void showSettings()    { setActiveButton(settingsBtn);    navigate("/com/library/ui/Settings.fxml", "— Settings", settingsBtn); }
+    @FXML
+    private void showDashboard() {
+        setActiveButton(dashboardBtn);
+        if (moduleText != null) moduleText.setText("— Dashboard");
+        // Restore dashboard center content
+        if (rootPane != null && dashboardCenter != null) {
+            rootPane.setCenter(dashboardCenter);
+            DashboardCache.getInstance().invalidate();
+            loadDashboardAsync();
+        }
+        Stage stage = (Stage) dashboardBtn.getScene().getWindow();
+        stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " — Dashboard");
+    }
+
+    @FXML private void showBooks()       { setActiveButton(booksBtn);       navigateCenter("/com/library/ui/AddBookForm.fxml",          "— Books"); }
+    @FXML private void showMembers()     { setActiveButton(membersBtn);     navigateCenter("/com/library/ui/AddMemberForm.fxml",         "— Members"); }
+    @FXML private void showIssueReturn() { setActiveButton(issueReturnBtn); navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml",  "— Issue/Return"); }
+    @FXML private void showEmployees()   { setActiveButton(employeesBtn);   navigateCenter("/com/library/ui/EmployeeForm.fxml",          "— Employees"); }
+    @FXML private void showArchive()     { setActiveButton(archiveBtn);     navigateCenter("/com/library/ui/ArchiveView.fxml",           "— Archive"); }
+    @FXML private void showReports()     { setActiveButton(reportsBtn);     navigateCenter("/com/library/ui/ReportsView.fxml",           "— Reports"); }
+    @FXML private void showSettings()    { setActiveButton(settingsBtn);    navigateCenter("/com/library/ui/Settings.fxml",              "— Settings"); }
 
     // ── Quick actions ─────────────────────────────────────────────────────────
 
-    @FXML private void addNewBook()    { navigate("/com/library/ui/AddBookForm.fxml",   "— Add Book",   booksBtn); }
-    @FXML private void addNewMember()  { navigate("/com/library/ui/AddMemberForm.fxml", "— Add Member", membersBtn); }
-    @FXML private void issueBook()     { navigate("/com/library/ui/IssueReturnBooksForm.fxml", "— Issue Book", issueReturnBtn); }
-    @FXML private void returnBook()    { navigate("/com/library/ui/IssueReturnBooksForm.fxml", "— Return Book", issueReturnBtn); }
-    @FXML private void generateReport(){ showToast("Reports module — Phase 4"); }
+    @FXML private void addNewBook()     { setActiveButton(booksBtn);       navigateCenter("/com/library/ui/AddBookForm.fxml",         "— Add Book"); }
+    @FXML private void addNewMember()   { setActiveButton(membersBtn);     navigateCenter("/com/library/ui/AddMemberForm.fxml",        "— Add Member"); }
+    @FXML private void issueBook()      { setActiveButton(issueReturnBtn); navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Issue Book"); }
+    @FXML private void returnBook()     { setActiveButton(issueReturnBtn); navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Return Book"); }
+    @FXML private void generateReport() { setActiveButton(reportsBtn);     navigateCenter("/com/library/ui/ReportsView.fxml",          "— Reports"); }
 
     // ── Logout ────────────────────────────────────────────────────────────────
 
@@ -321,42 +375,53 @@ public class DashboardController {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private void navigate(String fxml, String module, Button activeBtn) {
+    /**
+     * Loads an FXML and places it in the dashboard's center pane,
+     * keeping the sidebar and top-bar intact.
+     * Sub-module "← Dashboard" buttons call goBackToDashboard() which
+     * triggers showDashboard() on this controller via the scene's userData.
+     */
+    private void navigateCenter(String fxml, String module) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             if (loader.getLocation() == null) {
                 showToast("Cannot find: " + fxml);
                 return;
             }
+            Node content = loader.load();
+            // Strip the embedded top-bar from the loaded BorderPane so we don't show double headers
+            if (content instanceof BorderPane bp && bp.getTop() != null) {
+                bp.setTop(null);
+            }
+            if (rootPane != null) {
+                rootPane.setCenter(content);
+            }
+            if (moduleText != null) moduleText.setText(module);
             Stage stage = (Stage) dashboardBtn.getScene().getWindow();
-            boolean wasMaximized = stage.isMaximized();
-            // Reuse existing Scene — just swap root to avoid window jump/minimize
-            Scene scene = dashboardBtn.getScene();
-            scene.setRoot(loader.load());
-            ThemeManager.getInstance().applyTheme(scene);
             stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " " + module);
-            if (wasMaximized) stage.setMaximized(true);
+            // Store reference so sub-controllers can call back
+            dashboardBtn.getScene().setUserData(this);
         } catch (IOException e) {
             Throwable cause = e.getCause() != null ? e.getCause() : e;
-            showToast("Cannot load " + module + ":\n" + cause.getMessage());
-            cause.printStackTrace();
+            showToast("Cannot load " + module + ": " + cause.getMessage());
+            LOG.error("Navigation error loading {}", fxml, cause);
         }
     }
 
+    /** Called by sub-controllers when they want to go back to the dashboard. */
+    public void goBackToDashboard() {
+        showDashboard();
+    }
+
     private void setActiveButton(Button active) {
-        for (Button b : new Button[]{dashboardBtn, booksBtn, membersBtn,
-                issueReturnBtn, employeesBtn, archiveBtn, reportsBtn, settingsBtn}) {
-            b.getStyleClass().remove("active");
-        }
-        if (!active.getStyleClass().contains("active"))
+        Button[] navBtns = {dashboardBtn, booksBtn, membersBtn,
+                issueReturnBtn, employeesBtn, archiveBtn, reportsBtn, settingsBtn};
+        for (Button b : navBtns) if (b != null) b.getStyleClass().remove("active");
+        if (active != null && !active.getStyleClass().contains("active"))
             active.getStyleClass().add("active");
     }
 
     private void showToast(String msg) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle("LibraCore Pro");
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
+        ToastNotification.info(dashboardBtn.getScene(), msg);
     }
 }

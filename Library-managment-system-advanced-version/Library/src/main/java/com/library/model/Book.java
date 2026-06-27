@@ -33,6 +33,7 @@ public class Book {
     private String    status;
     private String    shelfLocation;
     private byte[]    coverImage;
+    private String    coverUrl;        // v3: Open Library cover URL
     private LocalDate createdAt;
 
     public Book() {
@@ -91,6 +92,9 @@ public class Book {
 
     public byte[]    getCoverImage()      { return coverImage; }
     public void      setCoverImage(byte[] v){ this.coverImage = v; }
+
+    public String    getCoverUrl()        { return coverUrl; }
+    public void      setCoverUrl(String v){ this.coverUrl = v; }
 
     public LocalDate getCreatedAt()       { return createdAt; }
     public void      setCreatedAt(LocalDate v){ this.createdAt = v; }

@@ -30,6 +30,89 @@
     -lc-shadow:            rgba(0,0,0,0.12);
 }
 
+.label,
+.check-box,
+.radio-button,
+.hyperlink,
+.tab-label,
+.menu-item .label,
+.context-menu .label,
+.tooltip,
+.dialog-pane,
+.dialog-pane .content,
+.dialog-pane .header-panel .label {
+    -fx-text-fill: -lc-text-primary;
+}
+
+.text {
+    -fx-fill: -lc-text-primary;
+}
+
+.button,
+.toggle-button,
+.choice-box,
+.combo-box,
+.list-cell,
+.tree-cell,
+.table-row-cell,
+.table-cell {
+    -fx-text-fill: -lc-text-primary;
+}
+
+.text-input,
+.text-field,
+.password-field,
+.text-area {
+    -fx-text-fill: -lc-text-primary;
+    -fx-prompt-text-fill: -lc-text-secondary;
+}
+
+.combo-box .list-cell,
+.choice-box .label,
+.date-picker .text-field {
+    -fx-text-fill: -lc-text-primary;
+}
+
+.context-menu,
+.combo-box-popup .list-view,
+.choice-box .context-menu {
+    -fx-background-color: -lc-surface;
+}
+
+.main-content,
+.form-section,
+.photo-section,
+.action-buttons,
+.operation-selector,
+.details-card,
+.activity-table .table-row-cell,
+.activity-table .column-header,
+.activity-table .column-header-background {
+    -fx-background-color: -lc-surface;
+}
+
+.field-label,
+.operation-radio,
+.activity-table .table-cell,
+.activity-table .column-header .label,
+.stat-label,
+.metric-label {
+    -fx-text-fill: -lc-text-primary;
+}
+
+.student-name,
+.student-detail,
+.book-title,
+.book-detail,
+.book-location,
+.section-title,
+.subsection-title,
+.chart-title,
+.kpi-number,
+.kpi-label {
+    -fx-fill: -lc-text-primary;
+}
+
 /* ── Scene / window background ────────────────────────────────── */
 .main-container,
 .root-pane {

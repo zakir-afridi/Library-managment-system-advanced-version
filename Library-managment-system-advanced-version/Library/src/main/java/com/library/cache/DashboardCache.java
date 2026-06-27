@@ -1,9 +1,10 @@
 package com.library.cache;
 
 import com.library.database.DatabaseConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,8 @@ import java.util.Map;
  * on every dashboard refresh.
  */
 public class DashboardCache {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DashboardCache.class);
 
     private static final long TTL_MS = 60_000; // 60 seconds
 

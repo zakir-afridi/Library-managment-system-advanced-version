@@ -323,12 +323,16 @@ public class EmployeeController {
 
     @FXML
     private void goBack() {
+        Scene scene = backBtn.getScene();
+        if (scene != null && scene.getUserData() instanceof DashboardController dc) {
+            dc.goBackToDashboard();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/library/ui/ProfessionalDashboard.fxml"));
             Stage stage = (Stage) backBtn.getScene().getWindow();
             boolean wasMaximized = stage.isMaximized();
-            Scene scene = backBtn.getScene();
             scene.setRoot(loader.load());
             ThemeManager.getInstance().applyTheme(scene);
             DashboardController dc = loader.getController();

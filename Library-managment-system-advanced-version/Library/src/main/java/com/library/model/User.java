@@ -21,9 +21,10 @@ public class User {
     private String        role;
     private String        status;
     private int           failedAttempts;
-    private boolean       forcePasswordChange;  // true for default admin on first login
+    private boolean       forcePasswordChange;
     private LocalDateTime lastLogin;
     private LocalDateTime createdAt;
+    private LocalDateTime lockedUntil;         // v3: time-based lockout
 
     public User() {
         this.role               = ROLE_LIBRARIAN;
@@ -61,6 +62,9 @@ public class User {
 
     public LocalDateTime getCreatedAt()               { return createdAt; }
     public void          setCreatedAt(LocalDateTime v){ this.createdAt = v; }
+
+    public LocalDateTime getLockedUntil()               { return lockedUntil; }
+    public void          setLockedUntil(LocalDateTime v){ this.lockedUntil = v; }
 
     public boolean       isLocked()                   { return STATUS_LOCKED.equals(status); }
     public boolean       isAdmin()                    { return ROLE_ADMIN.equals(role); }

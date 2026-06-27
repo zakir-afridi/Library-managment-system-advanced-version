@@ -1,4 +1,6 @@
 package com.library.service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.library.config.AppConfig;
 import com.library.database.DatabaseConnection;
@@ -20,6 +22,7 @@ import java.util.List;
  * Generates PDF and CSV reports using OpenPDF.
  */
 public class ReportService {
+    private static final Logger LOG = LoggerFactory.getLogger(ReportService.class);
 
     private static final DateTimeFormatter FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -28,7 +31,7 @@ public class ReportService {
     private final MemberService      memberService = new MemberService();
     private final TransactionService txService     = new TransactionService();
 
-    // ── PDF: Overdue Report ───────────────────────────────────────────────────
+    // â”€â”€ PDF: Overdue Report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void generateOverdueReport(OutputStream out) throws DocumentException {
         Document doc = new Document(PageSize.A4);
@@ -62,7 +65,7 @@ public class ReportService {
         doc.close();
     }
 
-    // ── PDF: Circulation Report ───────────────────────────────────────────────
+    // â”€â”€ PDF: Circulation Report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void generateCirculationReport(LocalDate from, LocalDate to,
                                            OutputStream out) throws DocumentException {
@@ -87,10 +90,10 @@ public class ReportService {
                     nvl(t.getBookName()),
                     t.getIssueDate()  != null ? t.getIssueDate().format(FMT)  : "",
                     t.getDueDate()    != null ? t.getDueDate().format(FMT)    : "",
-                    t.getReturnDate() != null ? t.getReturnDate().format(FMT) : "—",
+                    t.getReturnDate() != null ? t.getReturnDate().format(FMT) : "â€”",
                     nvl(t.getStatus()),
                     t.getFineAmount() > 0
-                            ? currency + " " + String.format("%.2f", t.getFineAmount()) : "—"
+                            ? currency + " " + String.format("%.2f", t.getFineAmount()) : "â€”"
             }, Color.WHITE);
         }
 
@@ -99,7 +102,7 @@ public class ReportService {
         doc.close();
     }
 
-    // ── PDF: Inventory Report ─────────────────────────────────────────────────
+    // â”€â”€ PDF: Inventory Report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void generateInventoryReport(OutputStream out) throws DocumentException {
         Document doc = new Document(PageSize.A4.rotate());
@@ -139,7 +142,7 @@ public class ReportService {
         doc.close();
     }
 
-    // ── PDF: Fine Collection Report ───────────────────────────────────────────
+    // â”€â”€ PDF: Fine Collection Report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void generateFineReport(OutputStream out) throws DocumentException {
         Document doc = new Document(PageSize.A4);
@@ -174,7 +177,7 @@ public class ReportService {
         doc.close();
     }
 
-    // ── PDF: Popular Books ────────────────────────────────────────────────────
+    // â”€â”€ PDF: Popular Books â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public void generatePopularBooksReport(int topN, OutputStream out) throws DocumentException {
         Document doc = new Document(PageSize.A4);
@@ -214,14 +217,14 @@ public class ReportService {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error generating popular books report: " + e.getMessage());
+            LOG.error("Error generating popular books report: " + e.getMessage());
         }
 
         doc.add(table);
         doc.close();
     }
 
-    // ── PDF helpers ───────────────────────────────────────────────────────────
+    // â”€â”€ PDF helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private void addHeader(Document doc, String title, String subtitle)
             throws DocumentException {
@@ -250,7 +253,7 @@ public class ReportService {
         Font f = new Font(Font.HELVETICA, 10, Font.BOLD);
         doc.add(new Paragraph("Summary: " + summary, f));
         Font small = new Font(Font.HELVETICA, 8, Font.ITALIC, Color.GRAY);
-        doc.add(new Paragraph("LibraCore Pro v2.0.0 — " + LocalDate.now().format(FMT), small));
+        doc.add(new Paragraph("LibraCore Pro v2.0.0 â€” " + LocalDate.now().format(FMT), small));
     }
 
     private PdfPTable createTable(String[] headers, float[] widths)
@@ -283,3 +286,5 @@ public class ReportService {
 
     private String nvl(String s) { return s != null ? s : ""; }
 }
+
+

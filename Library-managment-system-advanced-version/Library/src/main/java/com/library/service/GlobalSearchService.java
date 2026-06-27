@@ -1,4 +1,6 @@
 package com.library.service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.library.config.AppConfig;
 import com.library.database.DatabaseConnection;
@@ -13,6 +15,7 @@ import java.util.*;
  * clamped to PageRequest.MAX_LIMIT. No hardcoded limits.
  */
 public class GlobalSearchService {
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalSearchService.class);
 
     public static class SearchResult {
         public final String type;
@@ -33,7 +36,7 @@ public class GlobalSearchService {
         }
     }
 
-    /** Configurable limit — reads from AppConfig, clamped to MAX_LIMIT. */
+    /** Configurable limit â€” reads from AppConfig, clamped to MAX_LIMIT. */
     private int limitPerType() {
         return Math.min(AppConfig.getInstance().getDefaultLimit(), PageRequest.MAX_LIMIT);
     }
@@ -47,7 +50,7 @@ public class GlobalSearchService {
             results.addAll(searchMembers(c, p, includeArchived));
             results.addAll(searchEmployees(c, p, includeArchived));
         } catch (SQLException e) {
-            System.err.println("GlobalSearch error: " + e.getMessage());
+            LOG.error("GlobalSearch error: " + e.getMessage());
         }
         return results;
     }
@@ -56,7 +59,7 @@ public class GlobalSearchService {
         return search(query, false);
     }
 
-    // ── Per-entity searches ───────────────────────────────────────────────────
+    // â”€â”€ Per-entity searches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private List<SearchResult> searchBooks(Connection c, String p,
                                             boolean includeArchived) throws SQLException {
@@ -126,3 +129,5 @@ public class GlobalSearchService {
         return list;
     }
 }
+
+

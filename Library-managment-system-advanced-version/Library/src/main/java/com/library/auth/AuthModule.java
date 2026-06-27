@@ -24,7 +24,7 @@ public class AuthModule {
             Scene scene = new Scene(loader.load());
             ThemeManager.getInstance().applyTheme(scene);
             stage.setScene(scene);
-            stage.setTitle("LibraCore Pro v2.0.0 — Login");
+            stage.setTitle("LibraCore Pro v3.0.0 — Login");
             stage.setMinWidth(900);
             stage.setMinHeight(600);
             stage.setMaximized(false);

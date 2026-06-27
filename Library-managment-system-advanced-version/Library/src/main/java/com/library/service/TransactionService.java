@@ -1,4 +1,6 @@
 package com.library.service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.library.cache.DashboardCache;
 import com.library.config.AppConfig;
@@ -13,11 +15,12 @@ import java.util.*;
  * Service layer for Issue / Return transactions.
  *
  * Data structures used:
- *  - PriorityQueue<Transaction>  — overdue books sorted by days overdue (max-heap)
- *  - Stack<Transaction>          — recent activity log (undo capability)
- *  - HashMap<Integer,List<Transaction>> — active borrowings per member (O(1) lookup)
+ *  - PriorityQueue<Transaction>  â€” overdue books sorted by days overdue (max-heap)
+ *  - Stack<Transaction>          â€” recent activity log (undo capability)
+ *  - HashMap<Integer,List<Transaction>> â€” active borrowings per member (O(1) lookup)
  */
 public class TransactionService {
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionService.class);
 
     private final BookService    bookService;
     private final MemberService  memberService;
@@ -33,12 +36,12 @@ public class TransactionService {
         this.memberService = new MemberService();
     }
 
-    // ── Issue Book ────────────────────────────────────────────────────────────
+    // â”€â”€ Issue Book â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
      * Issues a book to a member.
      * Validates: book availability, member status, fine balance, book limit.
-     * Returns a result message — empty string means success.
+     * Returns a result message â€” empty string means success.
      */
     public String issueBook(int bookId, int memberId, String issuedBy) {
         // Validate member
@@ -103,12 +106,12 @@ public class TransactionService {
             return "";
 
         } catch (SQLException e) {
-            System.err.println("Error issuing book: " + e.getMessage());
+            LOG.error("Error issuing book: " + e.getMessage());
             return "Database error: " + e.getMessage();
         }
     }
 
-    // ── Return Book ───────────────────────────────────────────────────────────
+    // â”€â”€ Return Book â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
      * Returns a book. Calculates fine automatically.
@@ -157,12 +160,12 @@ public class TransactionService {
             return fine;
 
         } catch (SQLException e) {
-            System.err.println("Error returning book: " + e.getMessage());
+            LOG.error("Error returning book: " + e.getMessage());
             return -1;
         }
     }
 
-    // ── Queries ───────────────────────────────────────────────────────────────
+    // â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public Transaction getTransactionById(int id) {
         String sql = """
@@ -179,7 +182,7 @@ public class TransactionService {
                 if (rs.next()) return mapTransaction(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching transaction: " + e.getMessage());
+            LOG.error("Error fetching transaction: " + e.getMessage());
         }
         return null;
     }
@@ -225,7 +228,7 @@ public class TransactionService {
                 while (rs.next()) list.add(mapTransaction(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching member transactions: " + e.getMessage());
+            LOG.error("Error fetching member transactions: " + e.getMessage());
         }
         return list;
     }
@@ -248,12 +251,12 @@ public class TransactionService {
                 while (rs.next()) list.add(mapTransaction(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching transactions by date: " + e.getMessage());
+            LOG.error("Error fetching transactions by date: " + e.getMessage());
         }
         return list;
     }
 
-    // ── PriorityQueue: Overdue sorted by days overdue (max-heap) ─────────────
+    // â”€â”€ PriorityQueue: Overdue sorted by days overdue (max-heap) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
      * Returns overdue transactions sorted by days overdue descending
@@ -270,7 +273,7 @@ public class TransactionService {
         return sorted;
     }
 
-    // ── Stack: Recent activity log ────────────────────────────────────────────
+    // â”€â”€ Stack: Recent activity log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /** Returns last N transactions from the in-memory activity stack. */
     public List<Transaction> getRecentActivity(int limit) {
@@ -288,7 +291,7 @@ public class TransactionService {
         return recentActivity.isEmpty() ? null : recentActivity.pop();
     }
 
-    // ── Monthly stats for charts ──────────────────────────────────────────────
+    // â”€â”€ Monthly stats for charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /** Returns issued count per month for the last N months. */
     public Map<String, Integer> getMonthlyIssuedStats(int months) {
@@ -306,7 +309,7 @@ public class TransactionService {
                 while (rs.next()) stats.put(rs.getString("month"), rs.getInt("cnt"));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching monthly stats: " + e.getMessage());
+            LOG.error("Error fetching monthly stats: " + e.getMessage());
         }
         return stats;
     }
@@ -331,12 +334,12 @@ public class TransactionService {
                             new int[]{rs.getInt("issued"), rs.getInt("returned")});
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching daily stats: " + e.getMessage());
+            LOG.error("Error fetching daily stats: " + e.getMessage());
         }
         return stats;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private List<Transaction> queryTransactions(String sql) {
         List<Transaction> list = new ArrayList<>();
@@ -345,7 +348,7 @@ public class TransactionService {
              ResultSet rs = s.executeQuery(sql)) {
             while (rs.next()) list.add(mapTransaction(rs));
         } catch (SQLException e) {
-            System.err.println("Error querying transactions: " + e.getMessage());
+            LOG.error("Error querying transactions: " + e.getMessage());
         }
         return list;
     }
@@ -394,7 +397,9 @@ public class TransactionService {
             ps.setString(2, details);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error logging activity: " + e.getMessage());
+            LOG.error("Error logging activity: " + e.getMessage());
         }
     }
 }
+
+

@@ -6,7 +6,7 @@ import java.security.MessageDigest;
 public class Constants {
 
     public static final String APP_NAME    = "LibraCore Pro";
-    public static final String APP_VERSION = "v2.0.0";
+    public static final String APP_VERSION = "v3.0.0";
 
     // SHA-256 of "03150315"
     private static final String RECOVERY_KEY_HASH =

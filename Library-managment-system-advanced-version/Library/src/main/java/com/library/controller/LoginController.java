@@ -5,6 +5,7 @@ import com.library.config.ThemeManager;
 import com.library.model.User;
 import com.library.security.SessionManager;
 import com.library.service.UserService;
+import com.library.util.AsyncRunner;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -13,10 +14,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class LoginController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
     @FXML private TextField     usernameField;
     @FXML private PasswordField passwordField;
@@ -49,20 +54,26 @@ public class LoginController {
         loginButton.setDisable(true);
         loginButton.setText("⏳  Authenticating...");
 
-        // Run auth off the FX thread to avoid blocking UI
-        new Thread(() -> {
-            User user = userService.authenticate(username, password);
-            Platform.runLater(() -> {
+        // v3: Use virtual thread instead of raw Thread for authentication
+        AsyncRunner.run(
+            () -> userService.authenticate(username, password),
+            user -> {
                 loginButton.setDisable(false);
                 loginButton.setText("🔐  LOGIN");
-
                 if (user == null) {
                     handleFailedLogin(username);
                 } else {
                     handleSuccessfulLogin(user);
+                    LOG.info("User '{}' logged in successfully.", username);
                 }
-            });
-        }, "auth-thread").start();
+            },
+            err -> {
+                loginButton.setDisable(false);
+                loginButton.setText("🔐  LOGIN");
+                LOG.error("Auth error for user '{}'", username, err);
+                showError("Authentication error: " + err.getMessage());
+            }
+        );
     }
 
     private void handleFailedLogin(String username) {

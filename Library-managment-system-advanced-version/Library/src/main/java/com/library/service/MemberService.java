@@ -2,15 +2,26 @@ package com.library.service;
 
 import com.library.config.AppConfig;
 import com.library.database.DatabaseConnection;
+import com.library.email.EmailService;
 import com.library.model.Member;
 import com.library.util.IdGenerator;
 import com.library.util.PageRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * MemberService — v3 upgrades:
+ *  - SLF4J logging
+ *  - Welcome email sent on addMember via virtual thread
+ *  - PreparedStatement everywhere (no SQL injection)
+ */
 public class MemberService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MemberService.class);
 
     private final Map<String, Member> studentIdCache = new HashMap<>();
     private long lastCacheRefresh = 0;
@@ -25,7 +36,6 @@ public class MemberService {
             member.setLibraryCardNumber("LIB-" + System.currentTimeMillis());
         if (member.getEmail() == null) member.setEmail("");
 
-        // Auto-assign structured member code: ST00000001
         String memberCode = IdGenerator.next(IdGenerator.Type.STUDENT);
 
         String sql = """
@@ -73,10 +83,18 @@ public class MemberService {
             if (ok) {
                 invalidateCache();
                 SerialNumberService.getInstance().resequenceMembers();
+                // v3: send welcome email via virtual thread (non-blocking)
+                final String emailAddr = member.getEmail();
+                final String mName     = member.getName();
+                final String mCode     = memberCode;
+                if (emailAddr != null && !emailAddr.isBlank()) {
+                    Thread.ofVirtual().start(() ->
+                        EmailService.getInstance().sendWelcome(emailAddr, mName, mCode));
+                }
             }
             return ok;
         } catch (SQLException e) {
-            System.err.println("Error adding member: " + e.getMessage());
+            LOG.error("Error adding member: {}", e.getMessage());
             return false;
         }
     }
@@ -123,15 +141,14 @@ public class MemberService {
             invalidateCache();
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error updating member: " + e.getMessage());
+            LOG.error("Error updating member: {}", e.getMessage());
             return false;
         }
     }
 
     public boolean deleteMember(int stdId) {
-        String sql = "DELETE FROM members WHERE std_id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement("DELETE FROM members WHERE std_id=?")) {
             ps.setInt(1, stdId);
             boolean ok = ps.executeUpdate() > 0;
             if (ok) {
@@ -140,21 +157,20 @@ public class MemberService {
             }
             return ok;
         } catch (SQLException e) {
-            System.err.println("Error deleting member: " + e.getMessage());
+            LOG.error("Error deleting member: {}", e.getMessage());
             return false;
         }
     }
 
     public Member getMemberById(int stdId) {
-        String sql = "SELECT * FROM members WHERE std_id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement("SELECT * FROM members WHERE std_id=?")) {
             ps.setInt(1, stdId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return mapMember(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching member: " + e.getMessage());
+            LOG.error("Error fetching member by id {}: {}", stdId, e.getMessage());
         }
         return null;
     }
@@ -162,9 +178,8 @@ public class MemberService {
     public Member getMemberByStudentId(String studentId) {
         refreshCacheIfNeeded();
         if (studentIdCache.containsKey(studentId)) return studentIdCache.get(studentId);
-        String sql = "SELECT * FROM members WHERE student_id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement("SELECT * FROM members WHERE student_id=?")) {
             ps.setString(1, studentId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -174,75 +189,72 @@ public class MemberService {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching member by student ID: " + e.getMessage());
+            LOG.error("Error fetching member by student ID: {}", e.getMessage());
         }
         return null;
     }
 
-    /** Lookup by structured code e.g. ST00000001 */
     public Member getMemberByCode(String memberCode) {
-        String sql = "SELECT * FROM members WHERE member_code=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement("SELECT * FROM members WHERE member_code=?")) {
             ps.setString(1, memberCode);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return mapMember(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching member by code: " + e.getMessage());
+            LOG.error("Error fetching member by code: {}", e.getMessage());
         }
         return null;
     }
 
-    // ── Pagination — ordered by serial_no ────────────────────────────────────
+    // ── Pagination ────────────────────────────────────────────────────────────
 
     public List<Member> getAllMembers(int page, int pageSize) {
         PageRequest pr = PageRequest.of(page, pageSize);
-        String sql = "SELECT * FROM members WHERE status != 'Archived' ORDER BY COALESCE(serial_no, std_id) LIMIT ? OFFSET ?";
         List<Member> members = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM members WHERE status != 'Archived' ORDER BY COALESCE(serial_no, std_id) LIMIT ? OFFSET ?")) {
             ps.setInt(1, pr.limit);
             ps.setInt(2, pr.offset());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) members.add(mapMember(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching members: " + e.getMessage());
+            LOG.error("Error fetching members: {}", e.getMessage());
         }
         return members;
     }
 
     public List<Member> getArchivedMembers(int page, int pageSize) {
         PageRequest pr = PageRequest.of(page, pageSize);
-        String sql = "SELECT * FROM members WHERE status='Archived' ORDER BY COALESCE(serial_no, std_id) LIMIT ? OFFSET ?";
         List<Member> members = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM members WHERE status='Archived' ORDER BY COALESCE(serial_no, std_id) LIMIT ? OFFSET ?")) {
             ps.setInt(1, pr.limit);
             ps.setInt(2, pr.offset());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) members.add(mapMember(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching archived members: " + e.getMessage());
+            LOG.error("Error fetching archived members: {}", e.getMessage());
         }
         return members;
     }
 
     public int getTotalMembers() {
-        String sql = "SELECT COUNT(*) FROM members WHERE status != 'Archived'";
         try (Connection c = DatabaseConnection.getConnection();
              Statement s = c.createStatement();
-             ResultSet rs = s.executeQuery(sql)) {
+             ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM members WHERE status != 'Archived'")) {
             if (rs.next()) return rs.getInt(1);
         } catch (SQLException e) {
-            System.err.println("Error counting members: " + e.getMessage());
+            LOG.error("Error counting members: {}", e.getMessage());
         }
         return 0;
     }
 
-    // ── Search — includes member_code in search ───────────────────────────────
+    // ── Search ────────────────────────────────────────────────────────────────
 
     public List<Member> searchMembers(String query) {
         return searchMembers(query, false);
@@ -251,7 +263,6 @@ public class MemberService {
     public List<Member> searchMembers(String query, boolean includeArchived) {
         int limit = Math.min(AppConfig.getInstance().getDefaultLimit(), PageRequest.MAX_LIMIT);
         String statusClause = includeArchived ? "" : "status != 'Archived' AND ";
-        // Search by member_code (ST00000001), student_id, name, email, contact
         String sql = "SELECT * FROM members WHERE " + statusClause +
                      "(name LIKE ? OR student_id LIKE ? OR email LIKE ? OR contact LIKE ? OR COALESCE(member_code,'') LIKE ?) " +
                      "ORDER BY COALESCE(serial_no, std_id) LIMIT ?";
@@ -266,17 +277,17 @@ public class MemberService {
                 while (rs.next()) members.add(mapMember(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error searching members: " + e.getMessage());
+            LOG.error("Error searching members: {}", e.getMessage());
         }
         return members;
     }
 
-    // ── Archive — resequences both lists ─────────────────────────────────────
+    // ── Archive ───────────────────────────────────────────────────────────────
 
     public boolean archiveMember(int stdId) {
-        String sql = "UPDATE members SET status='Archived', archived_date=? WHERE std_id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "UPDATE members SET status='Archived', archived_date=? WHERE std_id=?")) {
             ps.setString(1, LocalDate.now().toString());
             ps.setInt(2, stdId);
             boolean ok = ps.executeUpdate() > 0;
@@ -287,15 +298,15 @@ public class MemberService {
             }
             return ok;
         } catch (SQLException e) {
-            System.err.println("Error archiving member: " + e.getMessage());
+            LOG.error("Error archiving member: {}", e.getMessage());
             return false;
         }
     }
 
     public boolean unarchiveMember(int stdId) {
-        String sql = "UPDATE members SET status='Active', archived_date=NULL WHERE std_id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "UPDATE members SET status='Active', archived_date=NULL WHERE std_id=?")) {
             ps.setInt(1, stdId);
             boolean ok = ps.executeUpdate() > 0;
             if (ok) {
@@ -305,7 +316,7 @@ public class MemberService {
             }
             return ok;
         } catch (SQLException e) {
-            System.err.println("Error unarchiving member: " + e.getMessage());
+            LOG.error("Error unarchiving member: {}", e.getMessage());
             return false;
         }
     }
@@ -313,71 +324,73 @@ public class MemberService {
     // ── Fine ──────────────────────────────────────────────────────────────────
 
     public boolean addFine(int stdId, double amount) {
-        String sql = "UPDATE members SET fine_balance = fine_balance + ? WHERE std_id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setDouble(1, amount); ps.setInt(2, stdId);
+             PreparedStatement ps = c.prepareStatement(
+                 "UPDATE members SET fine_balance = fine_balance + ? WHERE std_id=?")) {
+            ps.setDouble(1, amount);
+            ps.setInt(2, stdId);
             invalidateCache();
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error adding fine: " + e.getMessage());
+            LOG.error("Error adding fine: {}", e.getMessage());
             return false;
         }
     }
 
     public boolean clearFine(int stdId) {
-        String sql = "UPDATE members SET fine_balance = 0 WHERE std_id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "UPDATE members SET fine_balance = 0 WHERE std_id=?")) {
             ps.setInt(1, stdId);
             invalidateCache();
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error clearing fine: " + e.getMessage());
+            LOG.error("Error clearing fine: {}", e.getMessage());
             return false;
         }
     }
 
     public List<Member> getMembersWithOutstandingFines() {
         int limit = Math.min(AppConfig.getInstance().getDefaultLimit(), PageRequest.MAX_LIMIT);
-        String sql = "SELECT * FROM members WHERE fine_balance > 0 ORDER BY fine_balance DESC LIMIT ?";
         List<Member> members = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM members WHERE fine_balance > 0 ORDER BY fine_balance DESC LIMIT ?")) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) members.add(mapMember(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching members with fines: " + e.getMessage());
+            LOG.error("Error fetching members with fines: {}", e.getMessage());
         }
         return members;
     }
 
     public List<Member> filterByDepartment(String department) {
         int limit = Math.min(AppConfig.getInstance().getDefaultLimit(), PageRequest.MAX_LIMIT);
-        String sql = "SELECT * FROM members WHERE department=? AND status != 'Archived' ORDER BY COALESCE(serial_no, std_id) LIMIT ?";
         List<Member> members = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, department); ps.setInt(2, limit);
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM members WHERE department=? AND status != 'Archived' ORDER BY COALESCE(serial_no, std_id) LIMIT ?")) {
+            ps.setString(1, department);
+            ps.setInt(2, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) members.add(mapMember(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error filtering by department: " + e.getMessage());
+            LOG.error("Error filtering by department: {}", e.getMessage());
         }
         return members;
     }
 
-    // ── Student ID Generation ─────────────────────────────────────────────────
+    // ── Student ID generation ─────────────────────────────────────────────────
 
     public String generateStudentId() {
         int year = LocalDate.now().getYear();
         String prefix = "LIB-" + year + "-";
-        String sql = "SELECT MAX(student_id) FROM members WHERE student_id LIKE ?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT MAX(student_id) FROM members WHERE student_id LIKE ?")) {
             ps.setString(1, prefix + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next() && rs.getString(1) != null) {
@@ -387,21 +400,21 @@ public class MemberService {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error generating student ID: " + e.getMessage());
+            LOG.error("Error generating student ID: {}", e.getMessage());
         }
         return prefix + "0001";
     }
 
     public int getActiveBookCount(int stdId) {
-        String sql = "SELECT COUNT(*) FROM transactions WHERE member_id=? AND status='Issued'";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT COUNT(*) FROM transactions WHERE member_id=? AND status='Issued'")) {
             ps.setInt(1, stdId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error counting active books: " + e.getMessage());
+            LOG.error("Error counting active books: {}", e.getMessage());
         }
         return 0;
     }
@@ -444,7 +457,6 @@ public class MemberService {
         m.setProfilePic(rs.getBytes("profile_pic"));
         String reg = rs.getString("registration_date");
         if (reg != null) m.setRegistrationDate(LocalDate.parse(reg));
-        // Structured ID and serial number (added via migration)
         try { m.setMemberCode(rs.getString("member_code")); } catch (SQLException ignored) {}
         try { m.setSerialNo(rs.getInt("serial_no")); }       catch (SQLException ignored) {}
         return m;

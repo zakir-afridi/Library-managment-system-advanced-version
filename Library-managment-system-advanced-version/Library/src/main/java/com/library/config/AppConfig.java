@@ -31,6 +31,15 @@ public class AppConfig {
     public static final String KEY_THEME             = "ui.theme";
     public static final String KEY_OVERDUE_ALERT     = "notify.overdueAlert";
     public static final String KEY_DUE_SOON_DAYS     = "notify.dueSoonDays";
+    // v3: Email SMTP
+    public static final String KEY_EMAIL_HOST        = "email.smtp.host";
+    public static final String KEY_EMAIL_PORT        = "email.smtp.port";
+    public static final String KEY_EMAIL_USER        = "email.smtp.user";
+    public static final String KEY_EMAIL_PASSWORD    = "email.smtp.password";
+    public static final String KEY_EMAIL_FROM_NAME   = "email.from.name";
+    // v3: Weather
+    public static final String KEY_WEATHER_CITY      = "weather.city";
+    public static final String KEY_WEATHER_ENABLED   = "weather.enabled";
 
     private AppConfig() {
         load();
@@ -58,6 +67,12 @@ public class AppConfig {
         props.putIfAbsent(KEY_THEME,           "light");
         props.putIfAbsent(KEY_OVERDUE_ALERT,   "true");
         props.putIfAbsent(KEY_DUE_SOON_DAYS,   "2");
+        // v3 defaults
+        props.putIfAbsent(KEY_EMAIL_HOST,      "smtp.gmail.com");
+        props.putIfAbsent(KEY_EMAIL_PORT,      "587");
+        props.putIfAbsent(KEY_EMAIL_FROM_NAME, "LibraCore Pro Library");
+        props.putIfAbsent(KEY_WEATHER_CITY,    "Peshawar");
+        props.putIfAbsent(KEY_WEATHER_ENABLED, "true");
     }
 
     // ── I/O ───────────────────────────────────────────────────────────────────
