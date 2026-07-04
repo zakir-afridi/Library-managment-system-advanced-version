@@ -3,6 +3,7 @@ package com.library.config;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Singleton that loads/saves all application settings from/to
@@ -11,6 +12,7 @@ import java.util.Properties;
 public class AppConfig {
 
     private static final String CONFIG_FILE = "libra_config.properties";
+    private static final Logger LOG = Logger.getLogger(AppConfig.class.getName());
     private static AppConfig instance;
 
     private final Properties props = new Properties();
@@ -82,7 +84,7 @@ public class AppConfig {
             try (InputStream in = Files.newInputStream(path)) {
                 props.load(in);
             } catch (IOException e) {
-                System.err.println("Config load error: " + e.getMessage());
+                LOG.warning("Config load error: " + e.getMessage());
             }
         }
         applyDefaults();
@@ -92,7 +94,7 @@ public class AppConfig {
         try (OutputStream out = Files.newOutputStream(Paths.get(CONFIG_FILE))) {
             props.store(out, "LibraCore Pro Configuration");
         } catch (IOException e) {
-            System.err.println("Config save error: " + e.getMessage());
+            LOG.warning("Config save error: " + e.getMessage());
         }
     }
 

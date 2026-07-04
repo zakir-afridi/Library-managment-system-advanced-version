@@ -13,6 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>24</maven.compiler.source>
         <maven.compiler.target>24</maven.compiler.target>
+        <jar.finalName>LibraCore-Pro-3.0.0</jar.finalName>
         <javafx.version>21.0.2</javafx.version>
         <sqlite.version>3.49.1.0</sqlite.version>
         <hikari.version>5.1.0</hikari.version>
@@ -133,6 +134,7 @@
     </dependencies>
 
     <build>
+        <finalName>LibraCore-Pro-3.0.0</finalName>
         <plugins>
             <!-- ─── Compiler: Java 21 with virtual-thread support ─── -->
             <plugin>
@@ -160,8 +162,8 @@
                     <mainClass>com.library.LibraCoreApp</mainClass>
                     <options>
                         <option>--enable-preview</option>
-                        <option>--release=24</option>
                         <option>--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED</option>
+                        <option>--enable-native-access=ALL-UNNAMED</option>
                     </options>
                 </configuration>
             </plugin>
@@ -183,7 +185,6 @@
                         </manifestEntries>
                     </archive>
                     <outputDirectory>${project.build.directory}</outputDirectory>
-                    <finalName>LibraCore-Pro-3.0.0</finalName>
                 </configuration>
             </plugin>
 

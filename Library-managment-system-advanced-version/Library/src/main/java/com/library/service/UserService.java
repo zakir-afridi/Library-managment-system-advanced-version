@@ -43,7 +43,6 @@ public class UserService {
         updateLastLogin(user.getUserId());
         user.setLastLogin(LocalDateTime.now());
         user.setFailedAttempts(0);
-        SessionManager.getInstance().login(user, () -> {});
         return user;
     }
 

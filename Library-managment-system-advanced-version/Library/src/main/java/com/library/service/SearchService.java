@@ -5,6 +5,7 @@ import com.library.database.DatabaseConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Autocomplete search service backed by a Trie.
@@ -14,6 +15,7 @@ import java.util.List;
 public class SearchService {
 
     private static SearchService instance;
+    private static final Logger LOG = Logger.getLogger(SearchService.class.getName());
 
     private final SearchTrie titleTrie  = new SearchTrie();
     private final SearchTrie authorTrie = new SearchTrie();
@@ -55,7 +57,7 @@ public class SearchService {
             }
             loaded = true;
         } catch (SQLException e) {
-            System.err.println("SearchService load error: " + e.getMessage());
+            LOG.warning("SearchService load error: " + e.getMessage());
         }
     }
 

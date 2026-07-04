@@ -48,9 +48,9 @@ public class TransactionService {
         var member = memberService.getMemberById(memberId);
         if (member == null)                          return "Member not found.";
         if (!"Active".equals(member.getStatus()))    return "Member account is " + member.getStatus() + ".";
-        if (member.getFineBalance() > 0)             return "Member has outstanding fine of " +
+        if (member.getFineBalance() > 0.0)            return "Member has outstanding fine of " +
                 AppConfig.getInstance().getCurrency() + " " +
-                String.format("%.2f", member.getFineBalance()) + ". Please clear before issuing.";
+                String.format("%.2f", member.getFineBalance()) + ". Please clear fine before issuing.";
 
         int activeCount = memberService.getActiveBookCount(memberId);
         if (activeCount >= member.getBookLimit())    return "Member has reached book limit (" + member.getBookLimit() + ").";

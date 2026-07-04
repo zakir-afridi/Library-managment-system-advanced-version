@@ -69,7 +69,7 @@ public class DashboardCache {
             cache.put("pendingFines",  queryDouble(c,
                     "SELECT COALESCE(SUM(fine_amount),0) FROM transactions WHERE fine_paid=0 AND fine_amount>0"));
         } catch (SQLException e) {
-            System.err.println("DashboardCache refresh error: " + e.getMessage());
+            LOG.error("DashboardCache refresh error: {}", e.getMessage());
         }
     }
 

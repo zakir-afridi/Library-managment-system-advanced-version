@@ -63,7 +63,7 @@ set "JAR=target\LibraCore-Pro-3.0.0.jar"
 :: ── Skip build if JAR exists and --rebuild not passed ─────────────────────────
 if exist "%JAR%" (
     if /i not "%~1"=="--rebuild" (
-        echo  [OK] JAR found — skipping build. (pass --rebuild to force)
+        echo  [OK] JAR found - skipping build. (pass --rebuild to force)
         goto :launch
     )
 )
@@ -97,7 +97,7 @@ for /d %%A in ("%USERPROFILE%\.m2\wrapper\dists\apache-maven-*") do (
 )
 if defined MVN goto :build
 
-:: 4. Common manual install locations (includes D:\maven where it was installed)
+:: 4. Common manual install locations
 for %%D in (
     "D:\maven"
     "C:\maven"
@@ -124,6 +124,7 @@ echo  [OK] Maven: !MVN!
 echo.
 echo  [BUILD] Running: mvn clean package -DskipTests
 echo.
+set "JAVA_HOME=C:\Program Files\Java\jdk-24"
 "!MVN!" clean package -DskipTests
 if %errorlevel% neq 0 (
     echo.
@@ -146,21 +147,31 @@ if not exist "%JAR%" (
     pause & exit /b 1
 )
 
-:: Build module path from all JavaFX jars in target\lib
+:: Build module path from platform-specific JavaFX jars (prefer -win.jar)
 set "FX_PATH="
 for %%F in (
-    "target\lib\javafx-controls-*.jar"
-    "target\lib\javafx-fxml-*.jar"
-    "target\lib\javafx-graphics-*.jar"
-    "target\lib\javafx-base-*.jar"
-    "target\lib\javafx-swing-*.jar"
-    "target\lib\javafx-web-*.jar"
+    "target\lib\javafx-controls-*-win.jar"
+    "target\lib\javafx-fxml-*-win.jar"
+    "target\lib\javafx-graphics-*-win.jar"
+    "target\lib\javafx-base-*-win.jar"
+    "target\lib\javafx-swing-*-win.jar"
 ) do (
     for %%G in (%%F) do (
         if "!FX_PATH!"=="" (
             set "FX_PATH=%%G"
         ) else (
             set "FX_PATH=!FX_PATH!;%%G"
+        )
+    )
+)
+
+:: Fallback: include all javafx jars if no -win jars found
+if "!FX_PATH!"=="" (
+    for %%F in ("target\lib\javafx-*.jar") do (
+        if "!FX_PATH!"=="" (
+            set "FX_PATH=%%F"
+        ) else (
+            set "FX_PATH=!FX_PATH!;%%F"
         )
     )
 )
@@ -172,9 +183,10 @@ for %%F in (target\lib\*.jar) do set "CP=!CP!;%%F"
 "!JAVA_EXE!" ^
   --module-path "!FX_PATH!" ^
   --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base,javafx.swing ^
-  --enable-native-access=ALL-UNNAMED,javafx.graphics,javafx.media ^
   --enable-preview ^
+  --enable-native-access=ALL-UNNAMED ^
   -Dsun.misc.unsafe.memory.access=allow ^
+  -Dfile.encoding=UTF-8 ^
   -cp "!CP!" ^
   com.library.LibraCoreApp
 

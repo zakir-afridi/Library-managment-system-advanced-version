@@ -26,7 +26,7 @@ public class SettingsController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SettingsController.class);
 
-    // â”€â”€ General â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // General
     @FXML private Button    backBtn;
     @FXML private Button    saveBtn;
     @FXML private TextField libraryNameField;
@@ -38,39 +38,39 @@ public class SettingsController {
     @FXML private ComboBox<String> itemsPerPageCombo;
     @FXML private ComboBox<String> defaultLimitCombo;
 
-    // â”€â”€ Book settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Book settings
     @FXML private Spinner<Integer> loanDaysSpinner;
     @FXML private Spinner<Double>  fineRateSpinner;
     @FXML private Spinner<Integer> gracePeriodSpinner;
     @FXML private Spinner<Integer> maxBooksSpinner;
 
-    // â”€â”€ Appearance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Appearance
     @FXML private ToggleButton themeToggle;
     @FXML private Label        themeStatusLabel;
 
-    // â”€â”€ Notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Notifications
     @FXML private CheckBox         overdueAlertCheck;
     @FXML private Spinner<Integer> dueSoonDaysSpinner;
 
-    // â”€â”€ Email (v3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    @FXML private TextField smtpHostField;
-    @FXML private TextField smtpPortField;
-    @FXML private TextField smtpUserField;
+    // Email (v3)
+    @FXML private TextField     smtpHostField;
+    @FXML private TextField     smtpPortField;
+    @FXML private TextField     smtpUserField;
     @FXML private PasswordField smtpPasswordField;
-    @FXML private TextField emailFromNameField;
-    @FXML private Button    testEmailBtn;
-    @FXML private Label     emailStatusLabel;
+    @FXML private TextField     emailFromNameField;
+    @FXML private Button        testEmailBtn;
+    @FXML private Label         emailStatusLabel;
 
-    // â”€â”€ Weather (v3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Weather (v3)
     @FXML private TextField weatherCityField;
     @FXML private CheckBox  weatherEnabledCheck;
 
-    // â”€â”€ Backup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Backup
     @FXML private Label backupStatusLabel;
 
     private final AppConfig config = AppConfig.getInstance();
 
-    // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Init ──────────────────────────────────────────────────────────────────
 
     @FXML
     public void initialize() {
@@ -112,10 +112,10 @@ public class SettingsController {
         if (libraryPhoneField   != null) libraryPhoneField  .setText(nvl(config.get(AppConfig.KEY_LIBRARY_PHONE)));
         if (libraryEmailField   != null) libraryEmailField  .setText(nvl(config.get(AppConfig.KEY_LIBRARY_EMAIL)));
 
-        if (currencyCombo    != null) currencyCombo    .setValue(config.getCurrency());
-        if (dateFormatCombo  != null) dateFormatCombo  .setValue(config.getDateFormat());
-        if (itemsPerPageCombo!= null) itemsPerPageCombo.setValue(String.valueOf(config.getItemsPerPage()));
-        if (defaultLimitCombo!= null) defaultLimitCombo.setValue(String.valueOf(config.getDefaultLimit()));
+        if (currencyCombo     != null) currencyCombo    .setValue(config.getCurrency());
+        if (dateFormatCombo   != null) dateFormatCombo  .setValue(config.getDateFormat());
+        if (itemsPerPageCombo != null) itemsPerPageCombo.setValue(String.valueOf(config.getItemsPerPage()));
+        if (defaultLimitCombo != null) defaultLimitCombo.setValue(String.valueOf(config.getDefaultLimit()));
 
         if (loanDaysSpinner    != null) loanDaysSpinner   .getValueFactory().setValue(config.getLoanDays());
         if (fineRateSpinner    != null) fineRateSpinner   .getValueFactory().setValue(config.getFineRate());
@@ -125,20 +125,18 @@ public class SettingsController {
         if (overdueAlertCheck  != null) overdueAlertCheck.setSelected(config.isOverdueAlert());
         if (dueSoonDaysSpinner != null) dueSoonDaysSpinner.getValueFactory().setValue(config.getDueSoonDays());
 
-        // v3: Email
-        if (smtpHostField     != null) smtpHostField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_HOST)));
-        if (smtpPortField     != null) smtpPortField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_PORT)));
-        if (smtpUserField     != null) smtpUserField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_USER)));
-        if (smtpPasswordField != null) smtpPasswordField.setText(nvl(config.get(AppConfig.KEY_EMAIL_PASSWORD)));
-        if (emailFromNameField!= null) emailFromNameField.setText(nvl(config.get(AppConfig.KEY_EMAIL_FROM_NAME)));
+        if (smtpHostField      != null) smtpHostField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_HOST)));
+        if (smtpPortField      != null) smtpPortField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_PORT)));
+        if (smtpUserField      != null) smtpUserField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_USER)));
+        if (smtpPasswordField  != null) smtpPasswordField.setText(nvl(config.get(AppConfig.KEY_EMAIL_PASSWORD)));
+        if (emailFromNameField != null) emailFromNameField.setText(nvl(config.get(AppConfig.KEY_EMAIL_FROM_NAME)));
 
-        // v3: Weather
-        if (weatherCityField   != null) weatherCityField  .setText(nvl(config.get(AppConfig.KEY_WEATHER_CITY)));
-        if (weatherEnabledCheck!= null) weatherEnabledCheck.setSelected(
+        if (weatherCityField    != null) weatherCityField  .setText(nvl(config.get(AppConfig.KEY_WEATHER_CITY)));
+        if (weatherEnabledCheck != null) weatherEnabledCheck.setSelected(
             config.getBoolean(AppConfig.KEY_WEATHER_ENABLED, true));
     }
 
-    // â”€â”€ Save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Save ──────────────────────────────────────────────────────────────────
 
     @FXML
     private void saveSettings() {
@@ -147,10 +145,10 @@ public class SettingsController {
         if (libraryPhoneField   != null) config.set(AppConfig.KEY_LIBRARY_PHONE,   libraryPhoneField.getText().trim());
         if (libraryEmailField   != null) config.set(AppConfig.KEY_LIBRARY_EMAIL,   libraryEmailField.getText().trim());
 
-        if (currencyCombo     != null && currencyCombo.getValue()     != null) config.set(AppConfig.KEY_CURRENCY,        currencyCombo.getValue());
-        if (dateFormatCombo   != null && dateFormatCombo.getValue()   != null) config.set(AppConfig.KEY_DATE_FORMAT,     dateFormatCombo.getValue());
-        if (itemsPerPageCombo != null && itemsPerPageCombo.getValue() != null) config.set(AppConfig.KEY_ITEMS_PER_PAGE,  itemsPerPageCombo.getValue());
-        if (defaultLimitCombo != null && defaultLimitCombo.getValue() != null) config.set(AppConfig.KEY_DEFAULT_LIMIT,   defaultLimitCombo.getValue());
+        if (currencyCombo     != null && currencyCombo.getValue()     != null) config.set(AppConfig.KEY_CURRENCY,       currencyCombo.getValue());
+        if (dateFormatCombo   != null && dateFormatCombo.getValue()   != null) config.set(AppConfig.KEY_DATE_FORMAT,    dateFormatCombo.getValue());
+        if (itemsPerPageCombo != null && itemsPerPageCombo.getValue() != null) config.set(AppConfig.KEY_ITEMS_PER_PAGE, itemsPerPageCombo.getValue());
+        if (defaultLimitCombo != null && defaultLimitCombo.getValue() != null) config.set(AppConfig.KEY_DEFAULT_LIMIT,  defaultLimitCombo.getValue());
 
         if (loanDaysSpinner    != null) config.set(AppConfig.KEY_LOAN_DAYS,    String.valueOf(loanDaysSpinner.getValue()));
         if (fineRateSpinner    != null) config.set(AppConfig.KEY_FINE_RATE,    String.valueOf(fineRateSpinner.getValue()));
@@ -160,14 +158,12 @@ public class SettingsController {
         if (overdueAlertCheck  != null) config.set(AppConfig.KEY_OVERDUE_ALERT, String.valueOf(overdueAlertCheck.isSelected()));
         if (dueSoonDaysSpinner != null) config.set(AppConfig.KEY_DUE_SOON_DAYS, String.valueOf(dueSoonDaysSpinner.getValue()));
 
-        // v3: Email
-        if (smtpHostField     != null) config.set(AppConfig.KEY_EMAIL_HOST,       smtpHostField.getText().trim());
-        if (smtpPortField     != null) config.set(AppConfig.KEY_EMAIL_PORT,       smtpPortField.getText().trim());
-        if (smtpUserField     != null) config.set(AppConfig.KEY_EMAIL_USER,       smtpUserField.getText().trim());
-        if (smtpPasswordField != null) config.set(AppConfig.KEY_EMAIL_PASSWORD,   smtpPasswordField.getText().trim());
-        if (emailFromNameField!= null) config.set(AppConfig.KEY_EMAIL_FROM_NAME,  emailFromNameField.getText().trim());
+        if (smtpHostField      != null) config.set(AppConfig.KEY_EMAIL_HOST,      smtpHostField.getText().trim());
+        if (smtpPortField      != null) config.set(AppConfig.KEY_EMAIL_PORT,      smtpPortField.getText().trim());
+        if (smtpUserField      != null) config.set(AppConfig.KEY_EMAIL_USER,      smtpUserField.getText().trim());
+        if (smtpPasswordField  != null) config.set(AppConfig.KEY_EMAIL_PASSWORD,  smtpPasswordField.getText().trim());
+        if (emailFromNameField != null) config.set(AppConfig.KEY_EMAIL_FROM_NAME, emailFromNameField.getText().trim());
 
-        // v3: Weather
         if (weatherCityField    != null) config.set(AppConfig.KEY_WEATHER_CITY,    weatherCityField.getText().trim());
         if (weatherEnabledCheck != null) config.set(AppConfig.KEY_WEATHER_ENABLED, String.valueOf(weatherEnabledCheck.isSelected()));
 
@@ -176,7 +172,7 @@ public class SettingsController {
         LOG.info("Settings saved by user: {}", SessionManager.getInstance().getUsername());
     }
 
-    // â”€â”€ Email test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Email test ────────────────────────────────────────────────────────────
 
     @FXML
     private void testEmailConnection() {
@@ -184,11 +180,8 @@ public class SettingsController {
             ToastNotification.warning(getScene(), "Enter SMTP username first.");
             return;
         }
-        // Save current email config before testing
         saveSettings();
-
         if (emailStatusLabel != null) emailStatusLabel.setText("Testing...");
-
         AsyncRunner.run(
             () -> EmailService.getInstance().isConfigured(),
             configured -> {
@@ -197,7 +190,7 @@ public class SettingsController {
                 if (configured)
                     ToastNotification.success(getScene(), "Email configuration looks valid.");
                 else
-                    ToastNotification.warning(getScene(), "Email not configured â€” check SMTP settings.");
+                    ToastNotification.warning(getScene(), "Email not configured - check SMTP settings.");
             },
             err -> {
                 if (emailStatusLabel != null) emailStatusLabel.setText("Test failed");
@@ -206,7 +199,7 @@ public class SettingsController {
         );
     }
 
-    // â”€â”€ Exchange rates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Exchange rates ────────────────────────────────────────────────────────
 
     @FXML
     private void refreshExchangeRates() {
@@ -214,18 +207,16 @@ public class SettingsController {
         AsyncRunner.run(
             () -> ExchangeRateClient.getRates(config.getCurrency()),
             rates -> {
-                if (rates.isEmpty()) {
+                if (rates.isEmpty())
                     ToastNotification.warning(getScene(), "Exchange rates unavailable (offline?)");
-                } else {
-                    ToastNotification.success(getScene(),
-                        "Rates updated â€” " + rates.size() + " currencies loaded.");
-                }
+                else
+                    ToastNotification.success(getScene(), "Rates updated - " + rates.size() + " currencies loaded.");
             },
             err -> ToastNotification.error(getScene(), "Rate fetch failed: " + err.getMessage())
         );
     }
 
-    // â”€â”€ Theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Theme ─────────────────────────────────────────────────────────────────
 
     @FXML
     private void toggleTheme() {
@@ -237,13 +228,13 @@ public class SettingsController {
         boolean dark = ThemeManager.getInstance().isDark();
         if (themeToggle != null) {
             themeToggle.setSelected(dark);
-            themeToggle.setText(dark ? "â˜€ Light Mode" : "ðŸŒ™ Dark Mode");
+            themeToggle.setText(dark ? "Light Mode" : "Dark Mode");
         }
         if (themeStatusLabel != null)
             themeStatusLabel.setText("Current: " + (dark ? "Dark" : "Light") + " Mode");
     }
 
-    // â”€â”€ Backup & Restore â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Backup & Restore ──────────────────────────────────────────────────────
 
     @FXML
     private void backupDatabase() {
@@ -256,8 +247,7 @@ public class SettingsController {
             path -> {
                 if (backupStatusLabel != null)
                     backupStatusLabel.setText("Backup: " + path.getFileName());
-                ToastNotification.success(getScene(),
-                    "Database backed up: " + path.getFileName());
+                ToastNotification.success(getScene(), "Database backed up: " + path.getFileName());
             },
             err -> ToastNotification.error(getScene(), "Backup failed: " + err.getMessage())
         );
@@ -269,7 +259,6 @@ public class SettingsController {
         chooser.setTitle("Select Backup File to Restore");
         chooser.getExtensionFilters().add(
             new FileChooser.ExtensionFilter("SQLite Database", "*.db"));
-        // Default to backup folder
         try {
             Path backupDir = BackupScheduler.getInstance().getBackupDir();
             chooser.setInitialDirectory(backupDir.toFile());
@@ -285,39 +274,42 @@ public class SettingsController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
                 boolean ok = BackupScheduler.getInstance().restore(file.toPath());
-                if (ok) {
-                    ToastNotification.success(getScene(),
-                        "Restored successfully. Please restart the application.");
-                } else {
-                    ToastNotification.error(getScene(), "Restore failed â€” see logs.");
-                }
+                if (ok)
+                    ToastNotification.success(getScene(), "Restored successfully. Please restart the application.");
+                else
+                    ToastNotification.error(getScene(), "Restore failed - see logs.");
             }
         });
     }
 
-    // â”€â”€ Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Navigation ────────────────────────────────────────────────────────────
 
     @FXML
     private void goBack() {
+        Scene scene = backBtn.getScene();
+        if (scene != null && scene.getUserData() instanceof DashboardController dc) {
+            dc.goBackToDashboard();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/com/library/ui/ProfessionalDashboard.fxml"));
             Stage stage = (Stage) backBtn.getScene().getWindow();
             boolean wasMaximized = stage.isMaximized();
-            Scene scene = backBtn.getScene();
+            scene = backBtn.getScene();
             scene.setRoot(loader.load());
             ThemeManager.getInstance().applyTheme(scene);
             DashboardController dc = loader.getController();
             if (SessionManager.getInstance().isLoggedIn())
                 dc.initSession(SessionManager.getInstance().getCurrentUser());
-            stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " â€” Dashboard");
+            stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " - Dashboard");
             if (wasMaximized) stage.setMaximized(true);
         } catch (IOException e) {
             ToastNotification.error(getScene(), "Navigation error: " + e.getMessage());
         }
     }
 
-    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private Scene getScene() {
         return backBtn != null ? backBtn.getScene() : null;

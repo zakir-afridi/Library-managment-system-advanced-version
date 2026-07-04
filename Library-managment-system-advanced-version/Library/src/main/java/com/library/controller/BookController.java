@@ -584,3 +584,8 @@ public class BookController {
             ToastNotification.error(backBtn.getScene(), "Navigation error: " + e.getMessage());
         }
     }
+
+    private String nvl(String s){return s!=null?s:"";}
+    private String esc(String s){return s!=null?"\"" + s.replace("\"", "\"\"") + "\"": "";}
+    private int parseIntSafe(String s){try{return Integer.parseInt(s.trim());}catch(Exception e){return 0;}}
+}

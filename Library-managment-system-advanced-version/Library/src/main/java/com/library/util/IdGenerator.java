@@ -3,6 +3,7 @@ package com.library.util;
 import com.library.database.DatabaseConnection;
 
 import java.sql.*;
+import java.util.logging.Logger;
 
 /**
  * Thread-safe structured ID generator.
@@ -28,6 +29,8 @@ public final class IdGenerator {
         Type(String p) { this.prefix = p; }
     }
 
+    private static final Logger LOG = Logger.getLogger(IdGenerator.class.getName());
+
     private IdGenerator() {}
 
     /**
@@ -49,7 +52,7 @@ public final class IdGenerator {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("IdGenerator.next error: " + e.getMessage());
+            LOG.warning("IdGenerator.next error: " + e.getMessage());
         }
         // Fallback — should never happen in normal operation
         return type.prefix + String.format("%08d", System.currentTimeMillis() % 100_000_000L);
@@ -67,7 +70,7 @@ public final class IdGenerator {
                 if (rs.next()) return fmt(type.prefix, rs.getInt(1) + 1);
             }
         } catch (SQLException e) {
-            System.err.println("IdGenerator.peek error: " + e.getMessage());
+            LOG.warning("IdGenerator.peek error: " + e.getMessage());
         }
         return type.prefix + "00000001";
     }

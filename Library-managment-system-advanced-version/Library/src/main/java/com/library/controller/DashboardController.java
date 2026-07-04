@@ -231,31 +231,36 @@ public class DashboardController {
     private void updateKpiCards(DashboardStats s) {
         String currency = AppConfig.getInstance().getCurrency();
 
-        totalBooksText   .setText(String.valueOf(s.totalBooks));
-        totalMembersText .setText(String.valueOf(s.activeMembers));
-        issuedBooksText  .setText(String.valueOf(s.issuedBooks));
-        overdueBooksText .setText(String.valueOf(s.overdueBooks));
-        availableBooksText.setText(String.valueOf(s.availableBooks));
-        issuedTodayText  .setText(s.issuedToday + " today");
-        finesCollectedText.setText(currency + " " + String.format("%.2f", s.totalFinesCollected));
-        pendingFinesText .setText(currency + " " + String.format("%.2f", s.pendingFines));
+        if (totalBooksText    != null) totalBooksText   .setText(String.valueOf(s.totalBooks));
+        if (totalMembersText  != null) totalMembersText .setText(String.valueOf(s.activeMembers));
+        if (issuedBooksText   != null) issuedBooksText  .setText(String.valueOf(s.issuedBooks));
+        if (overdueBooksText  != null) overdueBooksText .setText(String.valueOf(s.overdueBooks));
+        if (availableBooksText!= null) availableBooksText.setText(String.valueOf(s.availableBooks));
+        if (issuedTodayText   != null) issuedTodayText  .setText(s.issuedToday + " today");
+        if (finesCollectedText!= null) finesCollectedText.setText(currency + " " + String.format("%.2f", s.totalFinesCollected));
+        if (pendingFinesText  != null) pendingFinesText .setText(currency + " " + String.format("%.2f", s.pendingFines));
 
         // Overdue alert badge
-        if (s.overdueBooks > 0) {
-            overdueAlertLabel.setText("⚠ " + s.overdueBooks + " Overdue");
-            overdueAlertLabel.setVisible(true);
-            overdueAlertLabel.setManaged(true);
-        } else {
-            overdueAlertLabel.setVisible(false);
-            overdueAlertLabel.setManaged(false);
+        if (overdueAlertLabel != null) {
+            if (s.overdueBooks > 0) {
+                overdueAlertLabel.setText("! " + s.overdueBooks + " Overdue");
+                overdueAlertLabel.setVisible(true);
+                overdueAlertLabel.setManaged(true);
+            } else {
+                overdueAlertLabel.setVisible(false);
+                overdueAlertLabel.setManaged(false);
+            }
         }
 
-        // Trend indicators (simple: compare issued vs available)
-        booksTrendText  .setText(s.availableBooks > s.issuedBooks ? "↑" : "↓");
-        membersTrendText.setText(s.activeMembers > 0 ? "↑" : "→");
-        booksTrendText  .setStyle(s.availableBooks > s.issuedBooks
-                ? "-fx-fill:#388e3c; -fx-font-weight:bold;"
-                : "-fx-fill:#d32f2f; -fx-font-weight:bold;");
+        // Trend indicators
+        if (booksTrendText != null) {
+            booksTrendText.setText(s.availableBooks > s.issuedBooks ? "up" : "down");
+            booksTrendText.setStyle(s.availableBooks > s.issuedBooks
+                    ? "-fx-fill:#388e3c; -fx-font-weight:bold;"
+                    : "-fx-fill:#d32f2f; -fx-font-weight:bold;");
+        }
+        if (membersTrendText != null)
+            membersTrendText.setText(s.activeMembers > 0 ? "up" : "stable");
     }
 
     // ── Charts ────────────────────────────────────────────────────────────────

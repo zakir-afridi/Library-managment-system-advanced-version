@@ -14,12 +14,8 @@ import java.time.Duration;
 import java.util.Optional;
 
 /**
- * Client for Open-Meteo weather API (100% free, no API key required).
- *
- * API: https://api.open-meteo.com/v1/forecast
- * Uses city → lat/lon lookup via the Open-Meteo geocoding API.
- *
- * Cached for 30 minutes to avoid hammering the free API.
+ * Client for Open-Meteo weather API (free, no API key required).
+ * Cached for 30 minutes. Thread-safe via double-checked locking.
  */
 public final class WeatherClient {
 
@@ -27,8 +23,8 @@ public final class WeatherClient {
 
     private static final String GEO_URL     = "https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1&language=en&format=json";
     private static final String WEATHER_URL = "https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current_weather=true&temperature_unit=celsius";
-
-    private static final Duration TIMEOUT = Duration.ofSeconds(6);
+    private static final Duration TIMEOUT   = Duration.ofSeconds(6);
+    private static final long CACHE_TTL_MS  = 30 * 60 * 1000L;
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .connectTimeout(TIMEOUT)
@@ -36,56 +32,53 @@ public final class WeatherClient {
             .build();
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Object CACHE_LOCK = new Object();
 
-    private static WeatherInfo cachedWeather = null;
-    private static long lastFetchMs = 0;
-    private static final long CACHE_TTL_MS = 30 * 60 * 1000L; // 30 minutes
+    private static volatile WeatherInfo cachedWeather = null;
+    private static volatile long        lastFetchMs   = 0;
 
     private WeatherClient() {}
 
-    /**
-     * Fetch current weather for the given city name.
-     * Uses a two-step process: geocode city → fetch weather.
-     * Returns cached data if within 30-minute TTL.
-     */
     public static Optional<WeatherInfo> getWeather(String city) {
         long now = System.currentTimeMillis();
-        if (cachedWeather != null && (now - lastFetchMs) < CACHE_TTL_MS) {
+        if (cachedWeather != null && (now - lastFetchMs) < CACHE_TTL_MS)
             return Optional.of(cachedWeather);
+
+        synchronized (CACHE_LOCK) {
+            // double-checked locking
+            if (cachedWeather != null && (System.currentTimeMillis() - lastFetchMs) < CACHE_TTL_MS)
+                return Optional.of(cachedWeather);
+            return fetch(city);
         }
+    }
 
+    private static Optional<WeatherInfo> fetch(String city) {
         try {
-            // Step 1: Geocode city name
+            // Step 1: geocode city
             String geoUrl = String.format(GEO_URL, city.replace(" ", "+"));
-            HttpRequest geoReq = HttpRequest.newBuilder()
-                    .uri(URI.create(geoUrl))
-                    .timeout(TIMEOUT)
-                    .GET().build();
-            HttpResponse<String> geoResp = HTTP.send(geoReq, HttpResponse.BodyHandlers.ofString());
-            if (geoResp.statusCode() != 200) return Optional.empty();
+            HttpResponse<String> geoResp = HTTP.send(
+                HttpRequest.newBuilder().uri(URI.create(geoUrl)).timeout(TIMEOUT).GET().build(),
+                HttpResponse.BodyHandlers.ofString());
+            if (geoResp.statusCode() != 200) return Optional.ofNullable(cachedWeather);
 
-            JsonNode geoRoot = JSON.readTree(geoResp.body());
-            JsonNode results = geoRoot.path("results");
-            if (!results.isArray() || results.size() == 0) {
-                LOG.warn("WeatherClient: city '{}' not found in geocoding API", city);
-                return Optional.empty();
+            JsonNode results = JSON.readTree(geoResp.body()).path("results");
+            if (!results.isArray() || results.isEmpty()) {
+                LOG.warn("WeatherClient: city '{}' not found", city);
+                return Optional.ofNullable(cachedWeather);
             }
 
             String lat  = results.get(0).path("latitude").asText();
             String lon  = results.get(0).path("longitude").asText();
             String name = results.get(0).path("name").asText(city);
 
-            // Step 2: Fetch weather
+            // Step 2: fetch weather
             String weatherUrl = String.format(WEATHER_URL, lat, lon);
-            HttpRequest wReq = HttpRequest.newBuilder()
-                    .uri(URI.create(weatherUrl))
-                    .timeout(TIMEOUT)
-                    .GET().build();
-            HttpResponse<String> wResp = HTTP.send(wReq, HttpResponse.BodyHandlers.ofString());
-            if (wResp.statusCode() != 200) return Optional.empty();
+            HttpResponse<String> wResp = HTTP.send(
+                HttpRequest.newBuilder().uri(URI.create(weatherUrl)).timeout(TIMEOUT).GET().build(),
+                HttpResponse.BodyHandlers.ofString());
+            if (wResp.statusCode() != 200) return Optional.ofNullable(cachedWeather);
 
-            JsonNode wRoot   = JSON.readTree(wResp.body());
-            JsonNode current = wRoot.path("current_weather");
+            JsonNode current = JSON.readTree(wResp.body()).path("current_weather");
 
             WeatherInfo info = new WeatherInfo();
             info.setCity(name);
@@ -95,8 +88,8 @@ public final class WeatherClient {
             info.setDescription(decodeWeatherCode(info.getWeathercode()));
 
             cachedWeather = info;
-            lastFetchMs   = now;
-            LOG.info("WeatherClient: {} — {}°C, {}", name, info.getTemperature(), info.getDescription());
+            lastFetchMs   = System.currentTimeMillis();
+            LOG.info("WeatherClient: {} - {}C, {}", name, info.getTemperature(), info.getDescription());
             return Optional.of(info);
 
         } catch (InterruptedException e) {
@@ -108,7 +101,6 @@ public final class WeatherClient {
         }
     }
 
-    /** Map WMO weather code to a human-readable description. */
     private static String decodeWeatherCode(int code) {
         return switch (code) {
             case 0          -> "Clear sky";
