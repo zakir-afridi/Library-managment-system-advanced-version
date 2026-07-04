@@ -7,6 +7,7 @@
     <!-- Console: clean format, app logs only -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
+            <charset>UTF-8</charset>
             <pattern>%d{HH:mm:ss} %-5level %logger{30} - %msg%n</pattern>
         </encoder>
     </appender>

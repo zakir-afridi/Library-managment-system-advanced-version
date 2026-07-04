@@ -184,9 +184,10 @@ for %%F in (target\lib\*.jar) do set "CP=!CP!;%%F"
   --module-path "!FX_PATH!" ^
   --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base,javafx.swing ^
   --enable-preview ^
-  --enable-native-access=ALL-UNNAMED ^
+  --enable-native-access=javafx.graphics,javafx.media,ALL-UNNAMED ^
   -Dsun.misc.unsafe.memory.access=allow ^
   -Dfile.encoding=UTF-8 ^
+  -Dstdout.encoding=UTF-8 ^
   -cp "!CP!" ^
   com.library.LibraCoreApp
 
