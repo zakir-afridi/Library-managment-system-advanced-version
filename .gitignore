@@ -4,17 +4,19 @@ target/
 *.jar
 *.war
 
-# Database files (runtime data — not source)
+# Database files (runtime data)
 *.db
 *.db-shm
 *.db-wal
 
-# IDE files
+# IDE / tool files
 .idea/
 *.iml
 .vscode/
 *.suo
 *.user
+.continue/
+.editorconfig
 
 # Maven wrapper cache
 .mvn/wrapper/maven-wrapper.jar
@@ -26,9 +28,16 @@ desktop.ini
 
 # Logs
 *.log
+logs/
 
-# Old MySQL connector (not needed — using SQLite)
+# Temp / debug files
+ResourceCheck.java
+ResourceCheck.class
+compile_errors.log
+
+# Windows shortcuts (machine-specific)
+*.lnk
+
+# Old stale folders
 mysql-connector-j-9.2.0/
-
-# Old Library folder (replaced by Library-managment-system-advanced-version)
 /Library/
