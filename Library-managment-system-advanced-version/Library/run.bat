@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal EnableDelayedExpansion
 title LibraCore Pro v3.0.0
 
@@ -184,7 +185,7 @@ for %%F in (target\lib\*.jar) do set "CP=!CP!;%%F"
   --module-path "!FX_PATH!" ^
   --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base,javafx.swing ^
   --enable-preview ^
-  --enable-native-access=javafx.graphics,javafx.media,ALL-UNNAMED ^
+  --enable-native-access=javafx.graphics,ALL-UNNAMED ^
   -Dsun.misc.unsafe.memory.access=allow ^
   -Dfile.encoding=UTF-8 ^
   -Dstdout.encoding=UTF-8 ^
