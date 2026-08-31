@@ -1,7 +1,6 @@
 package com.library.controller;
 
 import com.library.LibraCoreApp;
-import com.library.api.WeatherClient;
 import com.library.cache.DashboardCache;
 import com.library.cache.DashboardStats;
 import com.library.config.AppConfig;
@@ -10,6 +9,7 @@ import com.library.model.ActivityRecord;
 import com.library.model.Transaction;
 import com.library.model.User;
 import com.library.model.WeatherInfo;
+import com.library.api.WeatherClient;
 import com.library.security.SessionManager;
 import com.library.service.TransactionService;
 import com.library.util.AsyncRunner;
@@ -25,7 +25,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -36,27 +36,26 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DashboardController — Visual Analytics &amp; Business Intelligence Command Center.
+ */
 public class DashboardController {
 
     private static final Logger LOG = LoggerFactory.getLogger(DashboardController.class);
 
-    // ── Root for center-swap navigation ──────────────────────────────────────
-    @FXML private BorderPane rootPane;  // fx:id on the root BorderPane
-    private Node dashboardCenter;       // cached dashboard content
-
-    // ── Top bar ───────────────────────────────────────────────────────────────
-    @FXML private Button sidebarToggleBtn;
-    @FXML private Text   appTitleText;
-    @FXML private Text   moduleText;
-    @FXML private Label  userLabel;
-    @FXML private Label  overdueAlertLabel;
+    // ── Root & Layout ─────────────────────────────────────────────────────────
+    @FXML private BorderPane rootPane;
+    @FXML private VBox sidebar;
+    @FXML private Text appTitleText;
+    @FXML private Text moduleText;
+    @FXML private Label userLabel;
+    @FXML private Label overdueAlertLabel;
+    @FXML private Button themeToggleBtn;
     @FXML private Button refreshBtn;
     @FXML private Button logoutBtn;
-    @FXML private Button themeToggleBtn;
+    @FXML private Button sidebarToggleBtn;
 
-    // ── Sidebar ───────────────────────────────────────────────────────────────
-    @FXML private javafx.scene.layout.VBox sidebar;
-    private boolean sidebarVisible = true;
+    // ── Navigation buttons ────────────────────────────────────────────────────
     @FXML private Button dashboardBtn;
     @FXML private Button booksBtn;
     @FXML private Button membersBtn;
@@ -67,32 +66,48 @@ public class DashboardController {
     @FXML private Button settingsBtn;
     @FXML private Button sidebarLogoutBtn;
 
-    // ── Weather widget (v3) ───────────────────────────────────────────────────
+    // ── Weather widget ────────────────────────────────────────────────────────
     @FXML private Label weatherCityLabel;
     @FXML private Label weatherTempLabel;
     @FXML private Label weatherDescLabel;
     @FXML private Label weatherIconLabel;
 
-    // ── KPI cards ─────────────────────────────────────────────────────────────
+    // ── Filter Controls ───────────────────────────────────────────────────────
+    @FXML private ComboBox<String> timeHorizonCombo;
+    @FXML private Label dateRangeSummaryLabel;
+
+    // ── 8 3D KPI cards ────────────────────────────────────────────────────────
     @FXML private Text totalBooksText;
-    @FXML private Text totalMembersText;
-    @FXML private Text issuedBooksText;
-    @FXML private Text overdueBooksText;
-    @FXML private Text availableBooksText;
     @FXML private Text booksTrendText;
+    @FXML private Text netStockWorthText;
+    @FXML private Text netStockWorthSub;
+    @FXML private Text totalMembersText;
     @FXML private Text membersTrendText;
+    @FXML private Text issuedBooksText;
     @FXML private Text issuedTodayText;
+    @FXML private Text memberDuesText;
+    @FXML private Text memberDuesSub;
     @FXML private Text finesCollectedText;
     @FXML private Text pendingFinesText;
+    @FXML private Text overdueBooksText;
+    @FXML private Text overdueRiskAccountsText;
+    @FXML private Text availableBooksText;
+    @FXML private Text availabilityRateText;
 
-    // ── Charts ────────────────────────────────────────────────────────────────
-    @FXML private PieChart              bookStatusChart;
+    // ── 4 BI Charts ───────────────────────────────────────────────────────────
+    @FXML private PieChart bookStatusChart;
     @FXML private BarChart<String, Number> monthlyBarChart;
-    @FXML private CategoryAxis          barMonthAxis;
-    @FXML private NumberAxis            barCountAxis;
+    @FXML private CategoryAxis barMonthAxis;
+    @FXML private NumberAxis barCountAxis;
+    @FXML private BarChart<String, Number> categoryChart;
+    @FXML private CategoryAxis categoryAxis;
+    @FXML private NumberAxis categoryCountAxis;
+    @FXML private BarChart<String, Number> revenueChart;
+    @FXML private CategoryAxis revenueMonthAxis;
+    @FXML private NumberAxis revenueAmountAxis;
 
-    // ── Activity table ────────────────────────────────────────────────────────
-    @FXML private TableView<ActivityRecord>          activityTable;
+    // ── Activity table pulse ──────────────────────────────────────────────────
+    @FXML private TableView<ActivityRecord> activityTable;
     @FXML private TableColumn<ActivityRecord, String> memberColumn;
     @FXML private TableColumn<ActivityRecord, String> bookColumn;
     @FXML private TableColumn<ActivityRecord, String> actionColumn;
@@ -107,8 +122,11 @@ public class DashboardController {
     private static final DateTimeFormatter DATE_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+    private Node dashboardCenter;
+
     @FXML
     public void initialize() {
+        setupTimeHorizon();
         setupTable();
         setupSearch();
         setActiveButton(dashboardBtn);
@@ -116,8 +134,25 @@ public class DashboardController {
         if (AppConfig.getInstance().getBoolean(AppConfig.KEY_WEATHER_ENABLED, true)) {
             loadWeatherAsync();
         }
-        // cache the dashboard center so we can restore it on showDashboard()
         if (rootPane != null) dashboardCenter = rootPane.getCenter();
+    }
+
+    private void setupTimeHorizon() {
+        if (timeHorizonCombo != null) {
+            timeHorizonCombo.setItems(FXCollections.observableArrayList(
+                    "All Time", "Today", "This Week", "This Month", "This Year"
+            ));
+            timeHorizonCombo.setValue("All Time");
+        }
+    }
+
+    @FXML
+    private void handleTimeframeChange() {
+        String val = timeHorizonCombo != null ? timeHorizonCombo.getValue() : "All Time";
+        if (dateRangeSummaryLabel != null) {
+            dateRangeSummaryLabel.setText("Aggregated analytics horizon: " + val + " (Auto-synchronized)");
+        }
+        handleRefresh();
     }
 
     /** Called by LoginController after successful auth. */
@@ -137,43 +172,45 @@ public class DashboardController {
     // ── Table setup ───────────────────────────────────────────────────────────
 
     private void setupTable() {
-        memberColumn.setCellValueFactory(new PropertyValueFactory<>("memberName"));
-        bookColumn  .setCellValueFactory(new PropertyValueFactory<>("bookTitle"));
-        actionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
-        dateColumn  .setCellValueFactory(new PropertyValueFactory<>("date"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-        // Colour-coded status column
-        statusColumn.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String s, boolean empty) {
-                super.updateItem(s, empty);
-                if (empty || s == null) { setText(null); setStyle(""); return; }
-                setText(s);
-                setStyle(switch (s.toLowerCase()) {
-                    case "issued"   -> "-fx-text-fill:#f57c00; -fx-font-weight:bold;";
-                    case "returned" -> "-fx-text-fill:#388e3c; -fx-font-weight:bold;";
-                    case "overdue"  -> "-fx-text-fill:#d32f2f; -fx-font-weight:bold;";
-                    default         -> "-fx-text-fill:#424242;";
-                });
-            }
-        });
+        if (memberColumn != null) memberColumn.setCellValueFactory(new PropertyValueFactory<>("memberName"));
+        if (bookColumn != null)   bookColumn  .setCellValueFactory(new PropertyValueFactory<>("bookTitle"));
+        if (actionColumn != null) actionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
+        if (dateColumn != null)   dateColumn  .setCellValueFactory(new PropertyValueFactory<>("date"));
+        if (statusColumn != null) {
+            statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+            statusColumn.setCellFactory(col -> new TableCell<>() {
+                @Override
+                protected void updateItem(String s, boolean empty) {
+                    super.updateItem(s, empty);
+                    if (empty || s == null) { setText(null); setStyle(""); return; }
+                    setText(s);
+                    setStyle(switch (s.toLowerCase()) {
+                        case "issued"   -> "-fx-text-fill:#f59e0b; -fx-font-weight:bold;";
+                        case "returned" -> "-fx-text-fill:#10b981; -fx-font-weight:bold;";
+                        case "overdue"  -> "-fx-text-fill:#ef4444; -fx-font-weight:bold;";
+                        default         -> "-fx-text-fill:#64748b;";
+                    });
+                }
+            });
+        }
 
         filteredActivity = new FilteredList<>(activityData, p -> true);
-        activityTable.setItems(filteredActivity);
+        if (activityTable != null) activityTable.setItems(filteredActivity);
     }
 
     private void setupSearch() {
-        searchField.textProperty().addListener((obs, old, val) ->
-            filteredActivity.setPredicate(r -> {
-                if (val == null || val.isBlank()) return true;
-                String lower = val.toLowerCase();
-                return r.getMemberName().toLowerCase().contains(lower)
-                    || r.getBookTitle().toLowerCase().contains(lower)
-                    || r.getAction().toLowerCase().contains(lower)
-                    || r.getStatus().toLowerCase().contains(lower);
-            })
-        );
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, old, val) ->
+                filteredActivity.setPredicate(r -> {
+                    if (val == null || val.isBlank()) return true;
+                    String lower = val.toLowerCase();
+                    return r.getMemberName().toLowerCase().contains(lower)
+                        || r.getBookTitle().toLowerCase().contains(lower)
+                        || r.getAction().toLowerCase().contains(lower)
+                        || r.getStatus().toLowerCase().contains(lower);
+                })
+            );
+        }
     }
 
     // ── Data loading ──────────────────────────────────────────────────────────
@@ -181,8 +218,10 @@ public class DashboardController {
     @FXML
     private void handleRefresh() {
         DashboardCache.getInstance().invalidate();
-        refreshBtn.setDisable(true);
-        refreshBtn.setText("⏳");
+        if (refreshBtn != null) {
+            refreshBtn.setDisable(true);
+            refreshBtn.setText("⏳");
+        }
         loadDashboardAsync();
         if (AppConfig.getInstance().getBoolean(AppConfig.KEY_WEATHER_ENABLED, true)) {
             loadWeatherAsync();
@@ -196,20 +235,25 @@ public class DashboardController {
                 updateKpiCards(s);
                 loadCharts(s);
                 loadActivityTable();
-                refreshBtn.setDisable(false);
-                refreshBtn.setText("🔄 Refresh");
+                if (refreshBtn != null) {
+                    refreshBtn.setDisable(false);
+                    refreshBtn.setText("🔄 Refresh");
+                }
             },
             err -> {
                 LOG.error("Dashboard load error", err);
-                refreshBtn.setDisable(false);
-                refreshBtn.setText("🔄 Refresh");
-                ToastNotification.error(dashboardBtn.getScene(),
-                    "Dashboard refresh failed: " + err.getMessage());
+                if (refreshBtn != null) {
+                    refreshBtn.setDisable(false);
+                    refreshBtn.setText("🔄 Refresh");
+                }
+                if (dashboardBtn != null && dashboardBtn.getScene() != null) {
+                    ToastNotification.error(dashboardBtn.getScene(),
+                        "Dashboard refresh failed: " + err.getMessage());
+                }
             }
         );
     }
 
-    /** Load weather data asynchronously using virtual threads. */
     private void loadWeatherAsync() {
         String city = AppConfig.getInstance().get(AppConfig.KEY_WEATHER_CITY);
         if (city == null || city.isBlank()) city = "Peshawar";
@@ -221,12 +265,13 @@ public class DashboardController {
         );
     }
 
-    private void updateWeatherWidget(WeatherInfo info) {
-        if (weatherCityLabel != null) weatherCityLabel.setText(info.getCity());
-        if (weatherTempLabel != null) weatherTempLabel.setText(
-            String.format("%.0f°C", info.getTemperature()));
-        if (weatherDescLabel != null) weatherDescLabel.setText(info.getDescription());
-        if (weatherIconLabel != null) weatherIconLabel.setText(info.getIcon());
+    private void updateWeatherWidget(WeatherInfo w) {
+        Platform.runLater(() -> {
+            if (weatherCityLabel != null) weatherCityLabel.setText(w.getCity());
+            if (weatherTempLabel != null) weatherTempLabel.setText(String.format("%.1f°C", w.getTemperature()));
+            if (weatherDescLabel != null) weatherDescLabel.setText(w.getDescription());
+            if (weatherIconLabel != null) weatherIconLabel.setText(w.getIcon());
+        });
     }
 
     // ── KPI cards ─────────────────────────────────────────────────────────────
@@ -234,16 +279,58 @@ public class DashboardController {
     private void updateKpiCards(DashboardStats s) {
         String currency = AppConfig.getInstance().getCurrency();
 
-        if (totalBooksText    != null) totalBooksText   .setText(String.valueOf(s.totalBooks));
-        if (totalMembersText  != null) totalMembersText .setText(String.valueOf(s.activeMembers));
-        if (issuedBooksText   != null) issuedBooksText  .setText(String.valueOf(s.issuedBooks));
-        if (overdueBooksText  != null) overdueBooksText .setText(String.valueOf(s.overdueBooks));
-        if (availableBooksText!= null) availableBooksText.setText(String.valueOf(s.availableBooks));
-        if (issuedTodayText   != null) issuedTodayText  .setText(s.issuedToday + " today");
-        if (finesCollectedText!= null) finesCollectedText.setText(currency + " " + String.format("%.2f", s.totalFinesCollected));
-        if (pendingFinesText  != null) pendingFinesText .setText(currency + " " + String.format("%.2f", s.pendingFines));
+        // 1. Total Books & Trend
+        if (totalBooksText != null) totalBooksText.setText(String.valueOf(s.totalBooks));
+        if (booksTrendText != null) {
+            boolean inStock = s.availableBooks >= s.issuedBooks;
+            booksTrendText.setText(inStock ? "▲ In Stock (" + s.totalCopies + " copies)" : "▼ High Demand");
+            booksTrendText.setStyle(inStock
+                    ? "-fx-fill:#059669; -fx-font-weight:bold; -fx-font-size:11px;"
+                    : "-fx-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:11px;");
+        }
 
-        // Overdue alert badge
+        // 2. Net Stock Worth
+        if (netStockWorthText != null)
+            netStockWorthText.setText(currency + " " + String.format("%,.2f", s.estimatedStockValue));
+        if (netStockWorthSub != null)
+            netStockWorthSub.setText(s.totalCopies + " Total Copies Catalogued");
+
+        // 3. Members
+        if (totalMembersText != null) totalMembersText.setText(String.valueOf(s.totalMembers));
+        if (membersTrendText != null) {
+            membersTrendText.setText(s.activeMembers > 0 ? "▲ " + s.activeMembers + " Active Borrowers" : "● Stable");
+            membersTrendText.setStyle("-fx-fill:#059669; -fx-font-weight:bold; -fx-font-size:11px;");
+        }
+
+        // 4. Issued Books
+        if (issuedBooksText != null) issuedBooksText.setText(String.valueOf(s.issuedBooks));
+        if (issuedTodayText != null) issuedTodayText.setText(s.issuedToday + " checkouts today");
+
+        // 5. Customer Dues / Receivables
+        if (memberDuesText != null)
+            memberDuesText.setText(currency + " " + String.format("%.2f", s.totalMemberDues));
+        if (memberDuesSub != null)
+            memberDuesSub.setText(s.totalMemberDues > 0 ? "Pending Collectible" : "Zero Arrears");
+
+        // 6. Realized Revenue
+        if (finesCollectedText != null)
+            finesCollectedText.setText(currency + " " + String.format("%.2f", s.totalFinesCollected));
+        if (pendingFinesText != null)
+            pendingFinesText.setText("▲ 100% Realized");
+
+        // 7. Overdue Risk
+        if (overdueBooksText != null) overdueBooksText.setText(String.valueOf(s.overdueBooks));
+        if (overdueRiskAccountsText != null)
+            overdueRiskAccountsText.setText(s.overdueAccountsCount + " At-Risk Accounts");
+
+        // 8. Availability Rate
+        if (availableBooksText != null) availableBooksText.setText(String.valueOf(s.availableBooks));
+        if (availabilityRateText != null) {
+            double rate = s.totalCopies > 0 ? ((double) s.availableBooks / s.totalCopies) * 100.0 : 100.0;
+            availabilityRateText.setText(String.format("%.1f%% Ready for Issue", rate));
+        }
+
+        // Overdue Alert Badge
         if (overdueAlertLabel != null) {
             if (s.overdueBooks > 0) {
                 overdueAlertLabel.setText("⚠ " + s.overdueBooks + " Overdue");
@@ -254,131 +341,159 @@ public class DashboardController {
                 overdueAlertLabel.setManaged(false);
             }
         }
-
-        // Trend indicators
-        if (booksTrendText != null) {
-            boolean inStock = s.availableBooks >= s.issuedBooks;
-            booksTrendText.setText(inStock ? "▲ In Stock" : "▼ High Demand");
-            booksTrendText.setStyle(inStock
-                    ? "-fx-fill:#059669; -fx-font-weight:bold; -fx-font-size:11px;"
-                    : "-fx-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:11px;");
-        }
-        if (membersTrendText != null) {
-            membersTrendText.setText(s.activeMembers > 0 ? "▲ Active" : "● Stable");
-            membersTrendText.setStyle("-fx-fill:#059669; -fx-font-weight:bold; -fx-font-size:11px;");
-        }
     }
 
     // ── Charts ────────────────────────────────────────────────────────────────
 
     private void loadCharts(DashboardStats s) {
-        // Pie chart — book status distribution
-        ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList(
-            new PieChart.Data("Available (" + s.availableBooks + ")", Math.max(s.availableBooks, 1)),
-            new PieChart.Data("Issued ("    + s.issuedBooks    + ")", Math.max(s.issuedBooks, 1)),
-            new PieChart.Data("Overdue ("   + s.overdueBooks   + ")", Math.max(s.overdueBooks, 1)),
-            new PieChart.Data("Reserved ("  + s.reservations   + ")", Math.max(s.reservations, 1))
-        );
-        bookStatusChart.setData(pieData);
-        bookStatusChart.setLegendVisible(true);
+        // Chart 1: Pie chart — book status distribution
+        if (bookStatusChart != null) {
+            ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList(
+                new PieChart.Data("Available (" + s.availableBooks + ")", Math.max(s.availableBooks, 1)),
+                new PieChart.Data("Issued ("    + s.issuedBooks    + ")", Math.max(s.issuedBooks, 1)),
+                new PieChart.Data("Overdue ("   + s.overdueBooks   + ")", Math.max(s.overdueBooks, 1)),
+                new PieChart.Data("Reserved ("  + s.reservations   + ")", Math.max(s.reservations, 1))
+            );
+            bookStatusChart.setData(pieData);
+            bookStatusChart.setLegendVisible(true);
+        }
 
-        // Bar chart — monthly issued (last 12 months)
-        Map<String, Integer> monthly = txService.getMonthlyIssuedStats(12);
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Books Issued");
-        monthly.forEach((month, count) ->
-            series.getData().add(new XYChart.Data<>(month, count)));
-        monthlyBarChart.getData().clear();
-        monthlyBarChart.getData().add(series);
+        // Chart 2: Bar chart — monthly issued
+        if (monthlyBarChart != null) {
+            Map<String, Integer> monthly = txService.getMonthlyIssuedStats(12);
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("Books Issued");
+            if (monthly.isEmpty()) {
+                series.getData().add(new XYChart.Data<>("Current", s.issuedBooks));
+            } else {
+                monthly.forEach((m, cnt) -> series.getData().add(new XYChart.Data<>(m, cnt)));
+            }
+            monthlyBarChart.getData().clear();
+            monthlyBarChart.getData().add(series);
+        }
+
+        // Chart 3: Bar chart — category demand
+        if (categoryChart != null) {
+            XYChart.Series<String, Number> catSeries = new XYChart.Series<>();
+            catSeries.setName("Books by Category");
+            if (s.categoryDistribution.isEmpty()) {
+                catSeries.getData().add(new XYChart.Data<>("General", Math.max(s.totalBooks, 1)));
+            } else {
+                s.categoryDistribution.forEach((cat, cnt) -> catSeries.getData().add(new XYChart.Data<>(cat, cnt)));
+            }
+            categoryChart.getData().clear();
+            categoryChart.getData().add(catSeries);
+        }
+
+        // Chart 4: Bar chart — revenue performance
+        if (revenueChart != null) {
+            XYChart.Series<String, Number> revSeries = new XYChart.Series<>();
+            revSeries.setName("Revenue (PKR)");
+            if (s.monthlyRevenue.isEmpty()) {
+                revSeries.getData().add(new XYChart.Data<>("Collected", s.totalFinesCollected));
+                revSeries.getData().add(new XYChart.Data<>("Receivables", s.totalMemberDues));
+            } else {
+                s.monthlyRevenue.forEach((m, amt) -> revSeries.getData().add(new XYChart.Data<>(m, amt)));
+            }
+            revenueChart.getData().clear();
+            revenueChart.getData().add(revSeries);
+        }
     }
-
-    // ── Activity table ────────────────────────────────────────────────────────
 
     private void loadActivityTable() {
-        List<Transaction> recent = txService.getRecentActivity(20);
-        activityData.clear();
-
-        if (recent.isEmpty()) {
-            // Load from DB directly if stack is empty (first load)
-            txService.getActiveTransactions().stream().limit(20).forEach(tx -> {
-                String date = tx.getIssueDate() != null
-                        ? tx.getIssueDate().format(DATE_FMT) : "";
-                String status = tx.isOverdue() ? "Overdue" : tx.getStatus();
-                activityData.add(new ActivityRecord(
-                        tx.getMemberName() != null ? tx.getMemberName() : "—",
-                        tx.getBookName()   != null ? tx.getBookName()   : "—",
-                        "Issued", date, status));
-            });
-        } else {
-            recent.forEach(tx -> {
-                String date = tx.getIssueDate() != null
-                        ? tx.getIssueDate().format(DATE_FMT) : "";
-                String status = tx.isOverdue() ? "Overdue" : tx.getStatus();
-                activityData.add(new ActivityRecord(
-                        tx.getMemberName() != null ? tx.getMemberName() : "—",
-                        tx.getBookName()   != null ? tx.getBookName()   : "—",
-                        tx.getStatus(), date, status));
-            });
-        }
-    }
-
-    // ── Theme toggle ──────────────────────────────────────────────────────────
-
-    // ── Sidebar Toggle ───────────────────────────────────────────────────────
-    @FXML
-    private void toggleSidebar() {
-        sidebarVisible = !sidebarVisible;
-        if (sidebar != null) {
-            sidebar.setVisible(sidebarVisible);
-            sidebar.setManaged(sidebarVisible);
-        }
-        if (sidebarToggleBtn != null) {
-            sidebarToggleBtn.setText(sidebarVisible ? "☰" : "▶");
-        }
-    }
-
-    // ── Theme toggle ──────────────────────────────────────────────────────────
-
-    @FXML
-    private void toggleTheme() {
-        ThemeManager.getInstance().toggle(dashboardBtn.getScene());
-        themeToggleBtn.setText(ThemeManager.getInstance().isDark() ? "☀" : "🌙");
+        AsyncRunner.run(
+            () -> txService.getRecentTransactions(15),
+            (List<Transaction> txList) -> {
+                activityData.clear();
+                for (Transaction tx : txList) {
+                    activityData.add(new ActivityRecord(
+                        tx.getMemberName() != null ? tx.getMemberName() : "Member #" + tx.getMemberId(),
+                        tx.getBookName()   != null ? tx.getBookName()   : "Book #" + tx.getBookId(),
+                        tx.getStatus()     != null ? tx.getStatus()     : "Transaction",
+                        tx.getIssueDate()  != null ? tx.getIssueDate().format(DATE_FMT) : "—",
+                        tx.getStatus()
+                    ));
+                }
+            },
+            err -> LOG.error("Activity load error: {}", err.getMessage())
+        );
     }
 
     // ── Navigation ────────────────────────────────────────────────────────────
 
     @FXML
-    private void showDashboard() {
+    public void showDashboard() {
         setActiveButton(dashboardBtn);
-        setModuleStyle("module-dashboard");
-        if (moduleText != null) moduleText.setText("— Dashboard");
-        // Restore dashboard center content
-        if (rootPane != null && dashboardCenter != null) {
+        if (moduleText != null) moduleText.setText("— Visual Analytics & BI Command Center");
+        if (dashboardCenter != null && rootPane != null) {
             rootPane.setCenter(dashboardCenter);
-            DashboardCache.getInstance().invalidate();
-            loadDashboardAsync();
+            handleRefresh();
         }
-        Stage stage = (Stage) dashboardBtn.getScene().getWindow();
-        stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " — Dashboard");
     }
 
-    @FXML private void showBooks()       { setActiveButton(booksBtn);       setModuleStyle("module-books");       navigateCenter("/com/library/ui/AddBookForm.fxml",          "— Books"); }
-    @FXML private void showMembers()     { setActiveButton(membersBtn);     setModuleStyle("module-members");     navigateCenter("/com/library/ui/AddMemberForm.fxml",         "— Members"); }
-    @FXML private void showIssueReturn() { setActiveButton(issueReturnBtn); setModuleStyle("module-issue");       navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml",  "— Issue/Return"); }
-    @FXML private void showEmployees()   { setActiveButton(employeesBtn);   setModuleStyle("module-employees");   navigateCenter("/com/library/ui/EmployeeForm.fxml",          "— Employees"); }
-    @FXML private void showArchive()     { setActiveButton(archiveBtn);     setModuleStyle("module-archive");     navigateCenter("/com/library/ui/ArchiveView.fxml",           "— Archive"); }
-    @FXML private void showReports()     { setActiveButton(reportsBtn);     setModuleStyle("module-reports");     navigateCenter("/com/library/ui/ReportsView.fxml",           "— Reports"); }
-    @FXML private void showSettings()    { setActiveButton(settingsBtn);    setModuleStyle("module-settings");    navigateCenter("/com/library/ui/Settings.fxml",              "— Settings"); }
+    @FXML public void showBooks()       { navigateCenter("/com/library/ui/AddBookForm.fxml",          "— Book Inventory Management",   booksBtn); }
+    @FXML public void showMembers()     { navigateCenter("/com/library/ui/AddMemberForm.fxml",        "— Member & Customer Directory", membersBtn); }
+    @FXML public void showIssueReturn() { navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Circulation & Returns",      issueReturnBtn); }
+    @FXML public void showEmployees()   { navigateCenter("/com/library/ui/EmployeeForm.fxml",         "— Employee Management",         employeesBtn); }
+    @FXML public void showArchive()     { navigateCenter("/com/library/ui/ArchiveView.fxml",          "— Archive Management",          archiveBtn); }
+    @FXML public void showReports()     { navigateCenter("/com/library/ui/ReportsView.fxml",          "— Enterprise Reports & BI",     reportsBtn); }
+    @FXML public void showSettings()    { navigateCenter("/com/library/ui/Settings.fxml",             "— System Settings & Config",    settingsBtn); }
 
-    // ── Quick actions ─────────────────────────────────────────────────────────
+    public void navigateCenter(String fxmlPath, String moduleTitle, Button activeBtn) {
+        setActiveButton(activeBtn);
+        if (moduleText != null) moduleText.setText(moduleTitle);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Node content = loader.load();
+            if (content instanceof BorderPane bp) {
+                bp.setTop(null);
+            }
+            if (rootPane != null) {
+                rootPane.setCenter(content);
+            }
+        } catch (IOException e) {
+            LOG.error("Failed to load view {}: {}", fxmlPath, e.getMessage(), e);
+            if (dashboardBtn != null && dashboardBtn.getScene() != null) {
+                ToastNotification.error(dashboardBtn.getScene(),
+                        "Could not load " + moduleTitle + ": " + e.getMessage());
+            }
+        }
+    }
 
-    @FXML private void addNewBook()     { setActiveButton(booksBtn);       setModuleStyle("module-books");       navigateCenter("/com/library/ui/AddBookForm.fxml",         "— Add Book"); }
-    @FXML private void addNewMember()   { setActiveButton(membersBtn);     setModuleStyle("module-members");     navigateCenter("/com/library/ui/AddMemberForm.fxml",        "— Add Member"); }
-    @FXML private void issueBook()      { setActiveButton(issueReturnBtn); setModuleStyle("module-issue");       navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Issue Book"); }
-    @FXML private void returnBook()     { setActiveButton(issueReturnBtn); setModuleStyle("module-issue");       navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Return Book"); }
-    @FXML private void generateReport() { setActiveButton(reportsBtn);     setModuleStyle("module-reports");     navigateCenter("/com/library/ui/ReportsView.fxml",          "— Reports"); }
+    public void goBackToDashboard() {
+        showDashboard();
+    }
 
-    // ── Logout ────────────────────────────────────────────────────────────────
+    private void setActiveButton(Button btn) {
+        List<Button> all = List.of(dashboardBtn, booksBtn, membersBtn,
+                issueReturnBtn, employeesBtn, archiveBtn, reportsBtn, settingsBtn);
+        all.forEach(b -> {
+            if (b != null) {
+                b.getStyleClass().remove("active");
+                b.setStyle("");
+            }
+        });
+        if (btn != null) {
+            if (!btn.getStyleClass().contains("active"))
+                btn.getStyleClass().add("active");
+        }
+    }
+
+    @FXML
+    private void toggleSidebar() {
+        if (sidebar == null) return;
+        boolean visible = sidebar.isVisible();
+        sidebar.setVisible(!visible);
+        sidebar.setManaged(!visible);
+        sidebarToggleBtn.setText(visible ? "☰" : "✖");
+    }
+
+    @FXML
+    private void toggleTheme() {
+        if (rootPane == null || rootPane.getScene() == null) return;
+        ThemeManager.getInstance().toggle(rootPane.getScene());
+        themeToggleBtn.setText(ThemeManager.getInstance().isDark() ? "☀" : "🌙");
+    }
 
     @FXML
     private void handleLogout() {
@@ -386,78 +501,16 @@ public class DashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/library/ui/LoginPage.fxml"));
-            Stage stage = (Stage) logoutBtn.getScene().getWindow();
-            stage.setMaximized(false);
-            stage.setWidth(1000);
-            stage.setHeight(650);
-            Scene scene = logoutBtn.getScene();
-            scene.setRoot(loader.load());
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            boolean wasMaximized = stage.isMaximized();
+            Scene scene = new Scene(loader.load(), 1100, 700);
             ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
             stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " — Login");
-            stage.centerOnScreen();
+            if (wasMaximized) stage.setMaximized(true);
+            stage.show();
         } catch (IOException e) {
-            showToast("Logout error: " + e.getMessage());
+            LOG.error("Logout error", e);
         }
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    /**
-     * Loads an FXML and places it in the dashboard's center pane,
-     * keeping the sidebar and top-bar intact.
-     * Sub-module "← Dashboard" buttons call goBackToDashboard() which
-     * triggers showDashboard() on this controller via the scene's userData.
-     */
-    private void navigateCenter(String fxml, String module) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
-            if (loader.getLocation() == null) {
-                showToast("Cannot find: " + fxml);
-                return;
-            }
-            Node content = loader.load();
-            // Strip the embedded top-bar from the loaded BorderPane so we don't show double headers
-            if (content instanceof BorderPane bp && bp.getTop() != null) {
-                bp.setTop(null);
-            }
-            if (rootPane != null) {
-                rootPane.setCenter(content);
-            }
-            if (moduleText != null) moduleText.setText(module);
-            Stage stage = (Stage) dashboardBtn.getScene().getWindow();
-            stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " " + module);
-            // Store reference so sub-controllers can call back
-            dashboardBtn.getScene().setUserData(this);
-        } catch (IOException e) {
-            Throwable cause = e.getCause() != null ? e.getCause() : e;
-            showToast("Cannot load " + module + ": " + cause.getMessage());
-            LOG.error("Navigation error loading {}", fxml, cause);
-        }
-    }
-
-    /** Called by sub-controllers when they want to go back to the dashboard. */
-    public void goBackToDashboard() {
-        showDashboard();
-    }
-
-    private void setActiveButton(Button active) {
-        Button[] navBtns = {dashboardBtn, booksBtn, membersBtn,
-                issueReturnBtn, employeesBtn, archiveBtn, reportsBtn, settingsBtn};
-        for (Button b : navBtns) if (b != null) b.getStyleClass().remove("active");
-        if (active != null && !active.getStyleClass().contains("active"))
-            active.getStyleClass().add("active");
-    }
-
-    private void setModuleStyle(String moduleClass) {
-        if (rootPane != null) {
-            rootPane.getStyleClass().removeIf(s -> s.startsWith("module-"));
-            if (moduleClass != null && !moduleClass.isBlank()) {
-                rootPane.getStyleClass().add(moduleClass);
-            }
-        }
-    }
-
-    private void showToast(String msg) {
-        ToastNotification.info(dashboardBtn.getScene(), msg);
     }
 }

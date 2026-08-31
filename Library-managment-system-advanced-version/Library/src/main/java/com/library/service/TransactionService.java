@@ -314,6 +314,30 @@ public class TransactionService {
 
     // ── Stack: Recent activity log ───────────────────────────────────────────
 
+    /** Returns last N transactions from the database (or recent activity stack). */
+    public List<Transaction> getRecentTransactions(int limit) {
+        String sql = """
+            SELECT t.*, b.book_name, b.author, m.name as member_name, m.student_id
+            FROM transactions t
+            JOIN books b ON t.book_id = b.book_id
+            JOIN members m ON t.member_id = m.std_id
+            ORDER BY t.transaction_id DESC
+            LIMIT ?
+        """;
+        List<Transaction> list = new ArrayList<>();
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapTransaction(rs));
+            }
+        } catch (SQLException e) {
+            LOG.error("Error fetching recent transactions: " + e.getMessage());
+            return getRecentActivity(limit);
+        }
+        return list;
+    }
+
     /** Returns last N transactions from the in-memory activity stack. */
     public synchronized List<Transaction> getRecentActivity(int limit) {
         List<Transaction> list = new ArrayList<>();
