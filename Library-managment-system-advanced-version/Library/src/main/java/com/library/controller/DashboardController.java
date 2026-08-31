@@ -203,16 +203,27 @@ public class DashboardController {
 
     private void setupSearch() {
         if (searchField != null) {
-            searchField.textProperty().addListener((obs, old, val) ->
-                filteredActivity.setPredicate(r -> {
-                    if (val == null || val.isBlank()) return true;
-                    String lower = val.toLowerCase();
-                    return r.getMemberName().toLowerCase().contains(lower)
-                        || r.getBookTitle().toLowerCase().contains(lower)
-                        || r.getAction().toLowerCase().contains(lower)
-                        || r.getStatus().toLowerCase().contains(lower);
-                })
-            );
+            searchField.textProperty().addListener((obs, old, val) -> applyFilter(val));
+        }
+    }
+
+    @FXML
+    private void handleSearch() {
+        if (searchField != null) {
+            applyFilter(searchField.getText());
+        }
+    }
+
+    private void applyFilter(String val) {
+        if (filteredActivity != null) {
+            filteredActivity.setPredicate(r -> {
+                if (val == null || val.isBlank()) return true;
+                String lower = val.toLowerCase();
+                return (r.getMemberName() != null && r.getMemberName().toLowerCase().contains(lower))
+                    || (r.getBookTitle() != null && r.getBookTitle().toLowerCase().contains(lower))
+                    || (r.getAction() != null && r.getAction().toLowerCase().contains(lower))
+                    || (r.getStatus() != null && r.getStatus().toLowerCase().contains(lower));
+            });
         }
     }
 
