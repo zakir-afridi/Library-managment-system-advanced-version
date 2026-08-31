@@ -45,6 +45,7 @@ public class DashboardController {
     private Node dashboardCenter;       // cached dashboard content
 
     // ── Top bar ───────────────────────────────────────────────────────────────
+    @FXML private Button sidebarToggleBtn;
     @FXML private Text   appTitleText;
     @FXML private Text   moduleText;
     @FXML private Label  userLabel;
@@ -54,6 +55,8 @@ public class DashboardController {
     @FXML private Button themeToggleBtn;
 
     // ── Sidebar ───────────────────────────────────────────────────────────────
+    @FXML private javafx.scene.layout.VBox sidebar;
+    private boolean sidebarVisible = true;
     @FXML private Button dashboardBtn;
     @FXML private Button booksBtn;
     @FXML private Button membersBtn;
@@ -318,6 +321,21 @@ public class DashboardController {
 
     // ── Theme toggle ──────────────────────────────────────────────────────────
 
+    // ── Sidebar Toggle ───────────────────────────────────────────────────────
+    @FXML
+    private void toggleSidebar() {
+        sidebarVisible = !sidebarVisible;
+        if (sidebar != null) {
+            sidebar.setVisible(sidebarVisible);
+            sidebar.setManaged(sidebarVisible);
+        }
+        if (sidebarToggleBtn != null) {
+            sidebarToggleBtn.setText(sidebarVisible ? "☰" : "▶");
+        }
+    }
+
+    // ── Theme toggle ──────────────────────────────────────────────────────────
+
     @FXML
     private void toggleTheme() {
         ThemeManager.getInstance().toggle(dashboardBtn.getScene());
@@ -329,6 +347,7 @@ public class DashboardController {
     @FXML
     private void showDashboard() {
         setActiveButton(dashboardBtn);
+        setModuleStyle("module-dashboard");
         if (moduleText != null) moduleText.setText("— Dashboard");
         // Restore dashboard center content
         if (rootPane != null && dashboardCenter != null) {
@@ -340,21 +359,21 @@ public class DashboardController {
         stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " — Dashboard");
     }
 
-    @FXML private void showBooks()       { setActiveButton(booksBtn);       navigateCenter("/com/library/ui/AddBookForm.fxml",          "— Books"); }
-    @FXML private void showMembers()     { setActiveButton(membersBtn);     navigateCenter("/com/library/ui/AddMemberForm.fxml",         "— Members"); }
-    @FXML private void showIssueReturn() { setActiveButton(issueReturnBtn); navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml",  "— Issue/Return"); }
-    @FXML private void showEmployees()   { setActiveButton(employeesBtn);   navigateCenter("/com/library/ui/EmployeeForm.fxml",          "— Employees"); }
-    @FXML private void showArchive()     { setActiveButton(archiveBtn);     navigateCenter("/com/library/ui/ArchiveView.fxml",           "— Archive"); }
-    @FXML private void showReports()     { setActiveButton(reportsBtn);     navigateCenter("/com/library/ui/ReportsView.fxml",           "— Reports"); }
-    @FXML private void showSettings()    { setActiveButton(settingsBtn);    navigateCenter("/com/library/ui/Settings.fxml",              "— Settings"); }
+    @FXML private void showBooks()       { setActiveButton(booksBtn);       setModuleStyle("module-books");       navigateCenter("/com/library/ui/AddBookForm.fxml",          "— Books"); }
+    @FXML private void showMembers()     { setActiveButton(membersBtn);     setModuleStyle("module-members");     navigateCenter("/com/library/ui/AddMemberForm.fxml",         "— Members"); }
+    @FXML private void showIssueReturn() { setActiveButton(issueReturnBtn); setModuleStyle("module-issue");       navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml",  "— Issue/Return"); }
+    @FXML private void showEmployees()   { setActiveButton(employeesBtn);   setModuleStyle("module-employees");   navigateCenter("/com/library/ui/EmployeeForm.fxml",          "— Employees"); }
+    @FXML private void showArchive()     { setActiveButton(archiveBtn);     setModuleStyle("module-archive");     navigateCenter("/com/library/ui/ArchiveView.fxml",           "— Archive"); }
+    @FXML private void showReports()     { setActiveButton(reportsBtn);     setModuleStyle("module-reports");     navigateCenter("/com/library/ui/ReportsView.fxml",           "— Reports"); }
+    @FXML private void showSettings()    { setActiveButton(settingsBtn);    setModuleStyle("module-settings");    navigateCenter("/com/library/ui/Settings.fxml",              "— Settings"); }
 
     // ── Quick actions ─────────────────────────────────────────────────────────
 
-    @FXML private void addNewBook()     { setActiveButton(booksBtn);       navigateCenter("/com/library/ui/AddBookForm.fxml",         "— Add Book"); }
-    @FXML private void addNewMember()   { setActiveButton(membersBtn);     navigateCenter("/com/library/ui/AddMemberForm.fxml",        "— Add Member"); }
-    @FXML private void issueBook()      { setActiveButton(issueReturnBtn); navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Issue Book"); }
-    @FXML private void returnBook()     { setActiveButton(issueReturnBtn); navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Return Book"); }
-    @FXML private void generateReport() { setActiveButton(reportsBtn);     navigateCenter("/com/library/ui/ReportsView.fxml",          "— Reports"); }
+    @FXML private void addNewBook()     { setActiveButton(booksBtn);       setModuleStyle("module-books");       navigateCenter("/com/library/ui/AddBookForm.fxml",         "— Add Book"); }
+    @FXML private void addNewMember()   { setActiveButton(membersBtn);     setModuleStyle("module-members");     navigateCenter("/com/library/ui/AddMemberForm.fxml",        "— Add Member"); }
+    @FXML private void issueBook()      { setActiveButton(issueReturnBtn); setModuleStyle("module-issue");       navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Issue Book"); }
+    @FXML private void returnBook()     { setActiveButton(issueReturnBtn); setModuleStyle("module-issue");       navigateCenter("/com/library/ui/IssueReturnBooksForm.fxml", "— Return Book"); }
+    @FXML private void generateReport() { setActiveButton(reportsBtn);     setModuleStyle("module-reports");     navigateCenter("/com/library/ui/ReportsView.fxml",          "— Reports"); }
 
     // ── Logout ────────────────────────────────────────────────────────────────
 
@@ -424,6 +443,15 @@ public class DashboardController {
         for (Button b : navBtns) if (b != null) b.getStyleClass().remove("active");
         if (active != null && !active.getStyleClass().contains("active"))
             active.getStyleClass().add("active");
+    }
+
+    private void setModuleStyle(String moduleClass) {
+        if (rootPane != null) {
+            rootPane.getStyleClass().removeIf(s -> s.startsWith("module-"));
+            if (moduleClass != null && !moduleClass.isBlank()) {
+                rootPane.getStyleClass().add(moduleClass);
+            }
+        }
     }
 
     private void showToast(String msg) {

@@ -1,35 +1,95 @@
+/* ═══════════════════════════════════════════════════════════════
+   LibraCore Pro — Professional Dashboard Theme
+   Vibrant Colors, Responsive Layouts, Collapsible Navigation
+   ═══════════════════════════════════════════════════════════════ */
+
 /* ===== MAIN CONTAINER ===== */
 .main-container {
-    -fx-background-color: #f8f9fa;
+    -fx-background-color: #f0f3f8;
     -fx-font-family: "Segoe UI", "Roboto", "Arial", sans-serif;
 }
 
-/* ===== TOP BAR ===== */
+/* ===== TOP BAR & MODULE COLOR THEMES ===== */
 .top-bar {
-    -fx-background-color: linear-gradient(to right, #667eea 0%, #764ba2 100%);
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 2);
+    -fx-background-color: linear-gradient(to right, #4338ca 0%, #6366f1 50%, #8b5cf6 100%);
+    -fx-effect: dropshadow(gaussian, rgba(67, 56, 202, 0.35), 14, 0, 0, 3);
+}
+
+/* Dynamic Top Bar Gradients per Module */
+.module-dashboard .top-bar {
+    -fx-background-color: linear-gradient(to right, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+}
+
+.module-books .top-bar {
+    -fx-background-color: linear-gradient(to right, #0284c7 0%, #06b6d4 50%, #14b8a6 100%);
+}
+
+.module-members .top-bar {
+    -fx-background-color: linear-gradient(to right, #059669 0%, #10b981 50%, #34d399 100%);
+}
+
+.module-issue .top-bar {
+    -fx-background-color: linear-gradient(to right, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+}
+
+.module-employees .top-bar {
+    -fx-background-color: linear-gradient(to right, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%);
+}
+
+.module-archive .top-bar {
+    -fx-background-color: linear-gradient(to right, #475569 0%, #64748b 50%, #0284c7 100%);
+}
+
+.module-reports .top-bar {
+    -fx-background-color: linear-gradient(to right, #4f46e5 0%, #6366f1 50%, #ec4899 100%);
+}
+
+.module-settings .top-bar {
+    -fx-background-color: linear-gradient(to right, #e11d48 0%, #f43f5e 50%, #fb7185 100%);
 }
 
 .app-title {
     -fx-font-size: 22px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 800;
     -fx-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 3, 0, 0, 1);
 }
 
 .user-label {
     -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-font-weight: 500;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-background-color: rgba(255,255,255,0.15);
+    -fx-padding: 6 14 6 14;
+    -fx-background-radius: 20;
+}
+
+/* Hamburger / Sidebar Toggle Button */
+.hamburger-btn {
+    -fx-background-color: rgba(255,255,255,0.18);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 6 12 6 12;
+    -fx-border-color: rgba(255,255,255,0.3);
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.hamburger-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.32);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
 }
 
 .top-btn {
-    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-background-color: rgba(255,255,255,0.18);
     -fx-text-fill: white;
     -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 600;
     -fx-background-radius: 20;
-    -fx-padding: 8 16 8 16;
+    -fx-padding: 7 16 7 16;
     -fx-border-color: rgba(255,255,255,0.3);
     -fx-border-radius: 20;
     -fx-border-width: 1;
@@ -37,129 +97,138 @@
 }
 
 .top-btn:hover {
-    -fx-background-color: rgba(255,255,255,0.3);
+    -fx-background-color: rgba(255,255,255,0.32);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
 }
 
 .logout-btn {
-    -fx-background-color: #e74c3c;
+    -fx-background-color: #ef4444;
     -fx-text-fill: white;
     -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 600;
     -fx-background-radius: 20;
-    -fx-padding: 8 16 8 16;
+    -fx-padding: 7 16 7 16;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.4), 8, 0, 0, 2);
 }
 
 .logout-btn:hover {
-    -fx-background-color: #c0392b;
+    -fx-background-color: #dc2626;
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
 }
 
-/* ===== SIDEBAR ===== */
+/* ===== SIDEBAR NAVIGATION ===== */
 .sidebar {
-    -fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%);
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 2, 0);
+    -fx-background-color: linear-gradient(to bottom, #1e1b4b 0%, #0f172a 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 16, 0, 3, 0);
 }
 
 .sidebar-header {
-    -fx-text-fill: #bdc3c7;
+    -fx-text-fill: #94a3b8;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-padding: 0 20 10 20;
-    -fx-letter-spacing: 1px;
+    -fx-font-weight: 800;
+    -fx-padding: 0 20 12 20;
+    -fx-letter-spacing: 1.5px;
 }
 
 .sidebar-btn {
     -fx-background-color: transparent;
-    -fx-text-fill: #ecf0f1;
-    -fx-font-size: 14px;
-    -fx-font-weight: 500;
-    -fx-padding: 15 20 15 20;
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 600;
+    -fx-padding: 13 20 13 20;
     -fx-alignment: CENTER_LEFT;
-    -fx-background-radius: 0;
+    -fx-background-radius: 8;
     -fx-border-width: 0;
     -fx-cursor: hand;
+    -fx-margin: 2 10 2 10;
 }
 
 .sidebar-btn:hover {
-    -fx-background-color: rgba(52, 152, 219, 0.2);
-    -fx-text-fill: #3498db;
+    -fx-background-color: rgba(99, 102, 241, 0.2);
+    -fx-text-fill: #a5b4fc;
+    -fx-scale-x: 1.02;
 }
 
 .sidebar-btn.active {
-    -fx-background-color: #3498db;
+    -fx-background-color: linear-gradient(to right, #6366f1, #818cf8);
     -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.4), 8, 0, 0, 0);
+    -fx-font-weight: 700;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.5), 10, 0, 0, 2);
 }
 
 .sidebar-btn.logout {
-    -fx-text-fill: #e74c3c;
+    -fx-text-fill: #f87171;
 }
 
 .sidebar-btn.logout:hover {
-    -fx-background-color: rgba(231, 76, 60, 0.2);
-    -fx-text-fill: #c0392b;
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-text-fill: #ef4444;
 }
 
-/* ===== MAIN CONTENT ===== */
-.content-scroll {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-}
-
-.content-scroll .viewport {
-    -fx-background-color: transparent;
-}
-
-.main-content {
-    -fx-background-color: #f8f9fa;
-}
-
+/* ===== MAIN CONTENT & CARDS ===== */
 .section-title {
     -fx-font-size: 20px;
-    -fx-font-weight: bold;
-    -fx-fill: #2c3e50;
+    -fx-font-weight: 800;
+    -fx-fill: #1e293b;
 }
 
-/* ===== KPI CARDS ===== */
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-fill: #1e293b;
+}
+
+/* ===== KPI CARDS (VIBRANT & RESPONSIVE) ===== */
 .kpi-card {
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 12, 0, 0, 4);
     -fx-cursor: hand;
 }
 
 .kpi-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 8);
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 6);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
+/* Vibrant Individual Card Themes */
 .blue-card {
-    -fx-border-color: #3498db;
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 60%, #e0f2fe 100%);
+    -fx-border-color: #0284c7;
     -fx-border-width: 0 0 4 0;
-    -fx-border-radius: 0 0 12 12;
+    -fx-border-radius: 0 0 14 14;
 }
 
 .green-card {
-    -fx-border-color: #27ae60;
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 60%, #dcfce7 100%);
+    -fx-border-color: #10b981;
     -fx-border-width: 0 0 4 0;
-    -fx-border-radius: 0 0 12 12;
+    -fx-border-radius: 0 0 14 14;
 }
 
 .orange-card {
-    -fx-border-color: #f39c12;
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 60%, #fef3c7 100%);
+    -fx-border-color: #f59e0b;
     -fx-border-width: 0 0 4 0;
-    -fx-border-radius: 0 0 12 12;
+    -fx-border-radius: 0 0 14 14;
+}
+
+.red-card {
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 60%, #fee2e2 100%);
+    -fx-border-color: #ef4444;
+    -fx-border-width: 0 0 4 0;
+    -fx-border-radius: 0 0 14 14;
 }
 
 .purple-card {
-    -fx-border-color: #9b59b6;
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 60%, #f3e8ff 100%);
+    -fx-border-color: #a855f7;
     -fx-border-width: 0 0 4 0;
-    -fx-border-radius: 0 0 12 12;
+    -fx-border-radius: 0 0 14 14;
 }
 
 .kpi-icon {
@@ -168,161 +237,161 @@
 
 .kpi-number {
     -fx-font-size: 28px;
-    -fx-font-weight: bold;
-    -fx-fill: #2c3e50;
+    -fx-font-weight: 800;
+    -fx-fill: #0f172a;
 }
 
 .kpi-label {
     -fx-font-size: 12px;
-    -fx-fill: #7f8c8d;
-    -fx-font-weight: 500;
+    -fx-fill: #64748b;
+    -fx-font-weight: 600;
 }
 
-/* ===== CHARTS ===== */
+.kpi-trend {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+/* ===== CHARTS CONTAINER ===== */
 .chart-container {
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 12, 0, 0, 4);
 }
 
 .chart-title {
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-fill: #2c3e50;
+    -fx-font-weight: 700;
+    -fx-fill: #1e293b;
     -fx-text-alignment: center;
 }
 
 .chart {
     -fx-background-color: transparent;
-    -fx-padding: 10;
+    -fx-padding: 8;
 }
 
 .chart-pie-label {
     -fx-font-size: 11px;
-    -fx-fill: #2c3e50;
+    -fx-fill: #1e293b;
+    -fx-font-weight: 600;
 }
 
 .chart-legend {
     -fx-background-color: transparent;
-    -fx-padding: 10;
+    -fx-padding: 8;
 }
 
-/* ===== TABLE ===== */
+/* ===== TABLE CONTAINER ===== */
 .table-container {
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);
-    -fx-padding: 20;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 12, 0, 0, 4);
+    -fx-padding: 18;
 }
 
 .activity-table {
     -fx-background-color: transparent;
-    -fx-table-cell-border-color: #ecf0f1;
-    -fx-selection-bar: #3498db;
-    -fx-selection-bar-non-focused: #bdc3c7;
+    -fx-table-cell-border-color: #f1f5f9;
 }
 
 .activity-table .column-header {
-    -fx-background-color: #f8f9fa;
-    -fx-font-weight: bold;
+    -fx-background-color: #f8fafc;
+    -fx-font-weight: 700;
     -fx-font-size: 12px;
-    -fx-text-fill: #2c3e50;
-    -fx-padding: 15 10 15 10;
+    -fx-text-fill: #475569;
+    -fx-padding: 12 10 12 10;
 }
 
 .activity-table .table-row-cell {
     -fx-background-color: white;
-    -fx-border-color: #ecf0f1;
+    -fx-border-color: #f1f5f9;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 12 10 12 10;
+    -fx-padding: 10 8 10 8;
 }
 
 .activity-table .table-row-cell:hover {
-    -fx-background-color: #f8f9fa;
+    -fx-background-color: #f8fafc;
 }
 
 .activity-table .table-row-cell:selected {
-    -fx-background-color: #e3f2fd;
+    -fx-background-color: #e0e7ff;
 }
 
 .activity-table .table-cell {
     -fx-font-size: 13px;
-    -fx-text-fill: #2c3e50;
+    -fx-text-fill: #1e293b;
     -fx-alignment: CENTER_LEFT;
 }
 
 /* ===== SEARCH FIELD ===== */
 .search-field {
-    -fx-background-color: white;
+    -fx-background-color: #f8fafc;
     -fx-background-radius: 25;
-    -fx-border-color: #bdc3c7;
+    -fx-border-color: #cbd5e1;
     -fx-border-radius: 25;
-    -fx-border-width: 1;
-    -fx-padding: 10 15 10 15;
+    -fx-border-width: 1.5;
+    -fx-padding: 8 16 8 16;
     -fx-font-size: 13px;
-    -fx-prompt-text-fill: #95a5a6;
+    -fx-prompt-text-fill: #94a3b8;
 }
 
 .search-field:focused {
-    -fx-border-color: #3498db;
-    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.3), 8, 0, 0, 0);
+    -fx-background-color: white;
+    -fx-border-color: #6366f1;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.25), 8, 0, 0, 0);
 }
 
 /* ===== ACTION BUTTONS ===== */
 .action-btn {
     -fx-font-size: 13px;
-    -fx-font-weight: 500;
-    -fx-padding: 12 20 12 20;
-    -fx-background-radius: 8;
+    -fx-font-weight: 600;
+    -fx-padding: 10 16 10 16;
+    -fx-background-radius: 10;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);
 }
 
 .action-btn:hover {
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 12, 0, 0, 4);
+    -fx-scale-x: 1.04;
+    -fx-scale-y: 1.04;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
 }
 
 .primary-btn {
-    -fx-background-color: #3498db;
+    -fx-background-color: linear-gradient(to right, #3b82f6, #2563eb);
     -fx-text-fill: white;
 }
 
 .primary-btn:hover {
-    -fx-background-color: #2980b9;
+    -fx-background-color: linear-gradient(to right, #2563eb, #1d4ed8);
 }
 
 .secondary-btn {
-    -fx-background-color: #95a5a6;
+    -fx-background-color: linear-gradient(to right, #64748b, #475569);
     -fx-text-fill: white;
 }
 
 .secondary-btn:hover {
-    -fx-background-color: #7f8c8d;
+    -fx-background-color: linear-gradient(to right, #475569, #334155);
 }
 
 .accent-btn {
-    -fx-background-color: #9b59b6;
+    -fx-background-color: linear-gradient(to right, #8b5cf6, #7c3aed);
     -fx-text-fill: white;
 }
 
 .accent-btn:hover {
-    -fx-background-color: #8e44ad;
+    -fx-background-color: linear-gradient(to right, #7c3aed, #6d28d9);
 }
 
 .success-btn {
-    -fx-background-color: #27ae60;
+    -fx-background-color: linear-gradient(to right, #10b981, #059669);
     -fx-text-fill: white;
 }
 
 .success-btn:hover {
-    -fx-background-color: #229954;
-}
-
-/* ===== ANIMATIONS ===== */
-.kpi-card, .chart-container, .action-btn {
-    -fx-transition: all 0.3s ease;
+    -fx-background-color: linear-gradient(to right, #059669, #047857);
 }
 
 /* ===== SCROLLBAR STYLING ===== */
@@ -331,36 +400,15 @@
 }
 
 .scroll-bar .track {
-    -fx-background-color: #ecf0f1;
-    -fx-background-radius: 5;
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 6;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: #bdc3c7;
-    -fx-background-radius: 5;
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 6;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: #95a5a6;
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 1200px) {
-    .kpi-card {
-        -fx-pref-width: 180;
-    }
-    
-    .chart-container {
-        -fx-pref-width: 350;
-    }
-}
-
-@media (max-width: 800px) {
-    .sidebar {
-        -fx-pref-width: 200;
-    }
-    
-    .kpi-card {
-        -fx-pref-width: 160;
-    }
+    -fx-background-color: #94a3b8;
 }

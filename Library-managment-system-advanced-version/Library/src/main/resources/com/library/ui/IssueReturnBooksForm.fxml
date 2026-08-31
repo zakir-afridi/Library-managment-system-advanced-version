@@ -13,15 +13,14 @@
 
    <!-- TOP BAR -->
    <top>
-      <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="20">
+      <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #d97706 0%, #f59e0b 50%, #fbbf24 100%);" alignment="CENTER_LEFT" spacing="20">
          <padding><Insets top="15" right="25" bottom="15" left="25"/></padding>
-         <Button fx:id="backBtn" text="Back to Dashboard" styleClass="back-btn" onAction="#goBackToDashboard"/>
+         <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBackToDashboard"/>
          <Region HBox.hgrow="ALWAYS"/>
-         <Text text="Issue / Return Books" styleClass="page-title"/>
+         <Text text="🔄 Issue / Return Books" styleClass="app-title"/>
          <Region HBox.hgrow="ALWAYS"/>
          <HBox spacing="10">
-            <Button fx:id="refreshBtn" text="Refresh" styleClass="top-btn" onAction="#refreshData"/>
-            <Button fx:id="helpBtn" text="Help" styleClass="help-btn"/>
+            <Button fx:id="refreshBtn" text="🔄 Refresh" styleClass="top-btn" onAction="#refreshData"/>
          </HBox>
       </HBox>
    </top>

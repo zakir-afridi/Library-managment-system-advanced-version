@@ -12,7 +12,7 @@
             styleClass="main-container">
 
     <top>
-        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+        <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%);" alignment="CENTER_LEFT" spacing="16">
             <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
             <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
             <Region HBox.hgrow="ALWAYS"/>
