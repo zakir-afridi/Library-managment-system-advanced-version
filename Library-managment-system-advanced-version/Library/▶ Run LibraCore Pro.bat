@@ -84,9 +84,14 @@ for %%F in (target\lib\javafx-controls-*-win.jar target\lib\javafx-fxml-*-win.ja
 "!JAVA_EXE!" ^
   --module-path "!FX_PATH!" ^
   --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base,javafx.swing ^
-  --enable-preview ^
-  --enable-native-access=javafx.graphics,ALL-UNNAMED ^
-  -Dsun.misc.unsafe.memory.access=allow ^
+  --enable-native-access=ALL-UNNAMED ^
+  --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED ^
+  --add-opens=javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED ^
+  --add-opens=javafx.graphics/com.sun.marlin=ALL-UNNAMED ^
+  --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED ^
+  --add-opens=java.base/sun.misc=ALL-UNNAMED ^
+  -Dsun.misc.unsafe.warn=false ^
+  -Dpolyglot.engine.WarnInterpreterOnly=false ^
   -Dfile.encoding=UTF-8 ^
   -cp "!CP!" ^
   com.library.LibraCoreApp
