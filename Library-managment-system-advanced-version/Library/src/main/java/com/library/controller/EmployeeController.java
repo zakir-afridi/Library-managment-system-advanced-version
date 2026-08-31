@@ -148,6 +148,7 @@ public class EmployeeController {
         filtered = new FilteredList<>(allEmps, e -> true);
         sorted   = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(empTable.comparatorProperty());
+        empTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         empTable.setItems(sorted);
     }
 

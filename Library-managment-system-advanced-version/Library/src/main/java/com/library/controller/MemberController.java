@@ -176,6 +176,7 @@ public class MemberController {
         filteredMembers = new FilteredList<>(allMembers, m -> true);
         sortedMembers   = new SortedList<>(filteredMembers);
         sortedMembers.comparatorProperty().bind(memberTable.comparatorProperty());
+        memberTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         memberTable.setItems(sortedMembers);
     }
 

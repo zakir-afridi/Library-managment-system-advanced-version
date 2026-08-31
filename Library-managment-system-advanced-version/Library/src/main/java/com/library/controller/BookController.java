@@ -245,6 +245,7 @@ public class BookController {
         filteredBooks = new FilteredList<>(allBooks, b -> true);
         sortedBooks   = new SortedList<>(filteredBooks);
         sortedBooks.comparatorProperty().bind(bookTable.comparatorProperty());
+        bookTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         bookTable.setItems(sortedBooks);
     }
 
