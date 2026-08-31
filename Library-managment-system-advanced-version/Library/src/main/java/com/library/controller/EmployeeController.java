@@ -114,17 +114,23 @@ public class EmployeeController {
             }
         });
 
+        // Actions: Compact Icon-Only Buttons [✏] [📦] [🖨]
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button editBtn    = new Button("✏ Edit");
+            private final Button editBtn    = new Button("✏");
             private final Button archiveBtn = new Button("📦");
-            private final Button printBtn   = new Button("🖨 ID");
+            private final Button printBtn   = new Button("🖨");
             private final javafx.scene.layout.HBox box =
-                    new javafx.scene.layout.HBox(4, editBtn, archiveBtn, printBtn);
+                    new javafx.scene.layout.HBox(6, editBtn, archiveBtn, printBtn);
             {
-                box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                editBtn   .setStyle("-fx-background-color:#f59e0b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
-                archiveBtn.setStyle("-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
-                printBtn  .setStyle("-fx-background-color:#059669; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                box.setAlignment(javafx.geometry.Pos.CENTER);
+                editBtn.setTooltip(new Tooltip("Edit Employee Record"));
+                archiveBtn.setTooltip(new Tooltip("Archive / Restore"));
+                printBtn.setTooltip(new Tooltip("Print Employee Card"));
+
+                editBtn   .setStyle("-fx-background-color:#f59e0b; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(245,158,11,0.3),3,0,0,1);");
+                archiveBtn.setStyle("-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(100,116,139,0.3),3,0,0,1);");
+                printBtn  .setStyle("-fx-background-color:#059669; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(5,150,105,0.3),3,0,0,1);");
+
                 editBtn   .setOnAction(e -> populateForm(getTableView().getItems().get(getIndex())));
                 archiveBtn.setOnAction(e -> toggleArchive(getTableView().getItems().get(getIndex())));
                 printBtn  .setOnAction(e -> printSingle(getTableView().getItems().get(getIndex())));
@@ -134,10 +140,11 @@ public class EmployeeController {
                 if (empty) { setGraphic(null); return; }
                 Employee emp = getTableView().getItems().get(getIndex());
                 boolean archived = Employee.STATUS_ARCHIVED.equals(emp.getStatus());
-                archiveBtn.setText(archived ? "♻ Restore" : "📦 Archive");
+                archiveBtn.setText(archived ? "♻" : "📦");
+                archiveBtn.setTooltip(new Tooltip(archived ? "Restore Employee" : "Archive Employee"));
                 archiveBtn.setStyle(archived
-                    ? "-fx-background-color:#10b981; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10px; -fx-font-weight:bold; -fx-padding:3 7 3 7;"
-                    : "-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                    ? "-fx-background-color:#10b981; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(16,185,129,0.3),3,0,0,1);"
+                    : "-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(100,116,139,0.3),3,0,0,1);");
                 setGraphic(box);
             }
         });

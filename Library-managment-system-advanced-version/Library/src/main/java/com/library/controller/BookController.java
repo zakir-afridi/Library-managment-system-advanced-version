@@ -214,18 +214,22 @@ public class BookController {
             }
         });
 
-        // Actions: View, Edit, Delete / Archive buttons
+        // Actions: Compact Icon-Only Buttons [👁] [✏] [🗑]
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button viewBtn   = new Button("👁 View");
-            private final Button editBtn   = new Button("✏ Edit");
-            private final Button delBtn    = new Button("🗑 Delete");
+            private final Button viewBtn = new Button("👁");
+            private final Button editBtn = new Button("✏");
+            private final Button delBtn  = new Button("🗑");
             private final javafx.scene.layout.HBox box =
-                    new javafx.scene.layout.HBox(4, viewBtn, editBtn, delBtn);
+                    new javafx.scene.layout.HBox(6, viewBtn, editBtn, delBtn);
             {
-                box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                viewBtn.setStyle("-fx-background-color:#059669; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
-                editBtn.setStyle("-fx-background-color:#f59e0b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
-                delBtn .setStyle("-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                box.setAlignment(javafx.geometry.Pos.CENTER);
+                viewBtn.setTooltip(new Tooltip("View Book Details"));
+                editBtn.setTooltip(new Tooltip("Edit Book"));
+                delBtn.setTooltip(new Tooltip("Delete Book"));
+
+                viewBtn.setStyle("-fx-background-color:#059669; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(5,150,105,0.3),3,0,0,1);");
+                editBtn.setStyle("-fx-background-color:#f59e0b; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(245,158,11,0.3),3,0,0,1);");
+                delBtn .setStyle("-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:6; -fx-cursor:hand; -fx-font-size:12px; -fx-padding:4 8 4 8; -fx-effect:dropshadow(gaussian,rgba(239,68,68,0.3),3,0,0,1);");
 
                 viewBtn.setOnAction(e -> viewBook(getTableView().getItems().get(getIndex())));
                 editBtn.setOnAction(e -> editBook(getTableView().getItems().get(getIndex())));

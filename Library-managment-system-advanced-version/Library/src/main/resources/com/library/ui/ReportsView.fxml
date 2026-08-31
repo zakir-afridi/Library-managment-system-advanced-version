@@ -11,11 +11,11 @@
             styleClass="main-container">
 
     <top>
-        <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #047857 0%, #059669 50%, #10b981 100%);" alignment="CENTER_LEFT" spacing="16">
+        <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #022c22 0%, #064e3b 35%, #059669 75%, #10b981 100%);" alignment="CENTER_LEFT" spacing="16">
             <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
             <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Text text="📈 Reports &amp; Analytics" styleClass="app-title"/>
+            <Text text="📈 Reports &amp; Business Intelligence" styleClass="app-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="themeBtn" text="🌙" styleClass="top-btn" onAction="#toggleTheme"/>
         </HBox>
