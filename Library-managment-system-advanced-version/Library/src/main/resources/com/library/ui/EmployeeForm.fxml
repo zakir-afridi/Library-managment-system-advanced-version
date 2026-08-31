@@ -12,7 +12,7 @@
             styleClass="main-container">
 
     <top>
-        <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%);" alignment="CENTER_LEFT" spacing="16">
+        <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #064e3b 0%, #0f766e 50%, #14b8a6 100%);" alignment="CENTER_LEFT" spacing="16">
             <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
             <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
             <Region HBox.hgrow="ALWAYS"/>
@@ -52,7 +52,7 @@
                         <TableColumn fx:id="colDesig" text="Designation" prefWidth="130"/>
                         <TableColumn fx:id="colDept"  text="Department"  prefWidth="120"/>
                         <TableColumn fx:id="colStatus" text="Status"     prefWidth="80"/>
-                        <TableColumn fx:id="colActions" text="Actions"   prefWidth="130"/>
+                        <TableColumn fx:id="colActions" text="Actions"   prefWidth="190"/>
                     </columns>
                     <placeholder><Label text="No employees found. Add your first employee →"/></placeholder>
                 </TableView>

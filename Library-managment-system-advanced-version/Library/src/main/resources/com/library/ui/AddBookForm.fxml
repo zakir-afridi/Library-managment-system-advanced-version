@@ -65,7 +65,7 @@
                         <TableColumn fx:id="colQty"       text="Qty"       prefWidth="50"/>
                         <TableColumn fx:id="colAvail"     text="Avail"     prefWidth="50"/>
                         <TableColumn fx:id="colStatus"    text="Status"    prefWidth="90"/>
-                        <TableColumn fx:id="colActions"   text="Actions"   prefWidth="110"/>
+                        <TableColumn fx:id="colActions"   text="Actions"   prefWidth="215"/>
                     </columns>
                     <placeholder><Label text="No books found. Add your first book →"/></placeholder>
                 </TableView>

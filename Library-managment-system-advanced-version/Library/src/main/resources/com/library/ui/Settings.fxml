@@ -11,11 +11,11 @@
             styleClass="main-container">
 
     <top>
-        <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #e11d48 0%, #f43f5e 50%, #fb7185 100%);" alignment="CENTER_LEFT" spacing="16">
+        <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #064e3b 0%, #047857 50%, #059669 100%);" alignment="CENTER_LEFT" spacing="16">
             <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
             <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Text text="⚙️ Settings" styleClass="app-title"/>
+            <Text text="⚙️ System Settings" styleClass="app-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="saveBtn" text="💾 Save All" styleClass="logout-btn"
                     style="-fx-background-color:#10b981;" onAction="#saveSettings"/>

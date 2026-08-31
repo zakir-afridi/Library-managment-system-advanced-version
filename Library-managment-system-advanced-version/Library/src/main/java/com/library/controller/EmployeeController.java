@@ -115,15 +115,16 @@ public class EmployeeController {
         });
 
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button editBtn    = new Button("✏");
+            private final Button editBtn    = new Button("✏ Edit");
             private final Button archiveBtn = new Button("📦");
-            private final Button printBtn   = new Button("🖨");
+            private final Button printBtn   = new Button("🖨 ID");
             private final javafx.scene.layout.HBox box =
-                    new javafx.scene.layout.HBox(3, editBtn, archiveBtn, printBtn);
+                    new javafx.scene.layout.HBox(4, editBtn, archiveBtn, printBtn);
             {
-                editBtn   .setStyle("-fx-background-color:#1976d2; -fx-text-fill:white; -fx-background-radius:4; -fx-cursor:hand; -fx-font-size:10px;");
-                archiveBtn.setStyle("-fx-background-color:#757575; -fx-text-fill:white; -fx-background-radius:4; -fx-cursor:hand; -fx-font-size:10px;");
-                printBtn  .setStyle("-fx-background-color:#388e3c; -fx-text-fill:white; -fx-background-radius:4; -fx-cursor:hand; -fx-font-size:10px;");
+                box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                editBtn   .setStyle("-fx-background-color:#f59e0b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                archiveBtn.setStyle("-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                printBtn  .setStyle("-fx-background-color:#059669; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
                 editBtn   .setOnAction(e -> populateForm(getTableView().getItems().get(getIndex())));
                 archiveBtn.setOnAction(e -> toggleArchive(getTableView().getItems().get(getIndex())));
                 printBtn  .setOnAction(e -> printSingle(getTableView().getItems().get(getIndex())));
@@ -133,10 +134,10 @@ public class EmployeeController {
                 if (empty) { setGraphic(null); return; }
                 Employee emp = getTableView().getItems().get(getIndex());
                 boolean archived = Employee.STATUS_ARCHIVED.equals(emp.getStatus());
-                archiveBtn.setText(archived ? "♻" : "📦");
+                archiveBtn.setText(archived ? "♻ Restore" : "📦 Archive");
                 archiveBtn.setStyle(archived
-                    ? "-fx-background-color:#388e3c; -fx-text-fill:white; -fx-background-radius:4; -fx-cursor:hand; -fx-font-size:10px;"
-                    : "-fx-background-color:#757575; -fx-text-fill:white; -fx-background-radius:4; -fx-cursor:hand; -fx-font-size:10px;");
+                    ? "-fx-background-color:#10b981; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10px; -fx-font-weight:bold; -fx-padding:3 7 3 7;"
+                    : "-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
                 setGraphic(box);
             }
         });

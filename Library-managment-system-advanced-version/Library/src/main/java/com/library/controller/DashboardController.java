@@ -246,7 +246,7 @@ public class DashboardController {
         // Overdue alert badge
         if (overdueAlertLabel != null) {
             if (s.overdueBooks > 0) {
-                overdueAlertLabel.setText("! " + s.overdueBooks + " Overdue");
+                overdueAlertLabel.setText("⚠ " + s.overdueBooks + " Overdue");
                 overdueAlertLabel.setVisible(true);
                 overdueAlertLabel.setManaged(true);
             } else {
@@ -257,13 +257,16 @@ public class DashboardController {
 
         // Trend indicators
         if (booksTrendText != null) {
-            booksTrendText.setText(s.availableBooks > s.issuedBooks ? "up" : "down");
-            booksTrendText.setStyle(s.availableBooks > s.issuedBooks
-                    ? "-fx-fill:#388e3c; -fx-font-weight:bold;"
-                    : "-fx-fill:#d32f2f; -fx-font-weight:bold;");
+            boolean inStock = s.availableBooks >= s.issuedBooks;
+            booksTrendText.setText(inStock ? "▲ In Stock" : "▼ High Demand");
+            booksTrendText.setStyle(inStock
+                    ? "-fx-fill:#059669; -fx-font-weight:bold; -fx-font-size:11px;"
+                    : "-fx-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:11px;");
         }
-        if (membersTrendText != null)
-            membersTrendText.setText(s.activeMembers > 0 ? "up" : "stable");
+        if (membersTrendText != null) {
+            membersTrendText.setText(s.activeMembers > 0 ? "▲ Active" : "● Stable");
+            membersTrendText.setStyle("-fx-fill:#059669; -fx-font-weight:bold; -fx-font-size:11px;");
+        }
     }
 
     // ── Charts ────────────────────────────────────────────────────────────────

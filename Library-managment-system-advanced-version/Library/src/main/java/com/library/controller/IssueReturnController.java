@@ -146,12 +146,12 @@ public class IssueReturnController {
         statusColumn       .setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().isOverdue() ? "⚠ Overdue" : d.getValue().getStatus()));
 
-        // Return button in action column
+        // 3D Emerald Return button in action column
         actionColumn.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("Return");
+            private final Button btn = new Button("📥 Return Book");
             {
-                btn.setStyle("-fx-background-color:#1976d2; -fx-text-fill:white;" +
-                             "-fx-background-radius:6; -fx-font-size:11px; -fx-cursor:hand;");
+                btn.setStyle("-fx-background-color:linear-gradient(to bottom, #10b981, #059669); -fx-text-fill:white;" +
+                             "-fx-background-radius:6; -fx-font-size:11px; -fx-font-weight:bold; -fx-cursor:hand; -fx-padding:4 10 4 10;");
                 btn.setOnAction(e -> {
                     Transaction tx = getTableView().getItems().get(getIndex());
                     handleQuickReturn(tx);

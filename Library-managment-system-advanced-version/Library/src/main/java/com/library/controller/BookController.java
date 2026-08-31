@@ -214,27 +214,26 @@ public class BookController {
             }
         });
 
-        // Edit / Archive / Restore buttons
+        // Actions: View, Edit, Delete / Archive buttons
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button editBtn    = new Button("✏");
-            private final Button archiveBtn = new Button("📦");
+            private final Button viewBtn   = new Button("👁 View");
+            private final Button editBtn   = new Button("✏ Edit");
+            private final Button delBtn    = new Button("🗑 Delete");
             private final javafx.scene.layout.HBox box =
-                    new javafx.scene.layout.HBox(4, editBtn, archiveBtn);
+                    new javafx.scene.layout.HBox(4, viewBtn, editBtn, delBtn);
             {
-                editBtn   .setStyle("-fx-background-color:#1976d2; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:11px;");
-                archiveBtn.setStyle("-fx-background-color:#757575; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:11px;");
-                editBtn   .setOnAction(e -> editBook(getTableView().getItems().get(getIndex())));
-                archiveBtn.setOnAction(e -> toggleArchiveBook(getTableView().getItems().get(getIndex())));
+                box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                viewBtn.setStyle("-fx-background-color:#059669; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                editBtn.setStyle("-fx-background-color:#f59e0b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                delBtn .setStyle("-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+
+                viewBtn.setOnAction(e -> viewBook(getTableView().getItems().get(getIndex())));
+                editBtn.setOnAction(e -> editBook(getTableView().getItems().get(getIndex())));
+                delBtn .setOnAction(e -> deleteBook(getTableView().getItems().get(getIndex())));
             }
             @Override protected void updateItem(String s, boolean empty) {
                 super.updateItem(s, empty);
                 if (empty) { setGraphic(null); return; }
-                Book b = getTableView().getItems().get(getIndex());
-                boolean archived = Book.STATUS_ARCHIVED.equals(b.getStatus());
-                archiveBtn.setText(archived ? "♻" : "📦");
-                archiveBtn.setStyle(archived
-                    ? "-fx-background-color:#388e3c; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand;"
-                    : "-fx-background-color:#757575; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand;");
                 setGraphic(box);
             }
         });
@@ -418,6 +417,25 @@ public class BookController {
                 }
             }
         });
+    }
+
+    private void viewBook(Book b) {
+        if (b == null) return;
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Book Information");
+        alert.setHeaderText(b.getBookName() + " (" + nvl(b.getBookCode()) + ")");
+        String details = "Author: " + nvl(b.getAuthor()) + "\n"
+                + "ISBN: " + nvl(b.getIsbn()) + "\n"
+                + "Category: " + nvl(b.getCategory()) + "\n"
+                + "Publisher: " + nvl(b.getPublisher()) + "\n"
+                + "Year: " + b.getPublicationYear() + "\n"
+                + "Edition: " + nvl(b.getEdition()) + "\n"
+                + "Quantity: " + b.getQuantity() + " (Available: " + b.getAvailableQty() + ")\n"
+                + "Shelf Location: " + nvl(b.getShelfLocation()) + "\n"
+                + "Status: " + nvl(b.getStatus()) + "\n\n"
+                + "Description:\n" + nvl(b.getDescription());
+        alert.setContentText(details);
+        alert.showAndWait();
     }
 
     private void deleteBook(Book b) {

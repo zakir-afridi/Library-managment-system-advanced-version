@@ -64,7 +64,7 @@
                         <TableColumn fx:id="colContact"    text="Contact"    prefWidth="110"/>
                         <TableColumn fx:id="colStatus"     text="Status"     prefWidth="80"/>
                         <TableColumn fx:id="colFine"       text="Fine"       prefWidth="70"/>
-                        <TableColumn fx:id="colActions"    text="Actions"    prefWidth="110"/>
+                        <TableColumn fx:id="colActions"    text="Actions"    prefWidth="215"/>
                     </columns>
                     <placeholder><Label text="No members found. Add your first member →"/></placeholder>
                 </TableView>

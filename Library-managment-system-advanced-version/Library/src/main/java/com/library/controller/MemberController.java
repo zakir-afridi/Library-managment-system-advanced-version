@@ -145,26 +145,26 @@ public class MemberController {
             }
         });
 
-        // Edit / Archive / Restore buttons
+        // Actions: View, Edit, Delete / Archive buttons
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button editBtn    = new Button("✏");
-            private final Button archiveBtn = new Button("📦");
+            private final Button viewBtn   = new Button("👁 View");
+            private final Button editBtn   = new Button("✏ Edit");
+            private final Button delBtn    = new Button("🗑 Delete");
             private final javafx.scene.layout.HBox box =
-                    new javafx.scene.layout.HBox(4, editBtn, archiveBtn);
+                    new javafx.scene.layout.HBox(4, viewBtn, editBtn, delBtn);
             {
-                editBtn   .setStyle("-fx-background-color:#1976d2; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:11px;");
-                archiveBtn.setStyle("-fx-background-color:#757575; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:11px;");
-                editBtn   .setOnAction(e -> editMember(getTableView().getItems().get(getIndex())));
-                archiveBtn.setOnAction(e -> toggleArchive(getTableView().getItems().get(getIndex())));
+                box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                viewBtn.setStyle("-fx-background-color:#059669; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                editBtn.setStyle("-fx-background-color:#f59e0b; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+                delBtn .setStyle("-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10.5px; -fx-font-weight:bold; -fx-padding:3 7 3 7;");
+
+                viewBtn.setOnAction(e -> viewMember(getTableView().getItems().get(getIndex())));
+                editBtn.setOnAction(e -> editMember(getTableView().getItems().get(getIndex())));
+                delBtn .setOnAction(e -> deleteMember(getTableView().getItems().get(getIndex())));
             }
             @Override protected void updateItem(String s, boolean empty) {
                 super.updateItem(s, empty);
                 if (empty) { setGraphic(null); return; }
-                Member m = getTableView().getItems().get(getIndex());
-                archiveBtn.setText("Archived".equals(m.getStatus()) ? "♻ Restore" : "📦 Archive");
-                archiveBtn.setStyle("Archived".equals(m.getStatus())
-                    ? "-fx-background-color:#388e3c; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10px;"
-                    : "-fx-background-color:#757575; -fx-text-fill:white; -fx-background-radius:5; -fx-cursor:hand; -fx-font-size:10px;");
                 setGraphic(box);
             }
         });
@@ -354,6 +354,25 @@ public class MemberController {
                 }
             }
         });
+    }
+
+    private void viewMember(Member m) {
+        if (m == null) return;
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Member Information");
+        alert.setHeaderText(m.getName() + " (" + (m.getStudentId() != null ? m.getStudentId() : "") + ")");
+        String details = "Father Name: " + (m.getFname() != null ? m.getFname() : "—") + "\n"
+                + "CNIC: " + (m.getCnic() != null ? m.getCnic() : "—") + "\n"
+                + "Department: " + (m.getDepartment() != null ? m.getDepartment() : "—") + "\n"
+                + "Program: " + (m.getProgram() != null ? m.getProgram() : "—") + " (Sem: " + (m.getSemester() != null ? m.getSemester() : "—") + ")\n"
+                + "Email: " + (m.getEmail() != null ? m.getEmail() : "—") + "\n"
+                + "Contact: " + (m.getContact() != null ? m.getContact() : "—") + "\n"
+                + "Status: " + (m.getStatus() != null ? m.getStatus() : "—") + "\n"
+                + "Book Limit: " + m.getBookLimit() + "\n"
+                + "Fine Balance: " + AppConfig.getInstance().getCurrency() + " " + String.format("%.2f", m.getFineBalance()) + "\n"
+                + "Address: " + (m.getAddress() != null ? m.getAddress() : "—");
+        alert.setContentText(details);
+        alert.showAndWait();
     }
 
     private void deleteMember(Member m) {

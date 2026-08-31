@@ -79,7 +79,7 @@
                            <TableColumn fx:id="issueDateColumn"    text="Issue Date" prefWidth="100"/>
                            <TableColumn fx:id="dueDateColumn"      text="Due Date"   prefWidth="100"/>
                            <TableColumn fx:id="statusColumn"       text="Status"     prefWidth="80"/>
-                           <TableColumn fx:id="actionColumn"       text="Action"     prefWidth="100"/>
+                           <TableColumn fx:id="actionColumn"       text="Action"     prefWidth="130"/>
                         </columns>
                      </TableView>
                   </VBox>
