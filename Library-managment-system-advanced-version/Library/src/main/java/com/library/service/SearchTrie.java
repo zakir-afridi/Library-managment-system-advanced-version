@@ -3,8 +3,8 @@ package com.library.service;
 import java.util.*;
 
 /**
- * Trie (prefix tree) for fast autocomplete suggestions.
- * Used for book title and author name search.
+ * Thread-safe Trie (prefix tree) for fast autocomplete suggestions.
+ * Used for book title, author, and member name search.
  *
  * Insert: O(m)  where m = word length
  * Search: O(m)
@@ -21,7 +21,7 @@ public class SearchTrie {
     private final TrieNode root = new TrieNode();
 
     /** Insert a word into the Trie. */
-    public void insert(String word) {
+    public synchronized void insert(String word) {
         if (word == null || word.isBlank()) return;
         String lower = word.toLowerCase().trim();
         TrieNode node = root;
@@ -34,20 +34,22 @@ public class SearchTrie {
     }
 
     /** Insert all words from a list. */
-    public void insertAll(List<String> words) {
-        words.forEach(this::insert);
+    public synchronized void insertAll(List<String> words) {
+        if (words != null) {
+            words.forEach(this::insert);
+        }
     }
 
     /** Clear all entries. */
-    public void clear() {
+    public synchronized void clear() {
         root.children.clear();
     }
 
     /**
      * Returns up to {@code limit} suggestions that start with the given prefix.
-     * Case-insensitive.
+     * Case-insensitive and thread-safe.
      */
-    public List<String> suggest(String prefix, int limit) {
+    public synchronized List<String> suggest(String prefix, int limit) {
         List<String> results = new ArrayList<>();
         if (prefix == null || prefix.isBlank()) return results;
 
@@ -65,14 +67,14 @@ public class SearchTrie {
 
     private void collectWords(TrieNode node, List<String> results, int limit) {
         if (results.size() >= limit) return;
-        if (node.isEnd) results.add(node.fullWord);
+        if (node.isEnd && node.fullWord != null) results.add(node.fullWord);
         for (TrieNode child : node.children.values()) {
             if (results.size() >= limit) return;
             collectWords(child, results, limit);
         }
     }
 
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return root.children.isEmpty();
     }
 }

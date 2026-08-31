@@ -249,13 +249,13 @@ public class EmployeeService {
         e.setCnic(rs.getString("cnic"));
         e.setAddress(rs.getString("address"));
         String jd = rs.getString("join_date");
-        if (jd != null) e.setJoinDate(LocalDate.parse(jd));
+        if (jd != null && !jd.isBlank()) e.setJoinDate(com.library.shared.DateUtil.parseFlexible(jd));
         e.setStatus(rs.getString("status"));
         e.setSalary(rs.getDouble("salary"));
         e.setNotes(rs.getString("notes"));
         e.setProfilePic(rs.getBytes("profile_pic"));
         String ad = rs.getString("archived_date");
-        if (ad != null) e.setArchivedDate(LocalDate.parse(ad));
+        if (ad != null && !ad.isBlank()) e.setArchivedDate(com.library.shared.DateUtil.parseFlexible(ad));
         try { e.setSerialNo(rs.getInt("serial_no")); } catch (SQLException ignored) {}
         return e;
     }

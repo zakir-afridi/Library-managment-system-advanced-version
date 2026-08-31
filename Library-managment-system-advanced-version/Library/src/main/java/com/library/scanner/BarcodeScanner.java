@@ -44,13 +44,11 @@ public final class BarcodeScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(BarcodeScanner.class);
 
-    private static final MultiFormatReader READER;
+    private static final Map<DecodeHintType, Object> HINTS = new EnumMap<>(DecodeHintType.class);
 
     static {
-        READER = new MultiFormatReader();
-        Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
-        hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-        hints.put(DecodeHintType.POSSIBLE_FORMATS, java.util.List.of(
+        HINTS.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+        HINTS.put(DecodeHintType.POSSIBLE_FORMATS, java.util.List.of(
             BarcodeFormat.EAN_13,
             BarcodeFormat.EAN_8,
             BarcodeFormat.CODE_128,
@@ -59,7 +57,6 @@ public final class BarcodeScanner {
             BarcodeFormat.DATA_MATRIX,
             BarcodeFormat.UPC_A
         ));
-        READER.setHints(hints);
     }
 
     private static final ExecutorService EXECUTOR =
@@ -100,9 +97,6 @@ public final class BarcodeScanner {
     public static java.util.Optional<String> decodeFromFxImage(Image fxImage) {
         if (fxImage == null) return java.util.Optional.empty();
         try {
-            WritableImage wi = new WritableImage(
-                (int) fxImage.getWidth(), (int) fxImage.getHeight());
-            // snapshot approach
             BufferedImage bi = SwingFXUtils.fromFXImage(fxImage, null);
             return decode(bi);
         } catch (Exception e) {
@@ -140,7 +134,9 @@ public final class BarcodeScanner {
         try {
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-            Result result = READER.decodeWithState(bitmap);
+            MultiFormatReader reader = new MultiFormatReader();
+            reader.setHints(HINTS);
+            Result result = reader.decodeWithState(bitmap);
             String text = result.getText();
             LOG.info("Barcode decoded: {} (format: {})", text, result.getBarcodeFormat());
             return java.util.Optional.of(text);
@@ -149,8 +145,6 @@ public final class BarcodeScanner {
         } catch (Exception e) {
             LOG.debug("BarcodeScanner decode failed: {}", e.getMessage());
             return java.util.Optional.empty();
-        } finally {
-            READER.reset();
         }
     }
 }

@@ -38,18 +38,37 @@ public final class IdGenerator {
      * Example: BK00000001, ST00000002, EP00000001
      */
     public static synchronized String next(Type type) {
-        String upd = "UPDATE id_counters SET last_id = last_id + 1 WHERE entity = ?";
-        String sel = "SELECT last_id FROM id_counters WHERE entity = ?";
+        String init = "INSERT OR IGNORE INTO id_counters (entity, last_id) VALUES (?, 0)";
+        String upd  = "UPDATE id_counters SET last_id = last_id + 1 WHERE entity = ?";
+        String sel  = "SELECT last_id FROM id_counters WHERE entity = ?";
+
         try (Connection c = DatabaseConnection.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(upd)) {
-                ps.setString(1, type.prefix);
-                ps.executeUpdate();
-            }
-            try (PreparedStatement ps = c.prepareStatement(sel)) {
-                ps.setString(1, type.prefix);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return fmt(type.prefix, rs.getInt(1));
+            c.setAutoCommit(false);
+            try {
+                try (PreparedStatement psInit = c.prepareStatement(init)) {
+                    psInit.setString(1, type.prefix);
+                    psInit.executeUpdate();
                 }
+                try (PreparedStatement psUpd = c.prepareStatement(upd)) {
+                    psUpd.setString(1, type.prefix);
+                    psUpd.executeUpdate();
+                }
+                try (PreparedStatement psSel = c.prepareStatement(sel)) {
+                    psSel.setString(1, type.prefix);
+                    try (ResultSet rs = psSel.executeQuery()) {
+                        if (rs.next()) {
+                            int id = rs.getInt(1);
+                            c.commit();
+                            return fmt(type.prefix, id);
+                        }
+                    }
+                }
+                c.commit();
+            } catch (SQLException e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
             }
         } catch (SQLException e) {
             LOG.warning("IdGenerator.next error: " + e.getMessage());
@@ -61,13 +80,19 @@ public final class IdGenerator {
     /**
      * Preview the next ID without incrementing (for display in empty form fields).
      */
-    public static String peek(Type type) {
+    public static synchronized String peek(Type type) {
+        String init = "INSERT OR IGNORE INTO id_counters (entity, last_id) VALUES (?, 0)";
         String sel = "SELECT last_id FROM id_counters WHERE entity = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sel)) {
-            ps.setString(1, type.prefix);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return fmt(type.prefix, rs.getInt(1) + 1);
+        try (Connection c = DatabaseConnection.getConnection()) {
+            try (PreparedStatement psInit = c.prepareStatement(init)) {
+                psInit.setString(1, type.prefix);
+                psInit.executeUpdate();
+            }
+            try (PreparedStatement ps = c.prepareStatement(sel)) {
+                ps.setString(1, type.prefix);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return fmt(type.prefix, rs.getInt(1) + 1);
+                }
             }
         } catch (SQLException e) {
             LOG.warning("IdGenerator.peek error: " + e.getMessage());

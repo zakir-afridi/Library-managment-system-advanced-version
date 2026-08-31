@@ -105,6 +105,49 @@
                     </HBox>
                 </VBox>
 
+                <!-- EMAIL (SMTP) SETTINGS -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Text text="Email &amp; SMTP Configuration" styleClass="section-title"/>
+                    <Separator/>
+                    <GridPane hgap="16" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="180" prefWidth="200"/>
+                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="SMTP Host" GridPane.rowIndex="0"/>
+                        <TextField fx:id="smtpHostField" promptText="smtp.gmail.com" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="SMTP Port" GridPane.rowIndex="1"/>
+                        <TextField fx:id="smtpPortField" promptText="587" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="SMTP Username" GridPane.rowIndex="2"/>
+                        <TextField fx:id="smtpUserField" promptText="library@gmail.com" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label text="App Password" GridPane.rowIndex="3"/>
+                        <PasswordField fx:id="smtpPasswordField" promptText="••••••••••••••••" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Label text="From Name" GridPane.rowIndex="4"/>
+                        <TextField fx:id="emailFromNameField" promptText="LibraCore Pro" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    </GridPane>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Button fx:id="testEmailBtn" text="✉ Test Connection" styleClass="btn btn-secondary" onAction="#testEmailConnection"/>
+                        <Label fx:id="emailStatusLabel" text="" style="-fx-font-size:12px; -fx-text-fill:#1976d2;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- WEATHER WIDGET SETTINGS -->
+                <VBox styleClass="chart-container" spacing="12">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Text text="Live Weather Widget" styleClass="section-title"/>
+                    <Separator/>
+                    <CheckBox fx:id="weatherEnabledCheck" text="Enable live weather widget on dashboard"/>
+                    <GridPane hgap="16" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="180" prefWidth="200"/>
+                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="Default City" GridPane.rowIndex="0"/>
+                        <TextField fx:id="weatherCityField" promptText="Lahore" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    </GridPane>
+                </VBox>
+
                 <!-- BACKUP AND RESTORE -->
                 <VBox styleClass="chart-container" spacing="12">
                     <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>

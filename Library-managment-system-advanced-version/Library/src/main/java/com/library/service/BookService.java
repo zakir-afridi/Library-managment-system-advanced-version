@@ -347,7 +347,9 @@ public class BookService {
         b.setCoverImage(rs.getBytes("cover_image"));
         try { b.setCoverUrl(rs.getString("cover_url")); } catch (SQLException ignored) {}
         String created = rs.getString("created_at");
-        if (created != null) b.setCreatedAt(LocalDate.parse(created));
+        if (created != null && !created.isBlank()) {
+            b.setCreatedAt(com.library.shared.DateUtil.parseFlexible(created));
+        }
         try { b.setBookCode(rs.getString("book_code")); } catch (SQLException ignored) {}
         try { b.setSerialNo(rs.getInt("serial_no")); }   catch (SQLException ignored) {}
         return b;

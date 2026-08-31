@@ -138,7 +138,7 @@ public class IssueReturnController {
     private void setupIssuedBooksTable() {
         issuedBookIdColumn .setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getBookId())));
         issuedTitleColumn  .setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getBookName()));
-        issuedAuthorColumn .setCellValueFactory(d -> new SimpleStringProperty(""));
+        issuedAuthorColumn .setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getAuthor() != null ? d.getValue().getAuthor() : ""));
         issueDateColumn    .setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getIssueDate() != null ? d.getValue().getIssueDate().toString() : ""));
         dueDateColumn      .setCellValueFactory(d -> new SimpleStringProperty(
@@ -414,12 +414,17 @@ public class IssueReturnController {
     private void processRenew() {
         Transaction selected = issuedBooksTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            ToastNotification.warning(backBtn.getScene(), "Select a book to renew.");
+            ToastNotification.warning(backBtn.getScene(), "Select an issued book from the table to renew.");
             return;
         }
-        ToastNotification.info(backBtn.getScene(),
-                "Renew feature — extends due date by " +
-                AppConfig.getInstance().getLoanDays() + " days.");
+        int days = AppConfig.getInstance().getLoanDays();
+        String result = txService.renewBook(selected.getTransactionId(), days, SessionManager.getInstance().getUsername());
+        if (result.isEmpty()) {
+            ToastNotification.success(backBtn.getScene(), "Loan renewed for " + days + " additional days.");
+            refreshData();
+        } else {
+            ToastNotification.error(backBtn.getScene(), result);
+        }
     }
 
     // ── Other actions ─────────────────────────────────────────────────────────

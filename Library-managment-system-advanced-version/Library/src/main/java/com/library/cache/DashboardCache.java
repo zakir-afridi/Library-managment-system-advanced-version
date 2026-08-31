@@ -5,13 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Singleton cache for dashboard statistics.
+ * Singleton thread-safe cache for dashboard statistics.
  *
- * Uses a HashMap<String, Object> as the in-memory store with a
+ * Uses a ConcurrentHashMap<String, Object> as the in-memory store with a
  * configurable TTL (default 60 seconds) to avoid hammering SQLite
  * on every dashboard refresh.
  */
@@ -23,9 +23,9 @@ public class DashboardCache {
 
     private static DashboardCache instance;
 
-    // HashMap for O(1) stat lookups
-    private final Map<String, Object> cache = new HashMap<>();
-    private long lastRefresh = 0;
+    // ConcurrentHashMap for thread-safe O(1) stat lookups
+    private final Map<String, Object> cache = new ConcurrentHashMap<>();
+    private volatile long lastRefresh = 0;
 
     private DashboardCache() {}
 
@@ -35,10 +35,12 @@ public class DashboardCache {
     }
 
     /** Force the next call to getStats() to re-query the database. */
-    public void invalidate() { lastRefresh = 0; }
+    public void invalidate() {
+        lastRefresh = 0;
+    }
 
     /** Returns cached stats, refreshing from DB if TTL has expired. */
-    public DashboardStats getStats() {
+    public synchronized DashboardStats getStats() {
         long now = System.currentTimeMillis();
         if (now - lastRefresh > TTL_MS) {
             refresh();

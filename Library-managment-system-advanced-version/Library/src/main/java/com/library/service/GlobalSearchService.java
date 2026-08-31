@@ -63,7 +63,7 @@ public class GlobalSearchService {
 
     private List<SearchResult> searchBooks(Connection c, String p,
                                             boolean includeArchived) throws SQLException {
-        String statusClause = includeArchived ? "" : "AND status != 'Archived' ";
+        String statusClause = includeArchived ? "" : "status != 'Archived' AND ";
         String sql = "SELECT book_id, COALESCE(book_code, 'BK-' || printf('%06d', book_id)) as code, " +
                      "book_name, author, status FROM books " +
                      "WHERE " + statusClause +
@@ -86,7 +86,7 @@ public class GlobalSearchService {
 
     private List<SearchResult> searchMembers(Connection c, String p,
                                               boolean includeArchived) throws SQLException {
-        String statusClause = includeArchived ? "" : "AND status != 'Archived' ";
+        String statusClause = includeArchived ? "" : "status != 'Archived' AND ";
         String sql = "SELECT std_id, COALESCE(member_code, student_id, 'ST-' || printf('%06d', std_id)) as code, " +
                      "name, department, status FROM members " +
                      "WHERE " + statusClause +
@@ -109,7 +109,7 @@ public class GlobalSearchService {
 
     private List<SearchResult> searchEmployees(Connection c, String p,
                                                 boolean includeArchived) throws SQLException {
-        String statusClause = includeArchived ? "" : "AND status != 'Archived' ";
+        String statusClause = includeArchived ? "" : "status != 'Archived' AND ";
         String sql = "SELECT emp_id, employee_code, name, designation, status FROM employees " +
                      "WHERE " + statusClause +
                      "(name LIKE ? OR employee_code LIKE ? OR email LIKE ? OR contact LIKE ?) " +

@@ -165,11 +165,50 @@ public class TransactionService {
         }
     }
 
-    // â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Renew Book ────────────────────────────────────────────────────────────
+
+    /**
+     * Renews an active book transaction by extending the due date.
+     * Empty string return means success; non-empty string is an error message.
+     */
+    public String renewBook(int transactionId, int extensionDays, String renewedBy) {
+        Transaction tx = getTransactionById(transactionId);
+        if (tx == null) return "Transaction not found.";
+        if (!"Issued".equalsIgnoreCase(tx.getStatus())) {
+            return "Cannot renew a book that is already " + tx.getStatus() + ".";
+        }
+
+        LocalDate currentDue = tx.getDueDate() != null ? tx.getDueDate() : LocalDate.now();
+        LocalDate baseDate = currentDue.isBefore(LocalDate.now()) ? LocalDate.now() : currentDue;
+        LocalDate newDue = baseDate.plusDays(extensionDays > 0 ? extensionDays : 14);
+
+        String sql = "UPDATE transactions SET due_date = ?, status = 'Issued' WHERE transaction_id = ?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, newDue.toString());
+            ps.setInt(2, transactionId);
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                tx.setDueDate(newDue);
+                pushActivity(tx);
+                DashboardCache.getInstance().invalidate();
+                logActivity(renewedBy != null ? renewedBy : "system", "RENEW_BOOK",
+                        "Transaction #" + transactionId + " renewed until " + newDue);
+                LOG.info("Transaction #{} renewed until {} by {}", transactionId, newDue, renewedBy);
+                return "";
+            }
+        } catch (SQLException e) {
+            LOG.error("Error renewing transaction #{}: {}", transactionId, e.getMessage());
+            return "Database error renewing loan: " + e.getMessage();
+        }
+        return "Failed to renew loan.";
+    }
+
+    // ── Queries ───────────────────────────────────────────────────────────────
 
     public Transaction getTransactionById(int id) {
         String sql = """
-            SELECT t.*, b.book_name, m.name as member_name, m.student_id
+            SELECT t.*, b.book_name, b.author, m.name as member_name, m.student_id
             FROM transactions t
             JOIN books b ON t.book_id = b.book_id
             JOIN members m ON t.member_id = m.std_id
@@ -189,7 +228,7 @@ public class TransactionService {
 
     public List<Transaction> getActiveTransactions() {
         String sql = """
-            SELECT t.*, b.book_name, m.name as member_name, m.student_id
+            SELECT t.*, b.book_name, b.author, m.name as member_name, m.student_id
             FROM transactions t
             JOIN books b ON t.book_id = b.book_id
             JOIN members m ON t.member_id = m.std_id
@@ -201,7 +240,7 @@ public class TransactionService {
 
     public List<Transaction> getOverdueTransactions() {
         String sql = """
-            SELECT t.*, b.book_name, m.name as member_name, m.student_id
+            SELECT t.*, b.book_name, b.author, m.name as member_name, m.student_id
             FROM transactions t
             JOIN books b ON t.book_id = b.book_id
             JOIN members m ON t.member_id = m.std_id
@@ -213,7 +252,7 @@ public class TransactionService {
 
     public List<Transaction> getMemberTransactions(int memberId) {
         String sql = """
-            SELECT t.*, b.book_name, m.name as member_name, m.student_id
+            SELECT t.*, b.book_name, b.author, m.name as member_name, m.student_id
             FROM transactions t
             JOIN books b ON t.book_id = b.book_id
             JOIN members m ON t.member_id = m.std_id
@@ -256,7 +295,7 @@ public class TransactionService {
         return list;
     }
 
-    // â”€â”€ PriorityQueue: Overdue sorted by days overdue (max-heap) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── PriorityQueue: Overdue sorted by days overdue (max-heap) ────────────────
 
     /**
      * Returns overdue transactions sorted by days overdue descending
@@ -273,10 +312,10 @@ public class TransactionService {
         return sorted;
     }
 
-    // â”€â”€ Stack: Recent activity log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Stack: Recent activity log ───────────────────────────────────────────
 
     /** Returns last N transactions from the in-memory activity stack. */
-    public List<Transaction> getRecentActivity(int limit) {
+    public synchronized List<Transaction> getRecentActivity(int limit) {
         List<Transaction> list = new ArrayList<>();
         int count = 0;
         for (Transaction tx : recentActivity) {
@@ -287,11 +326,11 @@ public class TransactionService {
     }
 
     /** Undo the last transaction (pop from stack). */
-    public Transaction undoLastTransaction() {
+    public synchronized Transaction undoLastTransaction() {
         return recentActivity.isEmpty() ? null : recentActivity.pop();
     }
 
-    // â”€â”€ Monthly stats for charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Monthly stats for charts ────────────────────────────────────────────────
 
     /** Returns issued count per month for the last N months. */
     public Map<String, Integer> getMonthlyIssuedStats(int months) {
@@ -359,14 +398,15 @@ public class TransactionService {
         t.setBookId(rs.getInt("book_id"));
         t.setMemberId(rs.getInt("member_id"));
         t.setBookName(rs.getString("book_name"));
+        try { t.setAuthor(rs.getString("author")); } catch (SQLException ignored) {}
         t.setMemberName(rs.getString("member_name"));
         t.setStudentId(rs.getString("student_id"));
         String issue = rs.getString("issue_date");
-        if (issue != null) t.setIssueDate(LocalDate.parse(issue));
+        if (issue != null && !issue.isBlank()) t.setIssueDate(com.library.shared.DateUtil.parseFlexible(issue));
         String due = rs.getString("due_date");
-        if (due != null) t.setDueDate(LocalDate.parse(due));
+        if (due != null && !due.isBlank()) t.setDueDate(com.library.shared.DateUtil.parseFlexible(due));
         String ret = rs.getString("return_date");
-        if (ret != null) t.setReturnDate(LocalDate.parse(ret));
+        if (ret != null && !ret.isBlank()) t.setReturnDate(com.library.shared.DateUtil.parseFlexible(ret));
         t.setFineAmount(rs.getDouble("fine_amount"));
         t.setFinePaid(rs.getInt("fine_paid") == 1);
         t.setStatus(rs.getString("status"));
@@ -375,12 +415,12 @@ public class TransactionService {
         return t;
     }
 
-    private void pushActivity(Transaction tx) {
+    private synchronized void pushActivity(Transaction tx) {
         recentActivity.push(tx);
         if (recentActivity.size() > 50) recentActivity.removeLast();
     }
 
-    private void updateActiveBorrowingsCache(int memberId, Transaction tx, boolean add) {
+    private synchronized void updateActiveBorrowingsCache(int memberId, Transaction tx, boolean add) {
         activeBorrowings.computeIfAbsent(memberId, k -> new ArrayList<>());
         if (add) {
             activeBorrowings.get(memberId).add(tx);

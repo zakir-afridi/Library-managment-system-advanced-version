@@ -1,12 +1,14 @@
 package com.library.service;
 
+import com.library.database.DatabaseConnection;
 import com.library.database.HikariConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.time.LocalDate;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * Features:
  *  - Daily automatic backup to ~/.libracore/backups/ at next startup boundary
- *  - Compresses backups using ZIP
+ *  - WAL checkpointing prior to copy to ensure zero data loss
  *  - Keeps last 30 backups (configurable)
  *  - One-click manual backup/restore via SettingsController
  *
@@ -70,10 +72,14 @@ public class BackupScheduler {
     }
 
     /**
-     * Perform an immediate backup. Returns the path of the created backup file.
+     * Perform an immediate backup. Flushes SQLite WAL first.
+     * Returns the path of the created backup file.
      * Throws IOException on failure.
      */
     public Path backup() throws IOException {
+        // Flush WAL pages to main database file
+        checkpointWal();
+
         Path dbFile = Paths.get(HikariConnectionPool.getDatabasePath());
         if (!Files.exists(dbFile)) {
             throw new IOException("Database file not found: " + dbFile);
@@ -102,12 +108,30 @@ public class BackupScheduler {
         try {
             Path dbFile = Paths.get(HikariConnectionPool.getDatabasePath());
             HikariConnectionPool.close();
+
+            // Remove stale WAL / SHM files if present
+            Path walFile = Paths.get(HikariConnectionPool.getDatabasePath() + "-wal");
+            Path shmFile = Paths.get(HikariConnectionPool.getDatabasePath() + "-shm");
+            Files.deleteIfExists(walFile);
+            Files.deleteIfExists(shmFile);
+
             Files.copy(backupFile, dbFile, StandardCopyOption.REPLACE_EXISTING);
             LOG.info("Database restored from: {}", backupFile);
             return true;
         } catch (IOException e) {
             LOG.error("Restore failed: {}", e.getMessage());
             return false;
+        }
+    }
+
+    /** Checkpoints the SQLite WAL file into the main database file. */
+    private void checkpointWal() {
+        try (Connection c = DatabaseConnection.getConnection();
+             Statement st = c.createStatement()) {
+            st.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+            LOG.debug("SQLite WAL checkpoint (TRUNCATE) succeeded.");
+        } catch (Exception e) {
+            LOG.warn("WAL checkpoint warning: {}", e.getMessage());
         }
     }
 

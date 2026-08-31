@@ -17,12 +17,12 @@ import java.util.*;
 public class ReservationService {
     private static final Logger LOG = LoggerFactory.getLogger(ReservationService.class);
 
-    // HashMap of bookId -> FIFO queue of pending reservations
-    private final Map<Integer, Queue<Reservation>> waitingQueues = new HashMap<>();
+    // Thread-safe map of bookId -> FIFO queue of pending reservations
+    private final Map<Integer, Queue<Reservation>> waitingQueues = new java.util.concurrent.ConcurrentHashMap<>();
 
-    // â”€â”€ Reserve a book â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Reserve a book ────────────────────────────────────────────────────────
 
-    public String reserveBook(int bookId, int memberId) {
+    public synchronized String reserveBook(int bookId, int memberId) {
         // Check if member already has a pending reservation for this book
         if (hasPendingReservation(bookId, memberId))
             return "Member already has a pending reservation for this book.";
@@ -53,7 +53,9 @@ public class ReservationService {
                     r.setQueuePosition(queuePos);
                     r.setReservationDate(LocalDate.now());
 
-                    waitingQueues.computeIfAbsent(bookId, k -> new LinkedList<>()).offer(r);
+                    synchronized (waitingQueues) {
+                        waitingQueues.computeIfAbsent(bookId, k -> new LinkedList<>()).offer(r);
+                    }
                 }
             }
             return "";
@@ -215,11 +217,11 @@ public class ReservationService {
         r.setMemberName(rs.getString("member_name"));
         r.setStudentId(rs.getString("student_id"));
         String date = rs.getString("reservation_date");
-        if (date != null) r.setReservationDate(LocalDate.parse(date));
+        if (date != null && !date.isBlank()) r.setReservationDate(com.library.shared.DateUtil.parseFlexible(date));
         r.setStatus(rs.getString("status"));
         r.setQueuePosition(rs.getInt("queue_position"));
         String notified = rs.getString("notified_date");
-        if (notified != null) r.setNotifiedDate(LocalDate.parse(notified));
+        if (notified != null && !notified.isBlank()) r.setNotifiedDate(com.library.shared.DateUtil.parseFlexible(notified));
         return r;
     }
 }

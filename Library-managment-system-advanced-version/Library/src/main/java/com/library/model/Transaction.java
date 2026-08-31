@@ -24,6 +24,7 @@ public class Transaction {
     private int       bookId;
     private int       memberId;
     private String    bookName;       // denormalised for display
+    private String    author;         // denormalised for display
     private String    memberName;     // denormalised for display
     private String    studentId;      // denormalised for display
     private LocalDate issueDate;
@@ -84,6 +85,9 @@ public class Transaction {
 
     public String    getBookName()               { return bookName; }
     public void      setBookName(String v)       { this.bookName = v; }
+
+    public String    getAuthor()                 { return author; }
+    public void      setAuthor(String v)         { this.author = v; }
 
     public String    getMemberName()             { return memberName; }
     public void      setMemberName(String v)     { this.memberName = v; }

@@ -40,6 +40,7 @@ public final class WeatherClient {
     private WeatherClient() {}
 
     public static Optional<WeatherInfo> getWeather(String city) {
+        if (city == null || city.isBlank()) return Optional.ofNullable(cachedWeather);
         long now = System.currentTimeMillis();
         if (cachedWeather != null && (now - lastFetchMs) < CACHE_TTL_MS)
             return Optional.of(cachedWeather);

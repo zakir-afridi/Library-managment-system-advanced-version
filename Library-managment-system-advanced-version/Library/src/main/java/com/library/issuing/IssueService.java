@@ -22,6 +22,10 @@ public class IssueService {
         return delegate.returnBook(transactionId, condition, returnedBy);
     }
 
+    public String renewBook(int transactionId, int extensionDays, String renewedBy) {
+        return delegate.renewBook(transactionId, extensionDays, renewedBy);
+    }
+
     public List<Transaction> getActive()                       { return delegate.getActiveTransactions(); }
     public List<Transaction> getOverdue()                      { return delegate.getOverdueTransactions(); }
     public List<Transaction> getOverdueSorted()                { return delegate.getOverdueSortedByDays(); }

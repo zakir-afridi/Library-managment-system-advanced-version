@@ -429,7 +429,7 @@ public class MemberService {
         m.setFname(rs.getString("fname"));
         m.setCnic(rs.getString("cnic"));
         String dob = rs.getString("date_of_birth");
-        if (dob != null) m.setDateOfBirth(LocalDate.parse(dob));
+        if (dob != null && !dob.isBlank()) m.setDateOfBirth(com.library.shared.DateUtil.parseFlexible(dob));
         m.setGender(rs.getString("gender"));
         m.setContact(rs.getString("contact"));
         m.setEmail(rs.getString("email"));
@@ -445,18 +445,18 @@ public class MemberService {
         m.setSemester(rs.getString("semester"));
         m.setSession(rs.getString("session"));
         String adm = rs.getString("admission_date");
-        if (adm != null) m.setAdmissionDate(LocalDate.parse(adm));
+        if (adm != null && !adm.isBlank()) m.setAdmissionDate(com.library.shared.DateUtil.parseFlexible(adm));
         m.setStatus(rs.getString("status"));
         m.setLibraryCardNumber(rs.getString("library_card_no"));
         m.setBookLimit(rs.getInt("book_limit"));
         m.setMembershipType(rs.getString("membership_type"));
         String exp = rs.getString("membership_expiry");
-        if (exp != null) m.setMembershipExpiry(LocalDate.parse(exp));
+        if (exp != null && !exp.isBlank()) m.setMembershipExpiry(com.library.shared.DateUtil.parseFlexible(exp));
         m.setFineBalance(rs.getDouble("fine_balance"));
         m.setNotes(rs.getString("notes"));
         m.setProfilePic(rs.getBytes("profile_pic"));
         String reg = rs.getString("registration_date");
-        if (reg != null) m.setRegistrationDate(LocalDate.parse(reg));
+        if (reg != null && !reg.isBlank()) m.setRegistrationDate(com.library.shared.DateUtil.parseFlexible(reg));
         try { m.setMemberCode(rs.getString("member_code")); } catch (SQLException ignored) {}
         try { m.setSerialNo(rs.getInt("serial_no")); }       catch (SQLException ignored) {}
         return m;
