@@ -288,6 +288,7 @@ public class DatabaseConnection {
         runMigrations(c);
         seedDefaultAdmin(c);
         seedLegacyAdmin(c);
+        DataSeeder.seedIfEmpty(c);
     }
 
     // ── Migrations ─────────────────────────────────────────────────────────────
