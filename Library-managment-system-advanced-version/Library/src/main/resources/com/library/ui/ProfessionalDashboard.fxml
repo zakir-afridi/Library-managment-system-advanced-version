@@ -12,294 +12,593 @@
             fx:controller="com.library.controller.DashboardController"
             styleClass="main-container">
 
-    <!-- ═══ 3D GLOSSY EMERALD TOP BAR HEADER ═══ -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TOP HEADER BAR — Pixel-perfect match to design mockup
+         ═══════════════════════════════════════════════════════════════════════ -->
     <top>
         <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="12">
-            <padding><Insets top="10" right="20" bottom="10" left="16"/></padding>
+            <padding><Insets top="8" right="16" bottom="8" left="16"/></padding>
 
-            <!-- 3D Sidebar Toggle Button -->
-            <Button fx:id="sidebarToggleBtn" text="☰" onAction="#toggleSidebar"
-                    styleClass="hamburger-btn" style="-fx-font-size:15px;"/>
-
-            <HBox alignment="CENTER_LEFT" spacing="8">
-                <Text text="📚" style="-fx-font-size: 20px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 4, 0, 0, 1);"/>
-                <Text fx:id="appTitleText" text="LibraCore Pro" styleClass="app-title"/>
-                <Text fx:id="moduleText" text="— BI Analytics"
-                      style="-fx-font-size:12.5px; -fx-font-weight:600; -fx-fill:#a7f3d0;"/>
+            <!-- Brand + Logo + Hamburger -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Text text="📖" styleClass="brand-logo"/>
+                <VBox spacing="0" alignment="CENTER_LEFT">
+                    <Text fx:id="appTitleText" text="LibraCore Pro" styleClass="app-title"/>
+                    <Text text="Library Management System" styleClass="app-subtitle"/>
+                </VBox>
+                <Button fx:id="sidebarToggleBtn" text="☰" onAction="#toggleSidebar"
+                        styleClass="hamburger-btn"/>
             </HBox>
 
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <!-- Overdue Alert Pill -->
-            <Label fx:id="overdueAlertLabel" text="⚠ 0 Overdue"
-                   styleClass="overdue-badge"
-                   visible="false" managed="false"/>
-
-            <!-- Compact Weather Pill -->
-            <HBox alignment="CENTER" spacing="5" styleClass="weather-pill">
-                <Label fx:id="weatherIconLabel" text="☀️" style="-fx-font-size: 12px;"/>
-                <Label fx:id="weatherTempLabel" text="--°C" style="-fx-text-fill: #ecfdf5; -fx-font-size: 11px; -fx-font-weight: bold;"/>
-                <Label fx:id="weatherCityLabel" text="Peshawar" style="-fx-text-fill: #a7f3d0; -fx-font-size: 10.5px;"/>
+            <!-- Center Search Bar with Ctrl+K badge -->
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="header-search-box" HBox.hgrow="ALWAYS">
+                <padding><Insets top="4" right="10" bottom="4" left="12"/></padding>
+                <Label text="🔍" style="-fx-font-size: 13px; -fx-text-fill: #34d399;"/>
+                <TextField fx:id="searchField" promptText="Search books, members, orders, invoices..."
+                           styleClass="header-search-input" HBox.hgrow="ALWAYS" onKeyReleased="#handleSearch"/>
+                <Label text="Ctrl + K" styleClass="shortcut-badge"/>
             </HBox>
 
-            <Button fx:id="themeToggleBtn" text="🌙" onAction="#toggleTheme"
-                    styleClass="top-btn" style="-fx-font-size:13px; -fx-padding: 6 12;"/>
-            <Label fx:id="userLabel" text="Welcome, Admin" styleClass="user-label"/>
-            <Button fx:id="refreshBtn" text="🔄 Refresh" styleClass="top-btn" onAction="#handleRefresh" style="-fx-padding: 6 12;"/>
-            <Button fx:id="logoutBtn" text="🚪 Logout" styleClass="logout-btn" onAction="#handleLogout" style="-fx-padding: 6 12;"/>
+            <!-- Right Status & User Widgets -->
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <!-- Overdue Alert Pill -->
+                <HBox alignment="CENTER" spacing="5" styleClass="pill-warning" fx:id="overdueAlertPill">
+                    <Label text="⚠" style="-fx-text-fill: #ef4444; -fx-font-weight: bold;"/>
+                    <Label fx:id="overdueAlertLabel" text="35 Overdue Loans" styleClass="pill-warning-text"/>
+                </HBox>
+
+                <!-- Weather Widget -->
+                <HBox alignment="CENTER" spacing="5" styleClass="header-widget-pill">
+                    <Label fx:id="weatherIconLabel" text="🌤" style="-fx-font-size: 13px;"/>
+                    <Label fx:id="weatherTempLabel" text="31.9°C" styleClass="widget-bold-text"/>
+                    <Label fx:id="weatherCityLabel" text="Peshawar" styleClass="widget-sub-text"/>
+                </HBox>
+
+                <!-- Live Date Widget -->
+                <HBox alignment="CENTER" spacing="5" styleClass="header-widget-pill">
+                    <Label text="📅" style="-fx-font-size: 12px;"/>
+                    <Label fx:id="currentDateLabel" text="28 May 2025" styleClass="widget-bold-text"/>
+                    <Label text="Wednesday" styleClass="widget-sub-text"/>
+                </HBox>
+
+                <!-- Notification Bell with Counter -->
+                <StackPane styleClass="notif-box">
+                    <Label text="🔔" style="-fx-font-size: 14px; -fx-text-fill: #a7f3d0;"/>
+                    <Label text="8" styleClass="notif-badge" StackPane.alignment="TOP_RIGHT"/>
+                </StackPane>
+
+                <!-- Theme Toggle Button -->
+                <Button fx:id="themeToggleBtn" text="🌙" onAction="#toggleTheme"
+                        styleClass="theme-btn"/>
+
+                <!-- User Profile Chip -->
+                <HBox alignment="CENTER" spacing="8" styleClass="user-profile-chip">
+                    <StackPane styleClass="avatar-circle">
+                        <Label text="A" styleClass="avatar-text"/>
+                    </StackPane>
+                    <VBox spacing="0" alignment="CENTER_LEFT">
+                        <Label fx:id="userLabel" text="Admin User" styleClass="user-name-text"/>
+                        <Label text="Administrator" styleClass="user-role-text"/>
+                    </VBox>
+                    <Label text="▾" style="-fx-text-fill: #a7f3d0; -fx-font-size: 10px;"/>
+                </HBox>
+
+                <!-- Glowing Refresh Button -->
+                <Button fx:id="refreshBtn" text="🔄 Refresh" onAction="#handleRefresh"
+                        styleClass="btn-refresh-glow"/>
+            </HBox>
         </HBox>
     </top>
 
-    <!-- ═══ DEEP OBSIDIAN-GREEN 3D SIDEBAR NAVIGATION ═══ -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEFT SIDEBAR — Full Mockup Navigation & Sub-Cards
+         ═══════════════════════════════════════════════════════════════════════ -->
     <left>
-        <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="215" spacing="4">
-            <padding><Insets top="14" bottom="12" left="8" right="8"/></padding>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-background: transparent;">
+            <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="230" spacing="6">
+                <padding><Insets top="12" bottom="12" left="10" right="10"/></padding>
 
-            <Label text="MAIN NAVIGATION" styleClass="sidebar-header"/>
+                <Label text="MAIN NAVIGATION" styleClass="sidebar-header"/>
 
-            <Button fx:id="dashboardBtn"   text="📊  BI Dashboard"    styleClass="sidebar-btn" onAction="#showDashboard"/>
-            <Button fx:id="booksBtn"       text="📚  Books"           styleClass="sidebar-btn" onAction="#showBooks"/>
-            <Button fx:id="membersBtn"     text="👥  Members"         styleClass="sidebar-btn" onAction="#showMembers"/>
-            <Button fx:id="issueReturnBtn" text="🔄  Issue / Return"  styleClass="sidebar-btn" onAction="#showIssueReturn"/>
-            <Button fx:id="employeesBtn"   text="👤  Employees"       styleClass="sidebar-btn" onAction="#showEmployees"/>
-            <Button fx:id="archiveBtn"     text="📦  Archive"         styleClass="sidebar-btn" onAction="#showArchive"/>
-            <Button fx:id="reportsBtn"     text="📈  Reports"         styleClass="sidebar-btn" onAction="#showReports"/>
-            <Button fx:id="settingsBtn"    text="⚙️  Settings"        styleClass="sidebar-btn" onAction="#showSettings"/>
+                <Button fx:id="dashboardBtn" text="📊  Dashboard" styleClass="sidebar-btn, active" onAction="#showDashboard"/>
+                <Button fx:id="booksBtn" text="📚  Books &amp; Inventory        ›" styleClass="sidebar-btn" onAction="#showBooks"/>
+                <Button fx:id="membersBtn" text="👥  Members                    ›" styleClass="sidebar-btn" onAction="#showMembers"/>
+                <Button fx:id="issueReturnBtn" text="🔄  Issue / Return             ›" styleClass="sidebar-btn" onAction="#showIssueReturn"/>
+                <Button text="📦  Orders &amp; Acquisitions     ›" styleClass="sidebar-btn" onAction="#showReports"/>
+                <Button text="🏢  Suppliers                  ›" styleClass="sidebar-btn" onAction="#showReports"/>
+                <Button fx:id="employeesBtn" text="👤  Employees                  ›" styleClass="sidebar-btn" onAction="#showEmployees"/>
+                <Button fx:id="reportsBtn" text="📈  Reports &amp; Analytics        ›" styleClass="sidebar-btn" onAction="#showReports"/>
+                <Button text="💰  Finance                    ›" styleClass="sidebar-btn" onAction="#showReports"/>
 
-            <Region VBox.vgrow="ALWAYS"/>
+                <!-- Notification Nav with Counter -->
+                <HBox alignment="CENTER_LEFT" styleClass="sidebar-btn">
+                    <Label text="🔔  Notifications" style="-fx-text-fill: white; -fx-font-weight: 600; -fx-font-size: 12px;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="12" styleClass="sidebar-badge-green"/>
+                </HBox>
 
-            <Separator style="-fx-opacity: 0.15;"/>
-            <Button fx:id="sidebarLogoutBtn" text="🚪  Sign Out"
-                    styleClass="sidebar-btn, logout" onAction="#handleLogout"/>
-        </VBox>
+                <Button fx:id="settingsBtn" text="⚙️  Settings" styleClass="sidebar-btn" onAction="#showSettings"/>
+                <Button fx:id="archiveBtn" text="📜  System Logs / Archive" styleClass="sidebar-btn" onAction="#showArchive"/>
+
+                <Separator style="-fx-opacity: 0.15; -fx-padding: 4 0;"/>
+
+                <!-- Quick Actions Card -->
+                <VBox styleClass="sidebar-card" spacing="5">
+                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="⚡ Quick Actions" styleClass="sidebar-card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="▾" style="-fx-text-fill: #34d399; -fx-font-size: 10px;"/>
+                    </HBox>
+                    <Button text="➕ Add New Book" styleClass="quick-action-link" onAction="#showBooks"/>
+                    <Button text="📖 Issue Book" styleClass="quick-action-link" onAction="#showIssueReturn"/>
+                    <Button text="👤 Add Member" styleClass="quick-action-link" onAction="#showMembers"/>
+                    <Button text="📋 New Order" styleClass="quick-action-link" onAction="#showReports"/>
+                    <Button text="📊 Stock Adjustment" styleClass="quick-action-link" onAction="#showBooks"/>
+                </VBox>
+
+                <!-- System Status Card -->
+                <VBox styleClass="sidebar-card" spacing="3">
+                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                        <Label text="🛡" style="-fx-font-size: 11px;"/>
+                        <Label text="System Status" styleClass="sidebar-card-title"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="6">
+                        <Label text="●" style="-fx-text-fill: #10b981; -fx-font-size: 10px;"/>
+                        <Label text="All Systems Operational" style="-fx-text-fill: #d1fae5; -fx-font-size: 10.5px; -fx-font-weight: bold;"/>
+                    </HBox>
+                    <Label text="Last checked: 10:45 AM" style="-fx-text-fill: #6ee7b7; -fx-font-size: 9.5px;"/>
+                </VBox>
+
+                <!-- Sidebar Copyright -->
+                <VBox alignment="CENTER_LEFT" spacing="2" style="-fx-padding: 8 4 4 4;">
+                    <Label text="© 2025 LibraCore Pro v3.0.0" style="-fx-text-fill: #6ee7b7; -fx-font-size: 9.5px;"/>
+                    <Label text="All rights reserved." style="-fx-text-fill: #059669; -fx-font-size: 9px;"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
     </left>
 
-    <!-- ═══ MAIN VISUAL ANALYTICS & BI CENTER (Compact, Fits Screen) ═══ -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         MAIN BI DASHBOARD CENTER — Exact 4-Tier Grid Layout
+         ═══════════════════════════════════════════════════════════════════════ -->
     <center>
-        <VBox fx:id="mainContent" spacing="12" alignment="TOP_CENTER"
-              style="-fx-background-color:transparent;">
-            <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
+        <ScrollPane fitToWidth="true" fitToHeight="true"
+                    style="-fx-background-color: transparent; -fx-background: transparent;">
+            <VBox fx:id="mainContent" spacing="14" style="-fx-background-color: transparent;">
+                <padding><Insets top="12" right="16" bottom="14" left="16"/></padding>
 
-            <!-- ── TIMEFRAME HORIZON FILTER BAR ── -->
-            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="filter-bar">
-                <padding><Insets top="6" right="14" bottom="6" left="14"/></padding>
-                <Label text="📅 Horizon:" style="-fx-font-weight: 800; -fx-text-fill: #34d399; -fx-font-size: 11.5px;"/>
-                <ComboBox fx:id="timeHorizonCombo" prefWidth="130" styleClass="combo-box" onAction="#handleTimeframeChange"/>
-                <Label fx:id="dateRangeSummaryLabel" text="Real-time aggregation from active database records"
-                       style="-fx-text-fill: #a7f3d0; -fx-font-size: 11px;"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="● Live BI Engine" style="-fx-text-fill: #10b981; -fx-font-size: 11px; -fx-font-weight: bold;"/>
-            </HBox>
+                <!-- ── TIER 1: TOP 6 3D KPI CARDS ── -->
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                    </columnConstraints>
 
-            <!-- ── 8 3D CENTERED KPI CARDS WITH 3D BORDERS (2x4 Grid) ── -->
-            <GridPane hgap="10" vgap="10" alignment="CENTER">
-                <columnConstraints>
-                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
-                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
-                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
-                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
-                </columnConstraints>
+                    <!-- 1. Total Books -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="0">
+                        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-books">
+                                <Text text="📖" styleClass="kpi-icon"/>
+                            </StackPane>
+                            <VBox spacing="1">
+                                <Text text="Total Books" styleClass="kpi-label"/>
+                                <Text fx:id="totalBooksText" text="100" styleClass="kpi-number"/>
+                                <Text fx:id="booksTrendText" text="+12 This Month" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
 
-                <!-- Row 0: KPI 1 - Total Books -->
-                <VBox styleClass="kpi-card, card-books" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-books">
-                            <Text text="📚" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="totalBooksText" text="0" styleClass="kpi-number"/>
-                            <Text text="Total Inventory Titles" styleClass="kpi-label"/>
-                            <Text fx:id="booksTrendText" text="▲ In Stock" styleClass="kpi-trend, trend-up"/>
+                    <!-- 2. Total Copies -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="1">
+                        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-available">
+                                <Text text="🗂" styleClass="kpi-icon"/>
+                            </StackPane>
+                            <VBox spacing="1">
+                                <Text text="Total Copies" styleClass="kpi-label"/>
+                                <Text fx:id="totalCopiesText" text="5,888" styleClass="kpi-number"/>
+                                <Text text="+230 This Month" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- 3. Total Members -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="2">
+                        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-members">
+                                <Text text="👥" styleClass="kpi-icon"/>
+                            </StackPane>
+                            <VBox spacing="1">
+                                <Text text="Total Members" styleClass="kpi-label"/>
+                                <Text fx:id="totalMembersText" text="200" styleClass="kpi-number"/>
+                                <Text fx:id="membersTrendText" text="+18 This Month" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- 4. Active Loans -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="3">
+                        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-issued">
+                                <Text text="📗" styleClass="kpi-icon"/>
+                            </StackPane>
+                            <VBox spacing="1">
+                                <Text text="Active Loans" styleClass="kpi-label"/>
+                                <Text fx:id="issuedBooksText" text="35" styleClass="kpi-number"/>
+                                <Text fx:id="issuedTodayText" text="+5 Today" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- 5. Overdue Loans -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="4">
+                        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-overdue">
+                                <Text text="⏰" styleClass="kpi-icon"/>
+                            </StackPane>
+                            <VBox spacing="1">
+                                <Text text="Overdue Loans" styleClass="kpi-label"/>
+                                <Text fx:id="overdueBooksText" text="35" styleClass="kpi-number" style="-fx-fill:#ef4444;"/>
+                                <Text text="- View Details" styleClass="kpi-trend, trend-danger"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- 6. Available Copies -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="5">
+                        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-available">
+                                <Text text="✅" styleClass="kpi-icon"/>
+                            </StackPane>
+                            <VBox spacing="1">
+                                <Text text="Available Copies" styleClass="kpi-label"/>
+                                <Text fx:id="availableBooksText" text="5,499" styleClass="kpi-number"/>
+                                <Text fx:id="availabilityRateText" text="93.4% Available" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </GridPane>
+
+                <!-- ── TIER 2: MIDDLE 3 VISUAL BI CHARTS ── -->
+                <GridPane hgap="12" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="42"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="28"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="30"/>
+                    </columnConstraints>
+
+                    <!-- Chart 1: Library Overview (Multi-Bar Chart) -->
+                    <VBox styleClass="chart-container" spacing="4" GridPane.columnIndex="0">
+                        <padding><Insets top="10" right="12" bottom="8" left="12"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <VBox spacing="1">
+                                <Text text="📊 Library Overview" styleClass="chart-title"/>
+                                <Label text="Circulation, Returns &amp; Renewals (Last 12 Months)" styleClass="chart-subtitle"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <ComboBox fx:id="timeHorizonCombo" prefWidth="120" styleClass="combo-box-chart" onAction="#handleTimeframeChange"/>
+                        </HBox>
+                        <!-- Chart Legend -->
+                        <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 4 0;">
+                            <HBox alignment="CENTER" spacing="4">
+                                <Circle radius="4" fill="#0d9488"/>
+                                <Label text="Issued" styleClass="legend-label"/>
+                            </HBox>
+                            <HBox alignment="CENTER" spacing="4">
+                                <Circle radius="4" fill="#10b981"/>
+                                <Label text="Returned" styleClass="legend-label"/>
+                            </HBox>
+                            <HBox alignment="CENTER" spacing="4">
+                                <Circle radius="4" fill="#f59e0b"/>
+                                <Label text="Renewed" styleClass="legend-label"/>
+                            </HBox>
+                        </HBox>
+                        <BarChart fx:id="monthlyBarChart" prefHeight="170" animated="true" legendVisible="false">
+                            <xAxis><CategoryAxis fx:id="barMonthAxis"/></xAxis>
+                            <yAxis><NumberAxis fx:id="barCountAxis"/></yAxis>
+                        </BarChart>
+                    </VBox>
+
+                    <!-- Chart 2: Book Categories (Donut / Pie Chart) -->
+                    <VBox styleClass="chart-container" spacing="4" GridPane.columnIndex="1">
+                        <padding><Insets top="10" right="12" bottom="8" left="12"/></padding>
+                        <HBox alignment="CENTER_LEFT">
+                            <VBox spacing="1">
+                                <Text text="Book Categories" styleClass="chart-title"/>
+                                <Label text="Distribution by Categories" styleClass="chart-subtitle"/>
+                            </VBox>
+                        </HBox>
+                        <HBox alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
+                            <StackPane>
+                                <PieChart fx:id="bookStatusChart" prefHeight="155" prefWidth="155" legendVisible="false" labelsVisible="false"/>
+                                <VBox alignment="CENTER" mouseTransparent="true">
+                                    <Label text="100" style="-fx-font-weight: 900; -fx-font-size: 15px; -fx-text-fill: white;"/>
+                                    <Label text="Total Books" style="-fx-font-size: 9px; -fx-text-fill: #a7f3d0;"/>
+                                </VBox>
+                            </StackPane>
+                            <!-- Custom Categories Legend -->
+                            <VBox spacing="3" alignment="CENTER_LEFT">
+                                <HBox alignment="CENTER_LEFT" spacing="4">
+                                    <Circle radius="3" fill="#10b981"/><Label text="Computer Science 22 (22%)" styleClass="legend-mini"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="4">
+                                    <Circle radius="3" fill="#f59e0b"/><Label text="Engineering 18 (18%)" styleClass="legend-mini"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="4">
+                                    <Circle radius="3" fill="#06b6d4"/><Label text="Artificial Intelligence 16 (16%)" styleClass="legend-mini"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="4">
+                                    <Circle radius="3" fill="#6366f1"/><Label text="Data Science 14 (14%)" styleClass="legend-mini"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="4">
+                                    <Circle radius="3" fill="#ec4899"/><Label text="Management 10 (10%)" styleClass="legend-mini"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="4">
+                                    <Circle radius="3" fill="#8b5cf6"/><Label text="Mathematics 8 (8%)" styleClass="legend-mini"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="4">
+                                    <Circle radius="3" fill="#64748b"/><Label text="Others 12 (12%)" styleClass="legend-mini"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="View All Categories ›" styleClass="link-green" onMouseClicked="#showBooks"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Chart 3: Daily Issue Trend -->
+                    <VBox styleClass="chart-container" spacing="4" GridPane.columnIndex="2">
+                        <padding><Insets top="10" right="12" bottom="8" left="12"/></padding>
+                        <HBox alignment="CENTER_LEFT">
+                            <VBox spacing="1">
+                                <Text text="📈 Daily Issue Trend" styleClass="chart-title"/>
+                                <Label text="Last 30 Days" styleClass="chart-subtitle"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Last 30 Days ▾" styleClass="combo-box-chart"/>
+                        </HBox>
+                        <BarChart fx:id="categoryChart" prefHeight="170" animated="true" legendVisible="false">
+                            <xAxis><CategoryAxis fx:id="categoryAxis"/></xAxis>
+                            <yAxis><NumberAxis fx:id="categoryCountAxis"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                </GridPane>
+
+                <!-- ── TIER 3: FINANCIALS ROW (6 3D CARDS) ── -->
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="16.66"/>
+                    </columnConstraints>
+
+                    <!-- Fin 1: Net Stock Worth -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="0">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-available"><Text text="🪙" styleClass="kpi-icon"/></StackPane>
+                            <VBox spacing="1">
+                                <Text text="Net Stock Worth" styleClass="kpi-label"/>
+                                <Text fx:id="netStockWorthText" text="PKR 8,832,000.00" styleClass="kpi-number" style="-fx-font-size:13px; -fx-fill:#34d399;"/>
+                                <Text text="+5.7% vs Last Month" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Fin 2: Total Receivables -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="1">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-fines"><Text text="📄" styleClass="kpi-icon"/></StackPane>
+                            <VBox spacing="1">
+                                <Text text="Total Receivables" styleClass="kpi-label"/>
+                                <Text fx:id="memberDuesText" text="PKR 7,750.00" styleClass="kpi-number" style="-fx-font-size:13px; -fx-fill:#fbbf24;"/>
+                                <Text text="Pending from Members" styleClass="kpi-trend, trend-amber"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Fin 3: Total Payables -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="2">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-overdue"><Text text="💳" styleClass="kpi-icon"/></StackPane>
+                            <VBox spacing="1">
+                                <Text text="Total Payables" styleClass="kpi-label"/>
+                                <Text text="PKR 12,500.00" styleClass="kpi-number" style="-fx-font-size:13px; -fx-fill:#f87171;"/>
+                                <Text text="Payable to Suppliers" styleClass="kpi-trend, trend-danger"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Fin 4: Total Revenue -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="3">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-books"><Text text="📦" styleClass="kpi-icon"/></StackPane>
+                            <VBox spacing="1">
+                                <Text text="Total Revenue" styleClass="kpi-label"/>
+                                <Text fx:id="finesCollectedText" text="PKR 25,080.00" styleClass="kpi-number" style="-fx-font-size:13px; -fx-fill:#34d399;"/>
+                                <Text text="+100% vs Last Month" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Fin 5: Total Expenses -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="4">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-issued"><Text text="⏰" styleClass="kpi-icon"/></StackPane>
+                            <VBox spacing="1">
+                                <Text text="Total Expenses" styleClass="kpi-label"/>
+                                <Text text="PKR 3,450.00" styleClass="kpi-number" style="-fx-font-size:13px; -fx-fill:#fbbf24;"/>
+                                <Text text="-4.3% vs Last Month" styleClass="kpi-trend, trend-amber"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Fin 6: Net Profit -->
+                    <VBox styleClass="kpi-card" spacing="2" GridPane.columnIndex="5">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <StackPane styleClass="kpi-icon-box, icon-available"><Text text="💵" styleClass="kpi-icon"/></StackPane>
+                            <VBox spacing="1">
+                                <Text text="Net Profit" styleClass="kpi-label"/>
+                                <Text text="PKR 21,630.00" styleClass="kpi-number" style="-fx-font-size:13px; -fx-fill:#34d399;"/>
+                                <Text text="+120.6% vs Last Month" styleClass="kpi-trend, trend-up"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </GridPane>
+
+                <!-- ── TIER 4: BOTTOM 3 COMPACT DATA TABLES ── -->
+                <GridPane hgap="12" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="38"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="32"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="30"/>
+                    </columnConstraints>
+
+                    <!-- Table 1: Recent Book Issues -->
+                    <VBox styleClass="chart-container" spacing="6" GridPane.columnIndex="0">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT">
+                            <HBox alignment="CENTER_LEFT" spacing="6">
+                                <Label text="📚" style="-fx-font-size: 12px;"/>
+                                <Text text="Recent Book Issues" styleClass="chart-title"/>
+                            </HBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="View All" styleClass="btn-view-all" onAction="#showIssueReturn"/>
+                        </HBox>
+                        <TableView fx:id="activityTable" prefHeight="135" minHeight="120" styleClass="compact-table">
+                            <columns>
+                                <TableColumn fx:id="memberColumn" text="MEMBER" prefWidth="95"/>
+                                <TableColumn fx:id="bookColumn" text="BOOK" prefWidth="125"/>
+                                <TableColumn fx:id="dateColumn" text="ISSUE DATE" prefWidth="80"/>
+                                <TableColumn fx:id="statusColumn" text="STATUS" prefWidth="65"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+
+                    <!-- Table 2: Overdue Books -->
+                    <VBox styleClass="chart-container" spacing="6" GridPane.columnIndex="1">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT">
+                            <HBox alignment="CENTER_LEFT" spacing="6">
+                                <Label text="⊕" style="-fx-font-size: 12px; -fx-text-fill: #ef4444; -fx-font-weight: bold;"/>
+                                <Text text="Overdue Books" styleClass="chart-title"/>
+                            </HBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="View All" styleClass="btn-view-all" onAction="#showIssueReturn"/>
+                        </HBox>
+                        <!-- Compact Overdue Mini-List -->
+                        <VBox spacing="4" styleClass="mini-list-container" prefHeight="135">
+                            <HBox alignment="CENTER_LEFT" styleClass="mini-row">
+                                <VBox spacing="0" HBox.hgrow="ALWAYS">
+                                    <Label text="Ahmed Raza" styleClass="mini-row-title"/>
+                                    <Label text="Advanced Python" styleClass="mini-row-sub"/>
+                                </VBox>
+                                <Label text="15 May 2025" styleClass="mini-row-sub"/>
+                                <Label text="  13 Days" style="-fx-text-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:10.5px;"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" styleClass="mini-row">
+                                <VBox spacing="0" HBox.hgrow="ALWAYS">
+                                    <Label text="Fatima Noor" styleClass="mini-row-title"/>
+                                    <Label text="Machine Learning" styleClass="mini-row-sub"/>
+                                </VBox>
+                                <Label text="14 May 2025" styleClass="mini-row-sub"/>
+                                <Label text="  14 Days" style="-fx-text-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:10.5px;"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" styleClass="mini-row">
+                                <VBox spacing="0" HBox.hgrow="ALWAYS">
+                                    <Label text="Hamza Ali" styleClass="mini-row-title"/>
+                                    <Label text="Software Engineering" styleClass="mini-row-sub"/>
+                                </VBox>
+                                <Label text="10 May 2025" styleClass="mini-row-sub"/>
+                                <Label text="  18 Days" style="-fx-text-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:10.5px;"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Table 3: Low Stock Alert -->
+                    <VBox styleClass="chart-container" spacing="6" GridPane.columnIndex="2">
+                        <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+                        <HBox alignment="CENTER_LEFT">
+                            <HBox alignment="CENTER_LEFT" spacing="6">
+                                <Label text="📑" style="-fx-font-size: 12px;"/>
+                                <Text text="Low Stock Alert" styleClass="chart-title"/>
+                            </HBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="View All" styleClass="btn-view-all" onAction="#showBooks"/>
+                        </HBox>
+                        <!-- Compact Low Stock Mini-List -->
+                        <VBox spacing="4" styleClass="mini-list-container" prefHeight="135">
+                            <HBox alignment="CENTER_LEFT" styleClass="mini-row">
+                                <Label text="Clean Code" styleClass="mini-row-title" HBox.hgrow="ALWAYS"/>
+                                <Label text="Avail: 2 / 5  " styleClass="mini-row-sub"/>
+                                <Label text="Low Stock" style="-fx-text-fill:#f59e0b; -fx-font-weight:bold; -fx-font-size:10.5px;"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" styleClass="mini-row">
+                                <Label text="Deep Learning" styleClass="mini-row-title" HBox.hgrow="ALWAYS"/>
+                                <Label text="Avail: 3 / 10 " styleClass="mini-row-sub"/>
+                                <Label text="Low Stock" style="-fx-text-fill:#f59e0b; -fx-font-weight:bold; -fx-font-size:10.5px;"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" styleClass="mini-row">
+                                <Label text="Computer Networks" styleClass="mini-row-title" HBox.hgrow="ALWAYS"/>
+                                <Label text="Avail: 1 / 4  " styleClass="mini-row-sub"/>
+                                <Label text="Low Stock" style="-fx-text-fill:#f59e0b; -fx-font-weight:bold; -fx-font-size:10.5px;"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </GridPane>
+
+                <!-- ── BOTTOM SUMMARY RIBBON ── -->
+                <HBox alignment="CENTER" spacing="30" styleClass="bottom-summary-ribbon">
+                    <padding><Insets top="6" right="20" bottom="6" left="20"/></padding>
+                    <HBox alignment="CENTER" spacing="8">
+                        <Label text="👥" style="-fx-font-size: 14px;"/>
+                        <VBox spacing="0">
+                            <Label text="Total Members" style="-fx-font-size: 10px; -fx-text-fill: #a7f3d0;"/>
+                            <Label text="200  (+18 This Month)" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: white;"/>
                         </VBox>
                     </HBox>
-                </VBox>
-
-                <!-- Row 0: KPI 2 - Net Stock Worth -->
-                <VBox styleClass="kpi-card, card-available" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-available">
-                            <Text text="💎" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="netStockWorthText" text="PKR 0.00" styleClass="kpi-number" style="-fx-font-size:14px; -fx-fill:#34d399;"/>
-                            <Text text="Net Stock Worth" styleClass="kpi-label"/>
-                            <Text fx:id="netStockWorthSub" text="Total Copy Valuation" styleClass="kpi-trend, trend-up"/>
+                    <Separator orientation="VERTICAL" style="-fx-opacity: 0.2;"/>
+                    <HBox alignment="CENTER" spacing="8">
+                        <Label text="👤" style="-fx-font-size: 14px;"/>
+                        <VBox spacing="0">
+                            <Label text="Active Today" style="-fx-font-size: 10px; -fx-text-fill: #a7f3d0;"/>
+                            <Label text="45  (Members Visited)" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: #34d399;"/>
                         </VBox>
                     </HBox>
-                </VBox>
-
-                <!-- Row 0: KPI 3 - Active Members -->
-                <VBox styleClass="kpi-card, card-members" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-members">
-                            <Text text="👥" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="totalMembersText" text="0" styleClass="kpi-number"/>
-                            <Text text="Registered Members" styleClass="kpi-label"/>
-                            <Text fx:id="membersTrendText" text="▲ Active" styleClass="kpi-trend, trend-up"/>
+                    <Separator orientation="VERTICAL" style="-fx-opacity: 0.2;"/>
+                    <HBox alignment="CENTER" spacing="8">
+                        <Label text="✨" style="-fx-font-size: 14px;"/>
+                        <VBox spacing="0">
+                            <Label text="New Members" style="-fx-font-size: 10px; -fx-text-fill: #a7f3d0;"/>
+                            <Label text="12  (This Month)" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: white;"/>
                         </VBox>
                     </HBox>
-                </VBox>
+                </HBox>
 
-                <!-- Row 0: KPI 4 - Active Circulation -->
-                <VBox styleClass="kpi-card, card-issued" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="3" GridPane.rowIndex="0">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-issued">
-                            <Text text="📖" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="issuedBooksText" text="0" styleClass="kpi-number"/>
-                            <Text text="Active Borrowings" styleClass="kpi-label"/>
-                            <Text fx:id="issuedTodayText" text="0 today" styleClass="kpi-trend, trend-amber"/>
-                        </VBox>
-                    </HBox>
-                </VBox>
-
-                <!-- Row 1: KPI 5 - Customer Receivables / Dues -->
-                <VBox styleClass="kpi-card, card-fines" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-fines">
-                            <Text text="💳" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="memberDuesText" text="PKR 0.00" styleClass="kpi-number" style="-fx-font-size:14px; -fx-fill:#fbbf24;"/>
-                            <Text text="Customer Receivables" styleClass="kpi-label"/>
-                            <Text fx:id="memberDuesSub" text="Pending Dues" styleClass="kpi-trend, trend-amber"/>
-                        </VBox>
-                    </HBox>
-                </VBox>
-
-                <!-- Row 1: KPI 6 - Realized Revenue -->
-                <VBox styleClass="kpi-card, card-fines" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-fines">
-                            <Text text="💰" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="finesCollectedText" text="PKR 0.00" styleClass="kpi-number" style="-fx-font-size:14px; -fx-fill:#34d399;"/>
-                            <Text text="Realized Revenue" styleClass="kpi-label"/>
-                            <Text fx:id="pendingFinesText" text="▲ 100% Realized" styleClass="kpi-trend, trend-up"/>
-                        </VBox>
-                    </HBox>
-                </VBox>
-
-                <!-- Row 1: KPI 7 - Overdue Risk Accounts -->
-                <VBox styleClass="kpi-card, card-overdue" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-overdue">
-                            <Text text="⚠️" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="overdueBooksText" text="0" styleClass="kpi-number"/>
-                            <Text text="Overdue Loans" styleClass="kpi-label"/>
-                            <Text fx:id="overdueRiskAccountsText" text="0 Risk Accounts" styleClass="kpi-trend, trend-danger"/>
-                        </VBox>
-                    </HBox>
-                </VBox>
-
-                <!-- Row 1: KPI 8 - Available Copies -->
-                <VBox styleClass="kpi-card, card-available" spacing="2" alignment="CENTER_LEFT" GridPane.columnIndex="3" GridPane.rowIndex="1">
-                    <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane styleClass="kpi-icon-box, icon-available">
-                            <Text text="✅" styleClass="kpi-icon"/>
-                        </StackPane>
-                        <VBox spacing="1">
-                            <Text fx:id="availableBooksText" text="0" styleClass="kpi-number"/>
-                            <Text text="Available Copies" styleClass="kpi-label"/>
-                            <Text fx:id="availabilityRateText" text="Ready for Issue" styleClass="kpi-trend, trend-up"/>
-                        </VBox>
-                    </HBox>
-                </VBox>
-
-            </GridPane>
-
-            <!-- ── 4 COMPACT 3D BI CHARTS (2x2 Grid, Height Optimized) ── -->
-            <GridPane hgap="12" vgap="10" alignment="CENTER" VBox.vgrow="ALWAYS">
-                <columnConstraints>
-                    <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
-                    <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
-                </columnConstraints>
-
-                <!-- Chart 1: Inventory & Stock Distribution -->
-                <VBox styleClass="chart-container" spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                    <padding><Insets top="8" right="12" bottom="6" left="12"/></padding>
-                    <HBox alignment="CENTER_LEFT">
-                        <Text text="📊 Inventory &amp; Stock Ratio" styleClass="chart-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label text="Asset allocation" style="-fx-font-size:10px; -fx-text-fill:#6ee7b7;"/>
-                    </HBox>
-                    <PieChart fx:id="bookStatusChart" prefHeight="175" minHeight="160" animated="true" labelsVisible="true"/>
-                </VBox>
-
-                <!-- Chart 2: Borrowing Trends -->
-                <VBox styleClass="chart-container" spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                    <padding><Insets top="8" right="12" bottom="6" left="12"/></padding>
-                    <HBox alignment="CENTER_LEFT">
-                        <Text text="📈 12-Month Circulation Trend" styleClass="chart-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label text="Volume timeline" style="-fx-font-size:10px; -fx-text-fill:#6ee7b7;"/>
-                    </HBox>
-                    <BarChart fx:id="monthlyBarChart" prefHeight="175" minHeight="160" animated="true" legendVisible="false">
-                        <xAxis><CategoryAxis fx:id="barMonthAxis" label="Timeline"/></xAxis>
-                        <yAxis><NumberAxis fx:id="barCountAxis" label="Count"/></yAxis>
-                    </BarChart>
-                </VBox>
-
-                <!-- Chart 3: Category Demand -->
-                <VBox styleClass="chart-container" spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                    <padding><Insets top="8" right="12" bottom="6" left="12"/></padding>
-                    <HBox alignment="CENTER_LEFT">
-                        <Text text="🏷 Category Analytics &amp; Demand" styleClass="chart-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label text="Top Genres" style="-fx-font-size:10px; -fx-text-fill:#6ee7b7;"/>
-                    </HBox>
-                    <BarChart fx:id="categoryChart" prefHeight="175" minHeight="160" animated="true" legendVisible="false">
-                        <xAxis><CategoryAxis fx:id="categoryAxis" label="Category"/></xAxis>
-                        <yAxis><NumberAxis fx:id="categoryCountAxis" label="Books"/></yAxis>
-                    </BarChart>
-                </VBox>
-
-                <!-- Chart 4: Revenue & Dues -->
-                <VBox styleClass="chart-container" spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                    <padding><Insets top="8" right="12" bottom="6" left="12"/></padding>
-                    <HBox alignment="CENTER_LEFT">
-                        <Text text="💵 Revenue &amp; Dues Recovery" styleClass="chart-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label text="Financials" style="-fx-font-size:10px; -fx-text-fill:#6ee7b7;"/>
-                    </HBox>
-                    <BarChart fx:id="revenueChart" prefHeight="175" minHeight="160" animated="true" legendVisible="false">
-                        <xAxis><CategoryAxis fx:id="revenueMonthAxis" label="Month"/></xAxis>
-                        <yAxis><NumberAxis fx:id="revenueAmountAxis" label="PKR"/></yAxis>
-                    </BarChart>
-                </VBox>
-
-            </GridPane>
-
-        </VBox>
+            </VBox>
+        </ScrollPane>
     </center>
-
-    <!-- ═══ 3D STATUS FOOTER BAR ═══ -->
-    <bottom>
-        <HBox styleClass="footer-bar" alignment="CENTER_LEFT" spacing="14">
-            <padding><Insets top="5" right="18" bottom="5" left="18"/></padding>
-            <Label text="● System Online" style="-fx-text-fill: #34d399; -fx-font-weight: 800; -fx-font-size: 11px;"/>
-            <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.25);"/>
-            <Label text="HikariCP: 10/10 Active" style="-fx-text-fill: #a7f3d0; -fx-font-size: 10.5px;"/>
-            <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.25);"/>
-            <Label text="AES-256 Shield" style="-fx-text-fill: #a7f3d0; -fx-font-size: 10.5px;"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="LibraCore Pro v3.0.0 — Enterprise BI Edition"
-                   style="-fx-text-fill: #6ee7b7; -fx-font-size: 10.5px;"/>
-        </HBox>
-    </bottom>
 
 </BorderPane>

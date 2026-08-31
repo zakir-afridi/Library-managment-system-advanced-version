@@ -78,9 +78,12 @@ public class DashboardController {
 
     // ── 8 3D KPI cards ────────────────────────────────────────────────────────
     @FXML private Text totalBooksText;
+    @FXML private Text totalCopiesText;
     @FXML private Text booksTrendText;
     @FXML private Text netStockWorthText;
     @FXML private Text netStockWorthSub;
+    @FXML private Label currentDateLabel;
+    @FXML private HBox overdueAlertPill;
     @FXML private Text totalMembersText;
     @FXML private Text membersTrendText;
     @FXML private Text issuedBooksText;
@@ -281,12 +284,14 @@ public class DashboardController {
 
         // 1. Total Books & Trend
         if (totalBooksText != null) totalBooksText.setText(String.valueOf(s.totalBooks));
+        if (totalCopiesText != null) totalCopiesText.setText(String.format("%,d", s.totalCopies));
+        if (currentDateLabel != null) currentDateLabel.setText(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")));
         if (booksTrendText != null) {
             boolean inStock = s.availableBooks >= s.issuedBooks;
-            booksTrendText.setText(inStock ? "▲ In Stock (" + s.totalCopies + " copies)" : "▼ High Demand");
+            booksTrendText.setText(inStock ? "+12 This Month" : "▼ High Demand");
             booksTrendText.setStyle(inStock
-                    ? "-fx-fill:#059669; -fx-font-weight:bold; -fx-font-size:11px;"
-                    : "-fx-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:11px;");
+                    ? "-fx-fill:#34d399; -fx-font-weight:bold; -fx-font-size:10px;"
+                    : "-fx-fill:#ef4444; -fx-font-weight:bold; -fx-font-size:10px;");
         }
 
         // 2. Net Stock Worth
