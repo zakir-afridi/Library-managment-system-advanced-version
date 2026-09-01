@@ -2,7 +2,6 @@ package com.library.controller;
 
 import com.library.config.AppConfig;
 import com.library.config.ThemeManager;
-import com.library.database.BackupService;
 import com.library.model.*;
 import com.library.security.PasswordUtil;
 import com.library.security.SessionManager;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +46,7 @@ public class SettingsController implements Initializable {
     private final PublisherService publisherService     = new PublisherService();
     private final MeasurementService measurementService = new MeasurementService();
     private final UserService userService               = new UserService();
-    private final BackupService backupService           = new BackupService();
+    private final BackupScheduler backupScheduler       = BackupScheduler.getInstance();
 
     // ── Header & Navigation ──
     @FXML private Button backBtn;
@@ -982,9 +982,9 @@ public class SettingsController implements Initializable {
     @FXML
     public void backupDatabase() {
         try {
-            String path = backupService.backup();
+            Path path = backupScheduler.backup();
             if (dbBackupStatusLabel != null) {
-                dbBackupStatusLabel.setText("✓ Backup created: " + new File(path).getName());
+                dbBackupStatusLabel.setText("✓ Backup created: " + path.getFileName());
             }
             ToastNotification.success(backBtn.getScene(), "Safe backup created at:\n" + path);
         } catch (Exception e) {
@@ -1008,7 +1008,7 @@ public class SettingsController implements Initializable {
         File f = fc.showOpenDialog(null);
         if (f != null && f.exists()) {
             try {
-                boolean ok = backupService.restore(f.getAbsolutePath());
+                boolean ok = backupScheduler.restore(f.toPath());
                 if (ok) {
                     ToastNotification.success(backBtn.getScene(), "Database restored successfully.");
                     loadLibraryInfo();
