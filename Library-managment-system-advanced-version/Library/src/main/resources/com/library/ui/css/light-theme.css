@@ -42,10 +42,8 @@
 
 /* ── 3D Top Bar ── */
 .top-bar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #cbd5e1;
-    -fx-border-width: 0 0 1 0;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 8, 0, 0, 2);
+    -fx-background-color: linear-gradient(to right, #022c22 0%, #064e3b 35%, #059669 75%, #10b981 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 10, 0, 0, 3);
 }
 
 .brand-logo {
@@ -56,7 +54,7 @@
 .app-title {
     -fx-font-size: 15px;
     -fx-font-weight: 900;
-    -fx-fill: #064e3b;
+    -fx-fill: #ffffff;
 }
 
 .app-subtitle {
@@ -223,13 +221,14 @@
 
 /* ── SIDEBAR NAVIGATION ── */
 .sidebar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e2e8f0;
+    -fx-background-color: linear-gradient(to bottom, #022c22 0%, #064e3b 60%, #065f46 100%);
+    -fx-border-color: #047857;
     -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 4, 0);
 }
 
 .sidebar-header {
-    -fx-text-fill: #047857;
+    -fx-text-fill: #a7f3d0;
     -fx-font-size: 9.5px;
     -fx-font-weight: 800;
     -fx-padding: 4 6;
@@ -237,7 +236,7 @@
 
 .sidebar-btn {
     -fx-background-color: transparent;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #d1fae5;
     -fx-font-size: 11.5px;
     -fx-font-weight: 600;
     -fx-alignment: CENTER_LEFT;
@@ -248,15 +247,16 @@
 }
 
 .sidebar-btn:hover {
-    -fx-background-color: #ecfdf5;
-    -fx-text-fill: #059669;
+    -fx-background-color: rgba(16,185,129,0.25);
+    -fx-text-fill: #ffffff;
 }
 
 .sidebar-btn.active {
-    -fx-background-color: #059669;
+    -fx-background-color: linear-gradient(to right, #10b981, #059669);
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
     -fx-background-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(16,185,129,0.4), 6, 0, 0, 2);
 }
 
 .sidebar-badge-green {
@@ -536,3 +536,70 @@
     -fx-effect: dropshadow(gaussian, rgba(5, 150, 105, 0.2), 4, 0, 0, 0);
 }
 
+
+/* ── Top Bar Buttons ── */
+.top-btn {
+    -fx-background-color: rgba(255,255,255,0.15);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-padding: 4 10;
+    -fx-background-radius: 6;
+    -fx-border-color: rgba(255,255,255,0.3);
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.top-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.28);
+}
+
+/* ── Logout Button ── */
+.logout-btn {
+    -fx-background-color: linear-gradient(to bottom, #ef4444, #dc2626);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 5 14;
+    -fx-background-radius: 6;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(220,38,38,0.35), 4, 0, 0, 1);
+}
+
+.logout-btn:hover {
+    -fx-background-color: #b91c1c;
+}
+
+/* ── User Label (top bar) ── */
+.user-label {
+    -fx-text-fill: #d1fae5;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* ── Footer Bar ── */
+.footer-bar {
+    -fx-background-color: linear-gradient(to right, #022c22 0%, #064e3b 50%, #059669 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, -2);
+}
+
+/* ── Responsive: shrink sidebar text on small windows ── */
+.sidebar-btn {
+    -fx-wrap-text: false;
+}
+
+.main-container {
+    -fx-min-width: 900;
+}
+
+/* ── btn-success for Reports ── */
+.btn-success {
+    -fx-background-color: linear-gradient(to bottom, #10b981, #059669);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(16,185,129,0.25), 4, 0, 0, 1);
+}
+
+.btn-success:hover {
+    -fx-background-color: #047857;
+}

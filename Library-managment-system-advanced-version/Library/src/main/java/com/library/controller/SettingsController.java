@@ -1060,6 +1060,20 @@ public class SettingsController implements Initializable {
     // ── Navigation & Common ──
 
     @FXML
+    public void handleLogout() {
+        SessionManager.getInstance().logout();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/library/ui/LoginPage.fxml"));
+            Stage stage = (Stage) backBtn.getScene().getWindow();
+            Scene scene = new Scene(loader.load(), 1100, 700);
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            LOG.error("Logout error", e);
+        }
+    }
+
+    @FXML
     public void goBack() {
         Stage stage = (Stage) backBtn.getScene().getWindow();
         try {

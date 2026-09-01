@@ -23,6 +23,17 @@
         </HBox>
     </top>
 
+    <!-- BOTTOM BAR -->
+    <bottom>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16"
+              style="-fx-background-color:#022c22; -fx-padding:10 24 10 24;">
+            <Label text="© 2026 LibraCore Pro Enterprise — All Rights Reserved"
+                   style="-fx-text-fill:rgba(255,255,255,0.7); -fx-font-size:12px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="🚪 Logout" styleClass="logout-btn" onAction="#handleLogout"/>
+        </HBox>
+    </bottom>
+
     <!-- MAIN SPLIT -->
     <center>
         <SplitPane dividerPositions="0.62" style="-fx-background-color:transparent;">

@@ -83,6 +83,21 @@ public class ReportsController {
     }
 
     @FXML
+    private void handleLogout() {
+        SessionManager.getInstance().logout();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/library/ui/LoginPage.fxml"));
+            Stage stage = (Stage) backBtn.getScene().getWindow();
+            Scene scene = new Scene(loader.load(), 1100, 700);
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+            stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " — Login");
+        } catch (IOException e) {
+            ToastNotification.error(backBtn.getScene(), "Report logout error: " + e.getMessage());
+        }
+    }
+
+    @FXML
     private void goBack() {
         try {
             FXMLLoader loader = new FXMLLoader(
