@@ -465,6 +465,9 @@ public class BookController {
     }
 
     @FXML
+    private void resetForm() { clearForm(); }
+
+    @FXML
     private void clearForm() {
         editingBook = null;
         coverBytes  = null;
@@ -583,6 +586,22 @@ public class BookController {
     @FXML private void toggleTheme() {
         ThemeManager.getInstance().toggle(backBtn.getScene());
         themeBtn.setText(ThemeManager.getInstance().isDark() ? "☀" : "🌙");
+    }
+
+    @FXML
+    private void handleLogout() {
+        com.library.security.SessionManager.getInstance().logout();
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/library/ui/LoginPage.fxml"));
+            javafx.stage.Stage stage = (javafx.stage.Stage) backBtn.getScene().getWindow();
+            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load(), 1100, 700);
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+            stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " — Login");
+        } catch (IOException e) {
+            ToastNotification.error(backBtn.getScene(), "Logout error: " + e.getMessage());
+        }
     }
 
     @FXML
