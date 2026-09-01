@@ -43,7 +43,7 @@ public class Main {
             "-Dsun.misc.unsafe.warn=false",
             "-Dfile.encoding=UTF-8",
             "-cp", classPath,
-            "com.library.Main"
+            "com.library.LibraCoreApp"
         );
     }
 
