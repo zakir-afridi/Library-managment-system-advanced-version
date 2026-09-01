@@ -83,6 +83,16 @@
                                       -fx-padding: 0 14 0 14;" />
             </VBox>
 
+            <!-- Options Row: Keep Me Signed In & Forgot Password -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <CheckBox fx:id="rememberMeCheckbox" text="Keep me signed in"
+                          styleClass="remember-checkbox" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="Forgot Password?" onAction="#handleForgotPassword"
+                        style="-fx-background-color: transparent; -fx-text-fill: #059669;
+                               -fx-font-size: 12px; -fx-font-weight: 600; -fx-cursor: hand; -fx-underline: true; -fx-padding: 2 0 2 0;" />
+            </HBox>
+
             <!-- 3D Emerald Submit Button -->
             <Button fx:id="loginButton" text="🔐  SIGN IN TO LIBRACORE" onAction="#handleLogin"
                     maxWidth="Infinity" prefHeight="48"
@@ -98,9 +108,6 @@
                 <Label fx:id="attemptsLabel" text=""
                        style="-fx-text-fill: #d97706; -fx-font-size: 11.5px; -fx-font-weight: bold;" />
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="Forgot Password?" onAction="#handleForgotPassword"
-                        style="-fx-background-color: transparent; -fx-text-fill: #059669;
-                               -fx-font-size: 12px; -fx-font-weight: 600; -fx-cursor: hand; -fx-underline: true;" />
                 <Button fx:id="themeToggleBtn" text="🌙 Dark Mode" onAction="#toggleTheme"
                         style="-fx-background-color: #ecfdf5; -fx-text-fill: #065f46;
                                -fx-font-size: 11.5px; -fx-font-weight: 600; -fx-cursor: hand;

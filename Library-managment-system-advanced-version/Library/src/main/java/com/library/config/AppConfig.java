@@ -42,6 +42,9 @@ public class AppConfig {
     // v3: Weather
     public static final String KEY_WEATHER_CITY      = "weather.city";
     public static final String KEY_WEATHER_ENABLED   = "weather.enabled";
+    // Remember Me
+    public static final String KEY_REMEMBER_ME       = "auth.rememberMe";
+    public static final String KEY_SAVED_USERNAME    = "auth.savedUsername";
 
     private AppConfig() {
         load();
@@ -130,4 +133,16 @@ public class AppConfig {
     public String  getDateFormat()    { return get(KEY_DATE_FORMAT); }
     public boolean isOverdueAlert()   { return getBoolean(KEY_OVERDUE_ALERT, true); }
     public int     getDueSoonDays()   { return getInt(KEY_DUE_SOON_DAYS, 2); }
+    public boolean isRememberMe()     { return getBoolean(KEY_REMEMBER_ME, false); }
+    public String  getSavedUsername() { return get(KEY_SAVED_USERNAME) != null ? get(KEY_SAVED_USERNAME) : ""; }
+
+    public void setRememberMe(boolean remember, String username) {
+        set(KEY_REMEMBER_ME, String.valueOf(remember));
+        if (remember && username != null && !username.isBlank()) {
+            set(KEY_SAVED_USERNAME, username.trim());
+        } else if (!remember) {
+            set(KEY_SAVED_USERNAME, "");
+        }
+        save();
+    }
 }

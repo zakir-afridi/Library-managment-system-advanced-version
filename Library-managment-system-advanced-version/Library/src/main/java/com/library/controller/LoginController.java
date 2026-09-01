@@ -25,6 +25,7 @@ public class LoginController {
 
     @FXML private TextField     usernameField;
     @FXML private PasswordField passwordField;
+    @FXML private CheckBox      rememberMeCheckbox;
     @FXML private Button        loginButton;
     @FXML private Label         errorLabel;
     @FXML private Label         attemptsLabel;
@@ -37,6 +38,25 @@ public class LoginController {
         usernameField.setOnAction(e -> passwordField.requestFocus());
         passwordField.setOnAction(e -> handleLogin());
         updateThemeButtonLabel();
+
+        // Keep me signed in (Remember Me) initialization & restoration
+        boolean remember = com.library.config.AppConfig.getInstance().isRememberMe();
+        if (rememberMeCheckbox != null) {
+            rememberMeCheckbox.setSelected(remember);
+            rememberMeCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                if (!newVal) {
+                    com.library.config.AppConfig.getInstance().setRememberMe(false, "");
+                }
+            });
+        }
+
+        String savedUser = com.library.config.AppConfig.getInstance().getSavedUsername();
+        if (remember && savedUser != null && !savedUser.isBlank()) {
+            usernameField.setText(savedUser);
+            Platform.runLater(() -> passwordField.requestFocus());
+        } else {
+            Platform.runLater(() -> usernameField.requestFocus());
+        }
     }
 
     // ── Login ─────────────────────────────────────────────────────────────────
@@ -95,6 +115,10 @@ public class LoginController {
     private void handleSuccessfulLogin(User user) {
         attemptsLabel.setText("");
         hideError();
+
+        // Persist "Keep me signed in" choice and username
+        boolean remember = rememberMeCheckbox != null && rememberMeCheckbox.isSelected();
+        com.library.config.AppConfig.getInstance().setRememberMe(remember, user.getUsername());
 
         // Force password change for default admin
         if (user.isForcePasswordChange()) {

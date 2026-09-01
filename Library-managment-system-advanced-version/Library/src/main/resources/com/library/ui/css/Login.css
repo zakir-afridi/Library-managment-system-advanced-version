@@ -30,3 +30,46 @@
     -fx-border-width: 2;
     -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.35), 8, 0, 0, 0);
 }
+
+/* ── Keep Me Signed In CheckBox ── */
+.remember-checkbox {
+    -fx-font-size: 12px;
+    -fx-text-fill: #334155;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.remember-checkbox .box {
+    -fx-background-color: #f0fdf4;
+    -fx-border-color: #a7f3d0;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-border-width: 1.5;
+    -fx-padding: 2px;
+    -fx-min-width: 17px;
+    -fx-min-height: 17px;
+    -fx-pref-width: 17px;
+    -fx-pref-height: 17px;
+}
+
+.remember-checkbox:hover .box {
+    -fx-border-color: #059669;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.35), 6, 0, 0, 0);
+}
+
+.remember-checkbox:selected .box {
+    -fx-background-color: linear-gradient(to bottom, #10b981 0%, #059669 100%);
+    -fx-border-color: #047857;
+    -fx-effect: dropshadow(gaussian, rgba(5, 150, 105, 0.35), 4, 0, 0, 1);
+}
+
+.remember-checkbox .mark {
+    -fx-background-color: transparent;
+}
+
+.remember-checkbox:selected .mark {
+    -fx-background-color: white;
+    -fx-mark-color: white;
+    -fx-shape: "M1.73,12.91 8.1,19.28 22.79,4.59 20.8,2.6 8.1,15.3 3.72,10.92 Z";
+}
+
