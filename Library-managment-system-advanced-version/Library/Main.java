@@ -17,14 +17,8 @@ public class Main {
         java.io.File classesDir = new java.io.File(targetDir, "classes");
 
         if (!jar.exists() || !libDir.exists() || !classesDir.exists()) {
-            System.out.println("==> Building LibraCore Pro (first-time setup)...");
             run(dir, "D:\\maven\\apache-maven-3.9.6\\bin\\mvn.cmd", "clean", "package", "-DskipTests", "-q");
         }
-
-        System.out.println("==================================================");
-        System.out.println(" 🚀 Launching LibraCore Pro v3.0.0 (Enterprise)");
-        System.out.println(" 🔑 Default login:  admin | admin");
-        System.out.println("==================================================");
 
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + java.io.File.separator + "bin" + java.io.File.separator + "java";

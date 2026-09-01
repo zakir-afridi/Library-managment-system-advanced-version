@@ -31,9 +31,8 @@
     <logger name="org.apache.poi"    level="ERROR"/>
     <logger name="com.sun.mail"      level="WARN"/>
 
-    <!-- App code: INFO+ to both console and file -->
+    <!-- App code: WARN+ to console for clean terminal, full INFO+ to file -->
     <logger name="com.library" level="INFO" additivity="false">
-        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
 
