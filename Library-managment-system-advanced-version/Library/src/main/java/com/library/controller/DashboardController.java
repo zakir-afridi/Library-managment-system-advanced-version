@@ -475,6 +475,11 @@ public class DashboardController {
     @FXML public void showReports()     { navigateCenter("/com/library/ui/ReportsView.fxml",          "— Enterprise Reports & BI",     reportsBtn); }
     @FXML public void showSettings()    { navigateCenter("/com/library/ui/Settings.fxml",             "— System Settings & Config",    settingsBtn); }
 
+    @FXML public void addNewBook()   { showBooks(); }
+    @FXML public void addNewMember() { showMembers(); }
+    @FXML public void issueBook()    { showIssueReturn(); }
+    @FXML public void returnBook()   { showIssueReturn(); }
+
     public void navigateCenter(String fxmlPath, String moduleTitle, Button activeBtn) {
         setActiveButton(activeBtn);
         if (moduleText != null) moduleText.setText(moduleTitle);
