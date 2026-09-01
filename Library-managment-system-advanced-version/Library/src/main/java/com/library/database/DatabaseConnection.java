@@ -283,6 +283,68 @@ public class DatabaseConnection {
                 )
             """);
 
+            // ── book_copies (Physical Copies) ──────────────────────────────
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS book_copies (
+                    copy_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    book_id          INTEGER NOT NULL,
+                    copy_code        TEXT    NOT NULL UNIQUE,
+                    barcode          TEXT    UNIQUE,
+                    status           TEXT    NOT NULL DEFAULT 'Available',
+                    condition        TEXT    DEFAULT 'Good',
+                    shelf_location   TEXT,
+                    price            REAL    DEFAULT 0.0,
+                    acquisition_date TEXT    NOT NULL DEFAULT (date('now')),
+                    created_at       TEXT    NOT NULL DEFAULT (datetime('now')),
+                    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+                )
+            """);
+
+            // ── authors & book_authors ─────────────────────────────────────
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS authors (
+                    author_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name        TEXT    NOT NULL UNIQUE,
+                    biography   TEXT,
+                    status      TEXT    NOT NULL DEFAULT 'Active'
+                )
+            """);
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS book_authors (
+                    book_id   INTEGER NOT NULL,
+                    author_id INTEGER NOT NULL,
+                    PRIMARY KEY (book_id, author_id),
+                    FOREIGN KEY (book_id)   REFERENCES books(book_id) ON DELETE CASCADE,
+                    FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
+                )
+            """);
+
+            // ── book_categories ────────────────────────────────────────────
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS book_categories (
+                    book_id     INTEGER NOT NULL,
+                    category_id INTEGER NOT NULL,
+                    PRIMARY KEY (book_id, category_id),
+                    FOREIGN KEY (book_id)     REFERENCES books(book_id) ON DELETE CASCADE,
+                    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
+                )
+            """);
+
+            // ── audit_logs ─────────────────────────────────────────────────
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    audit_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id     INTEGER,
+                    username    TEXT,
+                    action      TEXT    NOT NULL,
+                    entity_type TEXT    NOT NULL,
+                    entity_id   TEXT,
+                    details     TEXT,
+                    ip_address  TEXT,
+                    timestamp   TEXT    NOT NULL DEFAULT (datetime('now'))
+                )
+            """);
+
             // ── id_counters ───────────────────────────────────────────────
             s.execute("""
                 CREATE TABLE IF NOT EXISTS id_counters (
@@ -291,6 +353,7 @@ public class DatabaseConnection {
                 )
             """);
             s.execute("INSERT OR IGNORE INTO id_counters (entity, last_id) VALUES ('BK', 0)");
+            s.execute("INSERT OR IGNORE INTO id_counters (entity, last_id) VALUES ('CP', 0)");
             s.execute("INSERT OR IGNORE INTO id_counters (entity, last_id) VALUES ('ST', 0)");
             s.execute("INSERT OR IGNORE INTO id_counters (entity, last_id) VALUES ('MB', 0)");
             s.execute("INSERT OR IGNORE INTO id_counters (entity, last_id) VALUES ('EP', 0)");
@@ -301,6 +364,10 @@ public class DatabaseConnection {
             s.execute("CREATE INDEX IF NOT EXISTS idx_books_category ON books(category)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_books_author   ON books(author)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_books_status   ON books(status)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_copies_book    ON book_copies(book_id)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_copies_status  ON book_copies(status)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_copies_code    ON book_copies(copy_code)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_copies_barcode ON book_copies(barcode)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_members_sid    ON members(student_id)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_members_name   ON members(name)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_members_email  ON members(email)");
@@ -316,6 +383,10 @@ public class DatabaseConnection {
             s.execute("CREATE INDEX IF NOT EXISTS idx_email_status   ON email_queue(status, attempts)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_publishers_name ON publishers(name)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_authors_name   ON authors(name)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_audit_action   ON audit_logs(action)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_audit_entity   ON audit_logs(entity_type, entity_id)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_audit_time     ON audit_logs(timestamp)");
         }
 
         runMigrations(c);
@@ -335,6 +406,7 @@ public class DatabaseConnection {
             "ALTER TABLE books        ADD COLUMN cover_url TEXT",
             "ALTER TABLE reservations ADD COLUMN expires_at TEXT",
             "ALTER TABLE transactions ADD COLUMN handled_by TEXT",
+            "ALTER TABLE transactions ADD COLUMN copy_id INTEGER",
             // v2 legacy safety
             "ALTER TABLE members   ADD COLUMN archived_date TEXT",
             "ALTER TABLE books     ADD COLUMN archived_date TEXT",
@@ -352,7 +424,50 @@ public class DatabaseConnection {
         try (Statement s = c.createStatement()) {
             s.execute("CREATE INDEX IF NOT EXISTS idx_books_code   ON books(book_code)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_members_code ON members(member_code)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_tx_copy      ON transactions(copy_id)");
         } catch (SQLException ignored) {}
+
+        // Auto-generate BookCopy entries for books that don't have copies yet
+        migrateBookCopies(c);
+    }
+
+    private static void migrateBookCopies(Connection c) {
+        String countSql = "SELECT COUNT(*) FROM book_copies";
+        try (Statement s = c.createStatement(); ResultSet rs = s.executeQuery(countSql)) {
+            if (rs.next() && rs.getInt(1) == 0) {
+                // Generate initial copies for existing books
+                String bookSql = "SELECT book_id, quantity, available_qty, shelf_location FROM books";
+                try (Statement bs = c.createStatement(); ResultSet brs = bs.executeQuery(bookSql)) {
+                    String insertCopy = "INSERT INTO book_copies (book_id, copy_code, barcode, status, shelf_location) VALUES (?, ?, ?, ?, ?)";
+                    try (PreparedStatement ps = c.prepareStatement(insertCopy)) {
+                        int copyIdx = 1;
+                        while (brs.next()) {
+                            int bookId = brs.getInt("book_id");
+                            int qty = Math.max(1, brs.getInt("quantity"));
+                            int avail = brs.getInt("available_qty");
+                            String shelf = brs.getString("shelf_location");
+
+                            for (int i = 1; i <= qty; i++) {
+                                String code = String.format("CP-%06d", copyIdx);
+                                String barcode = String.format("BC%08d", copyIdx);
+                                String status = (i <= avail) ? "Available" : "Issued";
+                                ps.setInt(1, bookId);
+                                ps.setString(2, code);
+                                ps.setString(3, barcode);
+                                ps.setString(4, status);
+                                ps.setString(5, shelf);
+                                ps.addBatch();
+                                copyIdx++;
+                            }
+                        }
+                        ps.executeBatch();
+                        LOG.info("Auto-migrated {} physical book copies for inventory.", copyIdx - 1);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            LOG.warn("Book copies migration notice: {}", e.getMessage());
+        }
     }
 
     // ── Seed ──────────────────────────────────────────────────────────────────

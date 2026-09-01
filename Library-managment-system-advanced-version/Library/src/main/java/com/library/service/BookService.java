@@ -29,6 +29,7 @@ public class BookService {
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
     public boolean addBook(Book book) {
+        com.library.validation.BookValidator.validate(book);
         String bookCode = IdGenerator.next(IdGenerator.Type.BOOK);
         String sql = """
             INSERT INTO books (isbn, book_name, author, publisher, publication_year,
@@ -36,32 +37,60 @@ public class BookService {
                                status, shelf_location, cover_image, cover_url, created_at, book_code)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """;
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1,  book.getIsbn());
-            ps.setString(2,  book.getBookName());
-            ps.setString(3,  book.getAuthor());
-            ps.setString(4,  book.getPublisher());
-            ps.setInt(5,     book.getPublicationYear());
-            ps.setString(6,  book.getEdition());
-            ps.setString(7,  book.getCategory());
-            ps.setString(8,  book.getDescription());
-            ps.setInt(9,     book.getQuantity());
-            ps.setInt(10,    book.getAvailableQty());
-            ps.setString(11, book.getStatus());
-            ps.setString(12, book.getShelfLocation());
-            ps.setBytes(13,  book.getCoverImage());
-            ps.setString(14, book.getCoverUrl());
-            ps.setString(15, LocalDate.now().toString());
-            ps.setString(16, bookCode);
-            boolean ok = ps.executeUpdate() > 0;
-            if (ok) {
-                invalidateCache();
-                SerialNumberService.getInstance().resequenceBooks();
+        try (Connection c = DatabaseConnection.getConnection()) {
+            c.setAutoCommit(false);
+            int newBookId = 0;
+            try (PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1,  book.getIsbn());
+                ps.setString(2,  book.getBookName());
+                ps.setString(3,  book.getAuthor());
+                ps.setString(4,  book.getPublisher());
+                ps.setInt(5,     book.getPublicationYear());
+                ps.setString(6,  book.getEdition());
+                ps.setString(7,  book.getCategory());
+                ps.setString(8,  book.getDescription());
+                ps.setInt(9,     book.getQuantity());
+                ps.setInt(10,    book.getAvailableQty());
+                ps.setString(11, book.getStatus());
+                ps.setString(12, book.getShelfLocation());
+                ps.setBytes(13,  book.getCoverImage());
+                ps.setString(14, book.getCoverUrl());
+                ps.setString(15, LocalDate.now().toString());
+                ps.setString(16, bookCode);
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) newBookId = rs.getInt(1);
+                }
             }
-            return ok;
+
+            if (newBookId > 0) {
+                book.setBookId(newBookId);
+                // Create physical copy records
+                String copySql = "INSERT INTO book_copies (book_id, copy_code, barcode, status, condition, shelf_location, acquisition_date) VALUES (?, ?, ?, ?, 'Good', ?, ?)";
+                try (PreparedStatement cps = c.prepareStatement(copySql)) {
+                    for (int i = 1; i <= book.getQuantity(); i++) {
+                        String copyCode = IdGenerator.next(IdGenerator.Type.BOOK).replace("BK", "CP");
+                        String barcode = "BC" + System.currentTimeMillis() % 100000000 + i;
+                        String status = (i <= book.getAvailableQty()) ? "Available" : "Issued";
+                        cps.setInt(1, newBookId);
+                        cps.setString(2, copyCode);
+                        cps.setString(3, barcode);
+                        cps.setString(4, status);
+                        cps.setString(5, book.getShelfLocation());
+                        cps.setString(6, LocalDate.now().toString());
+                        cps.addBatch();
+                    }
+                    cps.executeBatch();
+                }
+            }
+
+            c.commit();
+            invalidateCache();
+            SerialNumberService.getInstance().resequenceBooks();
+            AuditService.getInstance().log("BOOK_CREATED", "BOOK", String.valueOf(newBookId), "Added book: " + book.getBookName() + " (" + book.getQuantity() + " copies)");
+            return true;
         } catch (SQLException e) {
-            LOG.error("Error adding book: {}", e.getMessage());
+            LOG.error("Error adding book: {}", e.getMessage(), e);
             return false;
         }
     }

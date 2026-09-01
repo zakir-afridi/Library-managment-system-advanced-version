@@ -20,21 +20,24 @@ public class Transaction {
     public static final String CONDITION_DAMAGED = "Damaged";
     public static final String CONDITION_LOST    = "Lost";
 
-    private int       transactionId;
-    private int       bookId;
-    private int       memberId;
-    private String    bookName;       // denormalised for display
-    private String    author;         // denormalised for display
-    private String    memberName;     // denormalised for display
-    private String    studentId;      // denormalised for display
-    private LocalDate issueDate;
-    private LocalDate dueDate;
-    private LocalDate returnDate;
-    private double    fineAmount;
-    private boolean   finePaid;
-    private String    status;
-    private String    returnCondition;
-    private String    issuedBy;       // username of librarian
+    private int        transactionId;
+    private int        bookId;
+    private int        copyId;
+    private String     copyCode;
+    private int        memberId;
+    private String     bookName;       // denormalised for display
+    private String     author;         // denormalised for display
+    private String     memberName;     // denormalised for display
+    private String     studentId;      // denormalised for display
+    private LocalDate  issueDate;
+    private LocalDate  dueDate;
+    private LocalDate  returnDate;
+    private double     fineAmount;
+    private boolean    finePaid;
+    private String     status;
+    private String     returnCondition;
+    private String     issuedBy;       // username of librarian / counter operator
+    private String     handledBy;
 
     public Transaction() {
         this.issueDate  = LocalDate.now();
@@ -80,6 +83,12 @@ public class Transaction {
     public int       getBookId()                 { return bookId; }
     public void      setBookId(int v)            { this.bookId = v; }
 
+    public int       getCopyId()                 { return copyId; }
+    public void      setCopyId(int v)            { this.copyId = v; }
+
+    public String    getCopyCode()               { return copyCode != null ? copyCode : ""; }
+    public void      setCopyCode(String v)       { this.copyCode = v; }
+
     public int       getMemberId()               { return memberId; }
     public void      setMemberId(int v)          { this.memberId = v; }
 
@@ -107,6 +116,13 @@ public class Transaction {
     public double    getFineAmount()             { return fineAmount; }
     public void      setFineAmount(double v)     { this.fineAmount = v; }
 
+    public java.math.BigDecimal getFineAmountBigDecimal() {
+        return java.math.BigDecimal.valueOf(fineAmount).setScale(2, java.math.RoundingMode.HALF_UP);
+    }
+    public void setFineAmountBigDecimal(java.math.BigDecimal v) {
+        this.fineAmount = v != null ? v.doubleValue() : 0.0;
+    }
+
     public boolean   isFinePaid()                { return finePaid; }
     public void      setFinePaid(boolean v)      { this.finePaid = v; }
 
@@ -116,11 +132,11 @@ public class Transaction {
     public String    getReturnCondition()        { return returnCondition; }
     public void      setReturnCondition(String v){ this.returnCondition = v; }
 
-    public String    getIssuedBy()               { return issuedBy; }
-    public void      setIssuedBy(String v)       { this.issuedBy = v; }
+    public String    getIssuedBy()               { return issuedBy != null ? issuedBy : handledBy; }
+    public void      setIssuedBy(String v)       { this.issuedBy = v; this.handledBy = v; }
 
-    public String    getHandledBy()              { return issuedBy; }
-    public void      setHandledBy(String v)      { this.issuedBy = v; }
+    public String    getHandledBy()              { return handledBy != null ? handledBy : issuedBy; }
+    public void      setHandledBy(String v)      { this.handledBy = v; this.issuedBy = v; }
 
     // Legacy alias for old code that used IssueRecord
     public int       getBorrowId()               { return transactionId; }
