@@ -46,6 +46,7 @@ public class DashboardController {
     // ── Root & Layout ─────────────────────────────────────────────────────────
     @FXML private BorderPane rootPane;
     @FXML private VBox sidebar;
+    @FXML private ScrollPane sidebarContainer;
     @FXML private Text appTitleText;
     @FXML private Text moduleText;
     @FXML private Label userLabel;
@@ -132,6 +133,20 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+        if (rootPane != null && rootPane.getCenter() != null) {
+            dashboardCenter = rootPane.getCenter();
+        }
+        Platform.runLater(() -> {
+            if (rootPane != null) {
+                if (dashboardCenter == null) {
+                    dashboardCenter = rootPane.getCenter();
+                }
+                if (rootPane.getScene() != null) {
+                    rootPane.getScene().setUserData(this);
+                }
+            }
+        });
+
         setupTimeHorizon();
         setupTable();
         setupSearch();
@@ -141,7 +156,6 @@ public class DashboardController {
         if (AppConfig.getInstance().getBoolean(AppConfig.KEY_WEATHER_ENABLED, true)) {
             loadWeatherAsync();
         }
-        if (rootPane != null) dashboardCenter = rootPane.getCenter();
     }
 
     private void setupDynamicLibraryInfo() {
@@ -522,11 +536,17 @@ public class DashboardController {
 
     @FXML
     private void toggleSidebar() {
-        if (sidebar == null) return;
-        boolean visible = sidebar.isVisible();
-        sidebar.setVisible(!visible);
-        sidebar.setManaged(!visible);
-        sidebarToggleBtn.setText(visible ? "☰" : "✖");
+        if (sidebarContainer != null) {
+            boolean visible = sidebarContainer.isVisible();
+            sidebarContainer.setVisible(!visible);
+            sidebarContainer.setManaged(!visible);
+            sidebarToggleBtn.setText(visible ? "⋯" : "⋮");
+        } else if (sidebar != null) {
+            boolean visible = sidebar.isVisible();
+            sidebar.setVisible(!visible);
+            sidebar.setManaged(!visible);
+            sidebarToggleBtn.setText(visible ? "⋯" : "⋮");
+        }
     }
 
     @FXML

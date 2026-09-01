@@ -20,15 +20,17 @@
         <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="12">
             <padding><Insets top="8" right="16" bottom="8" left="16"/></padding>
 
-            <!-- Brand + Logo + Hamburger -->
+            <!-- Brand + Logo + 3-Dots Sidebar Toggle -->
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Text text="📖" styleClass="brand-logo"/>
                 <VBox spacing="0" alignment="CENTER_LEFT">
                     <Text fx:id="appTitleText" text="LibraCore Pro" styleClass="app-title"/>
                     <Text text="Library Management System" styleClass="app-subtitle"/>
                 </VBox>
-                <Button fx:id="sidebarToggleBtn" text="☰" onAction="#toggleSidebar"
-                        styleClass="hamburger-btn"/>
+                <Button fx:id="sidebarToggleBtn" text="⋮" onAction="#toggleSidebar"
+                        styleClass="three-dots-btn">
+                    <tooltip><Tooltip text="Toggle Navigation Bar"/></tooltip>
+                </Button>
             </HBox>
 
             <!-- Center Search Bar with Ctrl+K badge -->
@@ -70,7 +72,9 @@
 
                 <!-- Theme Toggle Button -->
                 <Button fx:id="themeToggleBtn" text="🌙" onAction="#toggleTheme"
-                        styleClass="theme-btn"/>
+                        styleClass="theme-btn">
+                    <tooltip><Tooltip text="Toggle Dark/Light Mode"/></tooltip>
+                </Button>
 
                 <!-- User Profile Chip -->
                 <HBox alignment="CENTER" spacing="8" styleClass="user-profile-chip">
@@ -95,9 +99,9 @@
          LEFT SIDEBAR — Clean Authentic Module Navigation Only
          ═══════════════════════════════════════════════════════════════════════ -->
     <left>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+        <ScrollPane fx:id="sidebarContainer" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
                     style="-fx-background-color: transparent; -fx-background: transparent;">
-            <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="230" spacing="6">
+            <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="230" minWidth="0" spacing="6">
                 <padding><Insets top="12" bottom="12" left="10" right="10"/></padding>
 
                 <Label text="MAIN MODULES" styleClass="sidebar-header"/>
