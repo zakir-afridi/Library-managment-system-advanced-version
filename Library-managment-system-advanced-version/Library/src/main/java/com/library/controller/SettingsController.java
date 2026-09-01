@@ -1,18 +1,27 @@
 package com.library.controller;
 
-import com.library.LibraCoreApp;
-import com.library.api.ExchangeRateClient;
 import com.library.config.AppConfig;
 import com.library.config.ThemeManager;
-import com.library.email.EmailService;
+import com.library.database.BackupService;
+import com.library.model.*;
+import com.library.security.PasswordUtil;
 import com.library.security.SessionManager;
-import com.library.service.BackupScheduler;
-import com.library.util.AsyncRunner;
+import com.library.service.*;
 import com.library.util.ToastNotification;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -20,300 +29,1052 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.net.URL;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class SettingsController {
+public class SettingsController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SettingsController.class);
 
-    // General
-    @FXML private Button    backBtn;
-    @FXML private Button    saveBtn;
-    @FXML private TextField libraryNameField;
-    @FXML private TextField libraryAddressField;
-    @FXML private TextField libraryPhoneField;
-    @FXML private TextField libraryEmailField;
-    @FXML private ComboBox<String> currencyCombo;
-    @FXML private ComboBox<String> dateFormatCombo;
-    @FXML private ComboBox<String> itemsPerPageCombo;
-    @FXML private ComboBox<String> defaultLimitCombo;
+    // ── Services ──
+    private final LibraryInfoService libraryInfoService = LibraryInfoService.getInstance();
+    private final EmployeeService employeeService       = new EmployeeService();
+    private final CategoryService categoryService       = new CategoryService();
+    private final PublisherService publisherService     = new PublisherService();
+    private final MeasurementService measurementService = new MeasurementService();
+    private final UserService userService               = new UserService();
+    private final BackupService backupService           = new BackupService();
 
-    // Book settings
-    @FXML private Spinner<Integer> loanDaysSpinner;
-    @FXML private Spinner<Double>  fineRateSpinner;
-    @FXML private Spinner<Integer> gracePeriodSpinner;
-    @FXML private Spinner<Integer> maxBooksSpinner;
+    // ── Header & Navigation ──
+    @FXML private Button backBtn;
+    @FXML private Button themeToggleBtn;
+    @FXML private Label settingsSubtitleLabel;
 
-    // Appearance
-    @FXML private ToggleButton themeToggle;
-    @FXML private Label        themeStatusLabel;
+    @FXML private Button tabInfoBtn;
+    @FXML private Button tabStaffBtn;
+    @FXML private Button tabCategoriesBtn;
+    @FXML private Button tabPublishersBtn;
+    @FXML private Button tabMeasurementBtn;
+    @FXML private Button tabAppSettingsBtn;
+    @FXML private Button tabAccountBtn;
+    @FXML private Button tabDatabaseBtn;
+    @FXML private Button tabPdfBtn;
 
-    // Notifications
-    @FXML private CheckBox         overdueAlertCheck;
-    @FXML private Spinner<Integer> dueSoonDaysSpinner;
+    // ── Tab Panes ──
+    @FXML private StackPane contentStack;
+    @FXML private VBox infoPane;
+    @FXML private VBox staffPane;
+    @FXML private VBox categoriesPane;
+    @FXML private VBox publishersPane;
+    @FXML private VBox measurementPane;
+    @FXML private VBox appSettingsPane;
+    @FXML private VBox accountPane;
+    @FXML private VBox databasePane;
+    @FXML private VBox pdfPane;
 
-    // Email (v3)
-    @FXML private TextField     smtpHostField;
-    @FXML private TextField     smtpPortField;
-    @FXML private TextField     smtpUserField;
-    @FXML private PasswordField smtpPasswordField;
-    @FXML private TextField     emailFromNameField;
-    @FXML private Button        testEmailBtn;
-    @FXML private Label         emailStatusLabel;
+    // ── Tab 1: Information Controls ──
+    @FXML private TextField infoLibraryNameField;
+    @FXML private TextField infoInstitutionField;
+    @FXML private TextField infoEmailField;
+    @FXML private TextField infoContactField;
+    @FXML private TextField infoAddressField;
+    @FXML private TextField infoWebsiteField;
+    @FXML private Label infoStatusLabel;
+    @FXML private Button saveInfoBtn;
 
-    // Weather (v3)
-    @FXML private TextField weatherCityField;
-    @FXML private CheckBox  weatherEnabledCheck;
+    // ── Tab 2: Staff Controls ──
+    @FXML private VBox staffFormBox;
+    @FXML private Text staffFormTitle;
+    @FXML private TextField staffNameInput;
+    @FXML private ComboBox<String> staffRoleCombo;
+    @FXML private TextField staffContactInput;
+    @FXML private TextField staffEmailInput;
+    @FXML private TextField staffDeptInput;
+    @FXML private ComboBox<String> staffStatusCombo;
+    @FXML private TextField staffSearchField;
+    @FXML private ComboBox<String> staffRoleFilter;
+    @FXML private ComboBox<String> staffStatusFilter;
+    @FXML private TableView<Employee> staffTable;
+    @FXML private TableColumn<Employee, String> colStaffCode;
+    @FXML private TableColumn<Employee, String> colStaffName;
+    @FXML private TableColumn<Employee, String> colStaffRole;
+    @FXML private TableColumn<Employee, String> colStaffContact;
+    @FXML private TableColumn<Employee, String> colStaffEmail;
+    @FXML private TableColumn<Employee, String> colStaffStatus;
+    @FXML private TableColumn<Employee, Void> colStaffActions;
+    private Employee editingStaff = null;
 
-    // Backup
-    @FXML private Label backupStatusLabel;
+    // ── Tab 3: Category Controls ──
+    @FXML private VBox categoryFormBox;
+    @FXML private Text categoryFormTitle;
+    @FXML private TextField categoryNameInput;
+    @FXML private TextField categoryDescInput;
+    @FXML private ComboBox<String> categoryStatusCombo;
+    @FXML private TextField categorySearchField;
+    @FXML private TableView<Category> categoryTable;
+    @FXML private TableColumn<Category, Integer> colCatId;
+    @FXML private TableColumn<Category, String> colCatName;
+    @FXML private TableColumn<Category, String> colCatDesc;
+    @FXML private TableColumn<Category, String> colCatStatus;
+    @FXML private TableColumn<Category, Void> colCatActions;
+    private Category editingCategory = null;
 
-    private final AppConfig config = AppConfig.getInstance();
+    // ── Tab 4: Publisher Controls ──
+    @FXML private VBox publisherFormBox;
+    @FXML private Text publisherFormTitle;
+    @FXML private TextField publisherNameInput;
+    @FXML private TextField publisherContactInput;
+    @FXML private TextField publisherAddressInput;
+    @FXML private TextField publisherSearchField;
+    @FXML private TableView<Publisher> publisherTable;
+    @FXML private TableColumn<Publisher, Integer> colPubId;
+    @FXML private TableColumn<Publisher, String> colPubName;
+    @FXML private TableColumn<Publisher, String> colPubContact;
+    @FXML private TableColumn<Publisher, String> colPubAddress;
+    @FXML private TableColumn<Publisher, String> colPubStatus;
+    @FXML private TableColumn<Publisher, Void> colPubActions;
+    private Publisher editingPublisher = null;
 
-    // ── Init ──────────────────────────────────────────────────────────────────
+    // ── Tab 5: Measurement Controls ──
+    @FXML private HBox unitFormBox;
+    @FXML private TextField unitNameInput;
+    @FXML private TextField unitSymbolInput;
+    @FXML private TableView<MeasurementUnit> unitTable;
+    @FXML private TableColumn<MeasurementUnit, Integer> colUnitId;
+    @FXML private TableColumn<MeasurementUnit, String> colUnitName;
+    @FXML private TableColumn<MeasurementUnit, String> colUnitSymbol;
+    @FXML private TableColumn<MeasurementUnit, String> colUnitStatus;
+    @FXML private TableColumn<MeasurementUnit, Void> colUnitActions;
+
+    // ── Tab 6: App Settings Controls ──
+    @FXML private ComboBox<String> appCurrencyCombo;
+    @FXML private TextField appTaxRateField;
+    @FXML private Spinner<Integer> appLoanDaysSpinner;
+    @FXML private Spinner<Double> appFineRateSpinner;
+    @FXML private Spinner<Integer> appGracePeriodSpinner;
+    @FXML private Spinner<Integer> appMaxBooksSpinner;
+    @FXML private ComboBox<String> appDateFormatCombo;
+    @FXML private ComboBox<Integer> appItemsPerPageCombo;
+
+    // ── Tab 7: Account Settings Controls ──
+    @FXML private TextField accountCurrentUsernameField;
+    @FXML private TextField accountNewUsernameField;
+    @FXML private PasswordField accountCurrentPasswordField;
+    @FXML private PasswordField accountNewPasswordField;
+    @FXML private PasswordField accountConfirmPasswordField;
+    @FXML private TextField accountRecoveryKeyField;
+    @FXML private Label accountStatusLabel;
+
+    // ── Tab 8: Database Controls ──
+    @FXML private Label dbBackupStatusLabel;
+
+    // ── Tab 9: PDF Settings Controls ──
+    @FXML private ComboBox<String> pdfPaperSizeCombo;
+    @FXML private ComboBox<String> pdfLanguageCombo;
+    @FXML private CheckBox pdfIssueSlipCheck;
+    @FXML private CheckBox pdfReturnSlipCheck;
+    @FXML private CheckBox pdfReceiptCheck;
+    @FXML private CheckBox pdfReportCheck;
+    @FXML private CheckBox pdfMemberReportCheck;
+    @FXML private Label pdfStatusLabel;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        initThemeLabel();
+        initNavigation();
+        loadLibraryInfo();
+        initStaffTab();
+        initCategoriesTab();
+        initPublishersTab();
+        initMeasurementTab();
+        initAppSettingsTab();
+        initAccountTab();
+        initPdfTab();
+    }
+
+    private void initThemeLabel() {
+        if (themeToggleBtn != null) {
+            boolean dark = ThemeManager.getInstance().isDark();
+            themeToggleBtn.setText(dark ? "☀️ Light" : "🌙 Dark");
+        }
+    }
+
+    // ── Sub-navigation Switching ──
+
+    private void initNavigation() {
+        showInfoTab();
+    }
+
+    private void switchTab(Button activeBtn, VBox targetPane) {
+        Button[] buttons = {tabInfoBtn, tabStaffBtn, tabCategoriesBtn, tabPublishersBtn, tabMeasurementBtn, tabAppSettingsBtn, tabAccountBtn, tabDatabaseBtn, tabPdfBtn};
+        for (Button b : buttons) {
+            if (b != null) {
+                b.getStyleClass().remove("active");
+            }
+        }
+        if (activeBtn != null) {
+            if (!activeBtn.getStyleClass().contains("active")) {
+                activeBtn.getStyleClass().add("active");
+            }
+        }
+
+        VBox[] panes = {infoPane, staffPane, categoriesPane, publishersPane, measurementPane, appSettingsPane, accountPane, databasePane, pdfPane};
+        for (VBox p : panes) {
+            if (p != null) {
+                p.setVisible(false);
+                p.setManaged(false);
+            }
+        }
+        if (targetPane != null) {
+            targetPane.setVisible(true);
+            targetPane.setManaged(true);
+        }
+    }
+
+    @FXML public void showInfoTab() { switchTab(tabInfoBtn, infoPane); loadLibraryInfo(); }
+    @FXML public void showStaffTab() { switchTab(tabStaffBtn, staffPane); loadStaffTable(); }
+    @FXML public void showCategoriesTab() { switchTab(tabCategoriesBtn, categoriesPane); loadCategoriesTable(); }
+    @FXML public void showPublishersTab() { switchTab(tabPublishersBtn, publishersPane); loadPublishersTable(); }
+    @FXML public void showMeasurementTab() { switchTab(tabMeasurementBtn, measurementPane); loadMeasurementTable(); }
+    @FXML public void showAppSettingsTab() { switchTab(tabAppSettingsBtn, appSettingsPane); loadAppSettings(); }
+    @FXML public void showAccountTab() { switchTab(tabAccountBtn, accountPane); loadAccountInfo(); }
+    @FXML public void showDatabaseTab() { switchTab(tabDatabaseBtn, databasePane); }
+    @FXML public void showPdfTab() { switchTab(tabPdfBtn, pdfPane); loadPdfSettings(); }
+
+    // ── Tab 1: Information ──
+
+    private void loadLibraryInfo() {
+        LibraryInfo info = libraryInfoService.getLibraryInfo();
+        if (infoLibraryNameField != null) infoLibraryNameField.setText(info.getLibraryName());
+        if (infoInstitutionField != null) infoInstitutionField.setText(info.getInstitutionName());
+        if (infoEmailField != null) infoEmailField.setText(info.getEmail());
+        if (infoContactField != null) infoContactField.setText(info.getContactNumber());
+        if (infoAddressField != null) infoAddressField.setText(info.getAddress());
+        if (infoWebsiteField != null) infoWebsiteField.setText(info.getWebsite());
+        if (settingsSubtitleLabel != null) {
+            settingsSubtitleLabel.setText(info.getLibraryName() + " — System Preferences");
+        }
+    }
 
     @FXML
-    public void initialize() {
-        populateCombos();
-        loadCurrentValues();
-        updateThemeUI();
-    }
+    public void saveLibraryInfo() {
+        String libName = infoLibraryNameField.getText() != null ? infoLibraryNameField.getText().trim() : "";
+        String instName = infoInstitutionField.getText() != null ? infoInstitutionField.getText().trim() : "";
+        String email = infoEmailField.getText() != null ? infoEmailField.getText().trim() : "";
+        String contact = infoContactField.getText() != null ? infoContactField.getText().trim() : "";
+        String address = infoAddressField.getText() != null ? infoAddressField.getText().trim() : "";
+        String website = infoWebsiteField.getText() != null ? infoWebsiteField.getText().trim() : "";
 
-    private void populateCombos() {
-        if (currencyCombo != null)
-            currencyCombo.getItems().addAll("PKR", "USD", "EUR", "GBP", "INR", "SAR", "AED");
-        if (dateFormatCombo != null)
-            dateFormatCombo.getItems().addAll("dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd");
-        if (itemsPerPageCombo != null)
-            itemsPerPageCombo.getItems().addAll("10", "25", "50", "100", "200");
-        if (defaultLimitCombo != null)
-            defaultLimitCombo.getItems().addAll("10", "25", "50", "100");
-
-        if (loanDaysSpinner != null)
-            loanDaysSpinner.setValueFactory(
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 90, 14));
-        if (fineRateSpinner != null)
-            fineRateSpinner.setValueFactory(
-                new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1000.0, 5.0, 0.5));
-        if (gracePeriodSpinner != null)
-            gracePeriodSpinner.setValueFactory(
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 14, 2));
-        if (maxBooksSpinner != null)
-            maxBooksSpinner.setValueFactory(
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 5));
-        if (dueSoonDaysSpinner != null)
-            dueSoonDaysSpinner.setValueFactory(
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 7, 2));
-    }
-
-    private void loadCurrentValues() {
-        if (libraryNameField    != null) libraryNameField   .setText(nvl(config.getLibraryName()));
-        if (libraryAddressField != null) libraryAddressField.setText(nvl(config.get(AppConfig.KEY_LIBRARY_ADDRESS)));
-        if (libraryPhoneField   != null) libraryPhoneField  .setText(nvl(config.get(AppConfig.KEY_LIBRARY_PHONE)));
-        if (libraryEmailField   != null) libraryEmailField  .setText(nvl(config.get(AppConfig.KEY_LIBRARY_EMAIL)));
-
-        if (currencyCombo     != null) currencyCombo    .setValue(config.getCurrency());
-        if (dateFormatCombo   != null) dateFormatCombo  .setValue(config.getDateFormat());
-        if (itemsPerPageCombo != null) itemsPerPageCombo.setValue(String.valueOf(config.getItemsPerPage()));
-        if (defaultLimitCombo != null) defaultLimitCombo.setValue(String.valueOf(config.getDefaultLimit()));
-
-        if (loanDaysSpinner    != null) loanDaysSpinner   .getValueFactory().setValue(config.getLoanDays());
-        if (fineRateSpinner    != null) fineRateSpinner   .getValueFactory().setValue(config.getFineRate());
-        if (gracePeriodSpinner != null) gracePeriodSpinner.getValueFactory().setValue(config.getGracePeriod());
-        if (maxBooksSpinner    != null) maxBooksSpinner   .getValueFactory().setValue(config.getMaxBooks());
-
-        if (overdueAlertCheck  != null) overdueAlertCheck.setSelected(config.isOverdueAlert());
-        if (dueSoonDaysSpinner != null) dueSoonDaysSpinner.getValueFactory().setValue(config.getDueSoonDays());
-
-        if (smtpHostField      != null) smtpHostField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_HOST)));
-        if (smtpPortField      != null) smtpPortField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_PORT)));
-        if (smtpUserField      != null) smtpUserField    .setText(nvl(config.get(AppConfig.KEY_EMAIL_USER)));
-        if (smtpPasswordField  != null) smtpPasswordField.setText(nvl(config.get(AppConfig.KEY_EMAIL_PASSWORD)));
-        if (emailFromNameField != null) emailFromNameField.setText(nvl(config.get(AppConfig.KEY_EMAIL_FROM_NAME)));
-
-        if (weatherCityField    != null) weatherCityField  .setText(nvl(config.get(AppConfig.KEY_WEATHER_CITY)));
-        if (weatherEnabledCheck != null) weatherEnabledCheck.setSelected(
-            config.getBoolean(AppConfig.KEY_WEATHER_ENABLED, true));
-    }
-
-    // ── Save ──────────────────────────────────────────────────────────────────
-
-    @FXML
-    private void saveSettings() {
-        if (libraryNameField    != null) config.set(AppConfig.KEY_LIBRARY_NAME,    libraryNameField.getText().trim());
-        if (libraryAddressField != null) config.set(AppConfig.KEY_LIBRARY_ADDRESS, libraryAddressField.getText().trim());
-        if (libraryPhoneField   != null) config.set(AppConfig.KEY_LIBRARY_PHONE,   libraryPhoneField.getText().trim());
-        if (libraryEmailField   != null) config.set(AppConfig.KEY_LIBRARY_EMAIL,   libraryEmailField.getText().trim());
-
-        if (currencyCombo     != null && currencyCombo.getValue()     != null) config.set(AppConfig.KEY_CURRENCY,       currencyCombo.getValue());
-        if (dateFormatCombo   != null && dateFormatCombo.getValue()   != null) config.set(AppConfig.KEY_DATE_FORMAT,    dateFormatCombo.getValue());
-        if (itemsPerPageCombo != null && itemsPerPageCombo.getValue() != null) config.set(AppConfig.KEY_ITEMS_PER_PAGE, itemsPerPageCombo.getValue());
-        if (defaultLimitCombo != null && defaultLimitCombo.getValue() != null) config.set(AppConfig.KEY_DEFAULT_LIMIT,  defaultLimitCombo.getValue());
-
-        if (loanDaysSpinner    != null) config.set(AppConfig.KEY_LOAN_DAYS,    String.valueOf(loanDaysSpinner.getValue()));
-        if (fineRateSpinner    != null) config.set(AppConfig.KEY_FINE_RATE,    String.valueOf(fineRateSpinner.getValue()));
-        if (gracePeriodSpinner != null) config.set(AppConfig.KEY_GRACE_PERIOD, String.valueOf(gracePeriodSpinner.getValue()));
-        if (maxBooksSpinner    != null) config.set(AppConfig.KEY_MAX_BOOKS,    String.valueOf(maxBooksSpinner.getValue()));
-
-        if (overdueAlertCheck  != null) config.set(AppConfig.KEY_OVERDUE_ALERT, String.valueOf(overdueAlertCheck.isSelected()));
-        if (dueSoonDaysSpinner != null) config.set(AppConfig.KEY_DUE_SOON_DAYS, String.valueOf(dueSoonDaysSpinner.getValue()));
-
-        if (smtpHostField      != null) config.set(AppConfig.KEY_EMAIL_HOST,      smtpHostField.getText().trim());
-        if (smtpPortField      != null) config.set(AppConfig.KEY_EMAIL_PORT,      smtpPortField.getText().trim());
-        if (smtpUserField      != null) config.set(AppConfig.KEY_EMAIL_USER,      smtpUserField.getText().trim());
-        if (smtpPasswordField  != null) config.set(AppConfig.KEY_EMAIL_PASSWORD,  smtpPasswordField.getText().trim());
-        if (emailFromNameField != null) config.set(AppConfig.KEY_EMAIL_FROM_NAME, emailFromNameField.getText().trim());
-
-        if (weatherCityField    != null) config.set(AppConfig.KEY_WEATHER_CITY,    weatherCityField.getText().trim());
-        if (weatherEnabledCheck != null) config.set(AppConfig.KEY_WEATHER_ENABLED, String.valueOf(weatherEnabledCheck.isSelected()));
-
-        config.save();
-        ToastNotification.success(getScene(), "Settings saved successfully.");
-        LOG.info("Settings saved by user: {}", SessionManager.getInstance().getUsername());
-    }
-
-    // ── Email test ────────────────────────────────────────────────────────────
-
-    @FXML
-    private void testEmailConnection() {
-        if (smtpUserField == null || smtpUserField.getText().isBlank()) {
-            ToastNotification.warning(getScene(), "Enter SMTP username first.");
+        if (libName.isEmpty()) {
+            ToastNotification.warning(backBtn.getScene(), "Library Name is required.");
             return;
         }
-        saveSettings();
-        if (emailStatusLabel != null) emailStatusLabel.setText("Testing...");
-        AsyncRunner.run(
-            () -> EmailService.getInstance().isConfigured(),
-            configured -> {
-                if (emailStatusLabel != null)
-                    emailStatusLabel.setText(configured ? "Email configured" : "Not configured");
-                if (configured)
-                    ToastNotification.success(getScene(), "Email configuration looks valid.");
-                else
-                    ToastNotification.warning(getScene(), "Email not configured - check SMTP settings.");
-            },
-            err -> {
-                if (emailStatusLabel != null) emailStatusLabel.setText("Test failed");
-                ToastNotification.error(getScene(), "Email test failed: " + err.getMessage());
-            }
-        );
-    }
 
-    // ── Exchange rates ────────────────────────────────────────────────────────
-
-    @FXML
-    private void refreshExchangeRates() {
-        ToastNotification.info(getScene(), "Fetching exchange rates...");
-        AsyncRunner.run(
-            () -> ExchangeRateClient.getRates(config.getCurrency()),
-            rates -> {
-                if (rates.isEmpty())
-                    ToastNotification.warning(getScene(), "Exchange rates unavailable (offline?)");
-                else
-                    ToastNotification.success(getScene(), "Rates updated - " + rates.size() + " currencies loaded.");
-            },
-            err -> ToastNotification.error(getScene(), "Rate fetch failed: " + err.getMessage())
-        );
-    }
-
-    // ── Theme ─────────────────────────────────────────────────────────────────
-
-    @FXML
-    private void toggleTheme() {
-        ThemeManager.getInstance().toggle(getScene());
-        updateThemeUI();
-    }
-
-    private void updateThemeUI() {
-        boolean dark = ThemeManager.getInstance().isDark();
-        if (themeToggle != null) {
-            themeToggle.setSelected(dark);
-            themeToggle.setText(dark ? "Light Mode" : "Dark Mode");
-        }
-        if (themeStatusLabel != null)
-            themeStatusLabel.setText("Current: " + (dark ? "Dark" : "Light") + " Mode");
-    }
-
-    // ── Backup & Restore ──────────────────────────────────────────────────────
-
-    @FXML
-    private void backupDatabase() {
-        ToastNotification.info(getScene(), "Creating backup...");
-        AsyncRunner.run(
-            () -> {
-                try { return BackupScheduler.getInstance().backup(); }
-                catch (Exception e) { throw new RuntimeException(e); }
-            },
-            path -> {
-                if (backupStatusLabel != null)
-                    backupStatusLabel.setText("Backup: " + path.getFileName());
-                ToastNotification.success(getScene(), "Database backed up: " + path.getFileName());
-            },
-            err -> ToastNotification.error(getScene(), "Backup failed: " + err.getMessage())
-        );
-    }
-
-    @FXML
-    private void restoreDatabase() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select Backup File to Restore");
-        chooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("SQLite Database", "*.db"));
-        try {
-            Path backupDir = BackupScheduler.getInstance().getBackupDir();
-            chooser.setInitialDirectory(backupDir.toFile());
-        } catch (Exception ignored) {}
-
-        File file = chooser.showOpenDialog(getScene().getWindow());
-        if (file == null) return;
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Restore Database");
-        confirm.setHeaderText("Replace current database with: " + file.getName() + "?");
-        confirm.setContentText("This cannot be undone. The app will need to restart after restore.");
-        confirm.showAndWait().ifPresent(btn -> {
-            if (btn == ButtonType.OK) {
-                boolean ok = BackupScheduler.getInstance().restore(file.toPath());
-                if (ok)
-                    ToastNotification.success(getScene(), "Restored successfully. Please restart the application.");
-                else
-                    ToastNotification.error(getScene(), "Restore failed - see logs.");
-            }
-        });
-    }
-
-    // ── Navigation ────────────────────────────────────────────────────────────
-
-    @FXML
-    private void goBack() {
-        Scene scene = backBtn.getScene();
-        if (scene != null && scene.getUserData() instanceof DashboardController dc) {
-            dc.goBackToDashboard();
+        if (!email.isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            ToastNotification.warning(backBtn.getScene(), "Please enter a valid email address.");
             return;
         }
+
+        LibraryInfo info = new LibraryInfo(libName, instName, email, contact, address, website);
+        boolean saved = libraryInfoService.saveLibraryInfo(info);
+        if (saved) {
+            if (infoStatusLabel != null) infoStatusLabel.setText("✓ Information saved successfully!");
+            if (settingsSubtitleLabel != null) settingsSubtitleLabel.setText(libName + " — System Preferences");
+            ToastNotification.success(backBtn.getScene(), "Library information updated successfully.");
+        } else {
+            ToastNotification.error(backBtn.getScene(), "Could not save library information. Check database.");
+        }
+    }
+
+    // ── Tab 2: Staff / Counters ──
+
+    private void initStaffTab() {
+        if (staffRoleCombo != null) {
+            staffRoleCombo.setItems(FXCollections.observableArrayList(
+                "Librarian", "Assistant Librarian", "Library Staff", "Counter Operator", "Administrator"
+            ));
+            staffRoleCombo.getSelectionModel().selectFirst();
+        }
+        if (staffStatusCombo != null) {
+            staffStatusCombo.setItems(FXCollections.observableArrayList("Active", "Inactive"));
+            staffStatusCombo.getSelectionModel().selectFirst();
+        }
+        if (staffRoleFilter != null) {
+            staffRoleFilter.setItems(FXCollections.observableArrayList(
+                "All Roles", "Librarian", "Assistant Librarian", "Library Staff", "Counter Operator", "Administrator"
+            ));
+            staffRoleFilter.getSelectionModel().selectFirst();
+        }
+        if (staffStatusFilter != null) {
+            staffStatusFilter.setItems(FXCollections.observableArrayList("All Status", "Active", "Inactive"));
+            staffStatusFilter.getSelectionModel().selectFirst();
+        }
+
+        if (colStaffCode != null) colStaffCode.setCellValueFactory(new PropertyValueFactory<>("employeeCode"));
+        if (colStaffName != null) colStaffName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        if (colStaffRole != null) colStaffRole.setCellValueFactory(new PropertyValueFactory<>("designation"));
+        if (colStaffContact != null) colStaffContact.setCellValueFactory(new PropertyValueFactory<>("contact"));
+        if (colStaffEmail != null) colStaffEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+        if (colStaffStatus != null) colStaffStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        if (colStaffActions != null) {
+            colStaffActions.setCellFactory(param -> new TableCell<>() {
+                private final Button editBtn = new Button("✏️ Edit");
+                private final Button toggleBtn = new Button("🔄 Status");
+                private final Button deleteBtn = new Button("🗑️");
+                private final HBox box = new HBox(6, editBtn, toggleBtn, deleteBtn);
+                {
+                    box.setAlignment(Pos.CENTER);
+                    editBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #059669; -fx-text-fill: white; -fx-cursor: hand;");
+                    toggleBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #0d9488; -fx-text-fill: white; -fx-cursor: hand;");
+                    deleteBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+
+                    editBtn.setOnAction(e -> {
+                        Employee emp = getTableView().getItems().get(getIndex());
+                        editStaffMember(emp);
+                    });
+                    toggleBtn.setOnAction(e -> {
+                        Employee emp = getTableView().getItems().get(getIndex());
+                        toggleStaffStatus(emp);
+                    });
+                    deleteBtn.setOnAction(e -> {
+                        Employee emp = getTableView().getItems().get(getIndex());
+                        deleteStaffMember(emp);
+                    });
+                }
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setGraphic(empty ? null : box);
+                }
+            });
+        }
+    }
+
+    @FXML
+    public void toggleAddStaffForm() {
+        editingStaff = null;
+        if (staffFormTitle != null) staffFormTitle.setText("New Staff Member / Counter Operator");
+        clearStaffForm();
+        if (staffFormBox != null) {
+            staffFormBox.setVisible(!staffFormBox.isVisible());
+            staffFormBox.setManaged(staffFormBox.isVisible());
+        }
+    }
+
+    private void editStaffMember(Employee emp) {
+        if (emp == null) return;
+        editingStaff = emp;
+        if (staffFormTitle != null) staffFormTitle.setText("Edit Staff: " + emp.getName() + " (" + emp.getEmployeeCode() + ")");
+        if (staffNameInput != null) staffNameInput.setText(emp.getName());
+        if (staffRoleCombo != null) staffRoleCombo.setValue(emp.getDesignation());
+        if (staffContactInput != null) staffContactInput.setText(emp.getContact());
+        if (staffEmailInput != null) staffEmailInput.setText(emp.getEmail());
+        if (staffDeptInput != null) staffDeptInput.setText(emp.getDepartment());
+        if (staffStatusCombo != null) staffStatusCombo.setValue(emp.getStatus());
+
+        if (staffFormBox != null) {
+            staffFormBox.setVisible(true);
+            staffFormBox.setManaged(true);
+        }
+    }
+
+    private void toggleStaffStatus(Employee emp) {
+        if (emp == null) return;
+        String newStatus = "Active".equalsIgnoreCase(emp.getStatus()) ? "Inactive" : "Active";
+        emp.setStatus(newStatus);
+        boolean ok = employeeService.updateEmployee(emp);
+        if (ok) {
+            ToastNotification.success(backBtn.getScene(), emp.getName() + " status set to " + newStatus);
+            loadStaffTable();
+        }
+    }
+
+    private void deleteStaffMember(Employee emp) {
+        if (emp == null) return;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete staff member '" + emp.getName() + "' [" + emp.getEmployeeCode() + "]?", ButtonType.YES, ButtonType.NO);
+        alert.setTitle("Delete Staff");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+            boolean ok = employeeService.deleteEmployee(emp.getEmpId());
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Staff member deleted.");
+                loadStaffTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Cannot delete staff member with linked activity.");
+            }
+        }
+    }
+
+    @FXML
+    public void saveStaffMember() {
+        String name = staffNameInput.getText() != null ? staffNameInput.getText().trim() : "";
+        String role = staffRoleCombo.getValue() != null ? staffRoleCombo.getValue() : "Library Staff";
+        String contact = staffContactInput.getText() != null ? staffContactInput.getText().trim() : "";
+        String email = staffEmailInput.getText() != null ? staffEmailInput.getText().trim() : "";
+        String dept = staffDeptInput.getText() != null ? staffDeptInput.getText().trim() : "Circulation";
+        String status = staffStatusCombo.getValue() != null ? staffStatusCombo.getValue() : "Active";
+
+        if (name.isEmpty()) {
+            ToastNotification.warning(backBtn.getScene(), "Staff Name is required.");
+            return;
+        }
+
+        if (editingStaff == null) {
+            Employee emp = new Employee();
+            emp.setName(name);
+            emp.setDesignation(role);
+            emp.setContact(contact);
+            emp.setEmail(email);
+            emp.setDepartment(dept);
+            emp.setStatus(status);
+            emp.setJoinDate(LocalDate.now());
+
+            boolean ok = employeeService.addEmployee(emp);
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "New staff member " + name + " registered.");
+                cancelStaffForm();
+                loadStaffTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not register staff member.");
+            }
+        } else {
+            editingStaff.setName(name);
+            editingStaff.setDesignation(role);
+            editingStaff.setContact(contact);
+            editingStaff.setEmail(email);
+            editingStaff.setDepartment(dept);
+            editingStaff.setStatus(status);
+
+            boolean ok = employeeService.updateEmployee(editingStaff);
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Staff member " + name + " updated.");
+                cancelStaffForm();
+                loadStaffTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not update staff member.");
+            }
+        }
+    }
+
+    @FXML
+    public void cancelStaffForm() {
+        editingStaff = null;
+        clearStaffForm();
+        if (staffFormBox != null) {
+            staffFormBox.setVisible(false);
+            staffFormBox.setManaged(false);
+        }
+    }
+
+    private void clearStaffForm() {
+        if (staffNameInput != null) staffNameInput.clear();
+        if (staffContactInput != null) staffContactInput.clear();
+        if (staffEmailInput != null) staffEmailInput.clear();
+        if (staffDeptInput != null) staffDeptInput.clear();
+    }
+
+    @FXML public void searchStaff() { filterStaff(); }
+    @FXML public void filterStaff() {
+        String q = staffSearchField != null ? staffSearchField.getText() : "";
+        String role = staffRoleFilter != null ? staffRoleFilter.getValue() : "All Roles";
+        String status = staffStatusFilter != null ? staffStatusFilter.getValue() : "All Status";
+
+        List<Employee> all = employeeService.searchEmployees(q != null ? q : "");
+        ObservableList<Employee> filtered = FXCollections.observableArrayList();
+        for (Employee e : all) {
+            boolean matchesRole = role == null || "All Roles".equals(role) || role.equalsIgnoreCase(e.getDesignation());
+            boolean matchesStatus = status == null || "All Status".equals(status) || status.equalsIgnoreCase(e.getStatus());
+            if (matchesRole && matchesStatus) {
+                filtered.add(e);
+            }
+        }
+        if (staffTable != null) staffTable.setItems(filtered);
+    }
+
+    @FXML
+    public void loadStaffTable() {
+        List<Employee> list = employeeService.getAllEmployees(1, 100);
+        if (staffTable != null) staffTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+    // ── Tab 3: Categories ──
+
+    private void initCategoriesTab() {
+        if (categoryStatusCombo != null) {
+            categoryStatusCombo.setItems(FXCollections.observableArrayList("Active", "Inactive"));
+            categoryStatusCombo.getSelectionModel().selectFirst();
+        }
+        if (colCatId != null) colCatId.setCellValueFactory(new PropertyValueFactory<>("categoryId"));
+        if (colCatName != null) colCatName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        if (colCatDesc != null) colCatDesc.setCellValueFactory(new PropertyValueFactory<>("description"));
+        if (colCatStatus != null) colCatStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        if (colCatActions != null) {
+            colCatActions.setCellFactory(param -> new TableCell<>() {
+                private final Button editBtn = new Button("✏️ Edit");
+                private final Button toggleBtn = new Button("🔄 Status");
+                private final Button deleteBtn = new Button("🗑️");
+                private final HBox box = new HBox(6, editBtn, toggleBtn, deleteBtn);
+                {
+                    box.setAlignment(Pos.CENTER);
+                    editBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #059669; -fx-text-fill: white; -fx-cursor: hand;");
+                    toggleBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #0d9488; -fx-text-fill: white; -fx-cursor: hand;");
+                    deleteBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+
+                    editBtn.setOnAction(e -> editCategory(getTableView().getItems().get(getIndex())));
+                    toggleBtn.setOnAction(e -> toggleCategoryStatus(getTableView().getItems().get(getIndex())));
+                    deleteBtn.setOnAction(e -> deleteCategory(getTableView().getItems().get(getIndex())));
+                }
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setGraphic(empty ? null : box);
+                }
+            });
+        }
+    }
+
+    @FXML
+    public void toggleAddCategoryForm() {
+        editingCategory = null;
+        if (categoryFormTitle != null) categoryFormTitle.setText("New Book Category");
+        if (categoryNameInput != null) categoryNameInput.clear();
+        if (categoryDescInput != null) categoryDescInput.clear();
+        if (categoryFormBox != null) {
+            categoryFormBox.setVisible(!categoryFormBox.isVisible());
+            categoryFormBox.setManaged(categoryFormBox.isVisible());
+        }
+    }
+
+    private void editCategory(Category cat) {
+        if (cat == null) return;
+        editingCategory = cat;
+        if (categoryFormTitle != null) categoryFormTitle.setText("Edit Category: " + cat.getName());
+        if (categoryNameInput != null) categoryNameInput.setText(cat.getName());
+        if (categoryDescInput != null) categoryDescInput.setText(cat.getDescription());
+        if (categoryStatusCombo != null) categoryStatusCombo.setValue(cat.getStatus());
+        if (categoryFormBox != null) {
+            categoryFormBox.setVisible(true);
+            categoryFormBox.setManaged(true);
+        }
+    }
+
+    private void toggleCategoryStatus(Category cat) {
+        if (cat == null) return;
+        boolean ok = categoryService.toggleStatus(cat.getCategoryId(), cat.getStatus());
+        if (ok) loadCategoriesTable();
+    }
+
+    private void deleteCategory(Category cat) {
+        if (cat == null) return;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete category '" + cat.getName() + "'?", ButtonType.YES, ButtonType.NO);
+        alert.setTitle("Delete Category");
+        Optional<ButtonType> res = alert.showAndWait();
+        if (res.isPresent() && res.get() == ButtonType.YES) {
+            boolean ok = categoryService.deleteCategory(cat.getCategoryId());
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Category deleted.");
+                loadCategoriesTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not delete category.");
+            }
+        }
+    }
+
+    @FXML
+    public void saveCategory() {
+        String name = categoryNameInput.getText() != null ? categoryNameInput.getText().trim() : "";
+        String desc = categoryDescInput.getText() != null ? categoryDescInput.getText().trim() : "";
+        String status = categoryStatusCombo.getValue() != null ? categoryStatusCombo.getValue() : "Active";
+
+        if (name.isEmpty()) {
+            ToastNotification.warning(backBtn.getScene(), "Category Name is required.");
+            return;
+        }
+
+        if (editingCategory == null) {
+            Category cat = new Category(0, name, desc, status);
+            boolean ok = categoryService.addCategory(cat);
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Category '" + name + "' added.");
+                cancelCategoryForm();
+                loadCategoriesTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not add category (name may already exist).");
+            }
+        } else {
+            editingCategory.setName(name);
+            editingCategory.setDescription(desc);
+            editingCategory.setStatus(status);
+            boolean ok = categoryService.updateCategory(editingCategory);
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Category '" + name + "' updated.");
+                cancelCategoryForm();
+                loadCategoriesTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not update category.");
+            }
+        }
+    }
+
+    @FXML
+    public void cancelCategoryForm() {
+        editingCategory = null;
+        if (categoryFormBox != null) {
+            categoryFormBox.setVisible(false);
+            categoryFormBox.setManaged(false);
+        }
+    }
+
+    @FXML
+    public void searchCategories() {
+        String q = categorySearchField != null ? categorySearchField.getText() : "";
+        List<Category> list = categoryService.searchCategories(q);
+        if (categoryTable != null) categoryTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+    @FXML
+    public void loadCategoriesTable() {
+        List<Category> list = categoryService.getAllCategories();
+        if (categoryTable != null) categoryTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+    // ── Tab 4: Publishers ──
+
+    private void initPublishersTab() {
+        if (colPubId != null) colPubId.setCellValueFactory(new PropertyValueFactory<>("publisherId"));
+        if (colPubName != null) colPubName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        if (colPubContact != null) colPubContact.setCellValueFactory(new PropertyValueFactory<>("contact"));
+        if (colPubAddress != null) colPubAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
+        if (colPubStatus != null) colPubStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        if (colPubActions != null) {
+            colPubActions.setCellFactory(param -> new TableCell<>() {
+                private final Button editBtn = new Button("✏️ Edit");
+                private final Button toggleBtn = new Button("🔄 Status");
+                private final Button deleteBtn = new Button("🗑️");
+                private final HBox box = new HBox(6, editBtn, toggleBtn, deleteBtn);
+                {
+                    box.setAlignment(Pos.CENTER);
+                    editBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #059669; -fx-text-fill: white; -fx-cursor: hand;");
+                    toggleBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #0d9488; -fx-text-fill: white; -fx-cursor: hand;");
+                    deleteBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+
+                    editBtn.setOnAction(e -> editPublisher(getTableView().getItems().get(getIndex())));
+                    toggleBtn.setOnAction(e -> togglePublisherStatus(getTableView().getItems().get(getIndex())));
+                    deleteBtn.setOnAction(e -> deletePublisher(getTableView().getItems().get(getIndex())));
+                }
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setGraphic(empty ? null : box);
+                }
+            });
+        }
+    }
+
+    @FXML
+    public void toggleAddPublisherForm() {
+        editingPublisher = null;
+        if (publisherFormTitle != null) publisherFormTitle.setText("New Publisher");
+        if (publisherNameInput != null) publisherNameInput.clear();
+        if (publisherContactInput != null) publisherContactInput.clear();
+        if (publisherAddressInput != null) publisherAddressInput.clear();
+        if (publisherFormBox != null) {
+            publisherFormBox.setVisible(!publisherFormBox.isVisible());
+            publisherFormBox.setManaged(publisherFormBox.isVisible());
+        }
+    }
+
+    private void editPublisher(Publisher pub) {
+        if (pub == null) return;
+        editingPublisher = pub;
+        if (publisherFormTitle != null) publisherFormTitle.setText("Edit Publisher: " + pub.getName());
+        if (publisherNameInput != null) publisherNameInput.setText(pub.getName());
+        if (publisherContactInput != null) publisherContactInput.setText(pub.getContact());
+        if (publisherAddressInput != null) publisherAddressInput.setText(pub.getAddress());
+        if (publisherFormBox != null) {
+            publisherFormBox.setVisible(true);
+            publisherFormBox.setManaged(true);
+        }
+    }
+
+    private void togglePublisherStatus(Publisher pub) {
+        if (pub == null) return;
+        boolean ok = publisherService.toggleStatus(pub.getPublisherId(), pub.getStatus());
+        if (ok) loadPublishersTable();
+    }
+
+    private void deletePublisher(Publisher pub) {
+        if (pub == null) return;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete publisher '" + pub.getName() + "'?", ButtonType.YES, ButtonType.NO);
+        alert.setTitle("Delete Publisher");
+        Optional<ButtonType> res = alert.showAndWait();
+        if (res.isPresent() && res.get() == ButtonType.YES) {
+            boolean ok = publisherService.deletePublisher(pub.getPublisherId());
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Publisher deleted.");
+                loadPublishersTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not delete publisher.");
+            }
+        }
+    }
+
+    @FXML
+    public void savePublisher() {
+        String name = publisherNameInput.getText() != null ? publisherNameInput.getText().trim() : "";
+        String contact = publisherContactInput.getText() != null ? publisherContactInput.getText().trim() : "";
+        String address = publisherAddressInput.getText() != null ? publisherAddressInput.getText().trim() : "";
+
+        if (name.isEmpty()) {
+            ToastNotification.warning(backBtn.getScene(), "Publisher Name is required.");
+            return;
+        }
+
+        if (editingPublisher == null) {
+            Publisher pub = new Publisher(0, name, contact, address, "Active");
+            boolean ok = publisherService.addPublisher(pub);
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Publisher '" + name + "' added.");
+                cancelPublisherForm();
+                loadPublishersTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not add publisher (duplicate name).");
+            }
+        } else {
+            editingPublisher.setName(name);
+            editingPublisher.setContact(contact);
+            editingPublisher.setAddress(address);
+            boolean ok = publisherService.updatePublisher(editingPublisher);
+            if (ok) {
+                ToastNotification.success(backBtn.getScene(), "Publisher '" + name + "' updated.");
+                cancelPublisherForm();
+                loadPublishersTable();
+            } else {
+                ToastNotification.error(backBtn.getScene(), "Could not update publisher.");
+            }
+        }
+    }
+
+    @FXML
+    public void cancelPublisherForm() {
+        editingPublisher = null;
+        if (publisherFormBox != null) {
+            publisherFormBox.setVisible(false);
+            publisherFormBox.setManaged(false);
+        }
+    }
+
+    @FXML
+    public void searchPublishers() {
+        String q = publisherSearchField != null ? publisherSearchField.getText() : "";
+        List<Publisher> list = publisherService.searchPublishers(q);
+        if (publisherTable != null) publisherTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+    @FXML
+    public void loadPublishersTable() {
+        List<Publisher> list = publisherService.getAllPublishers();
+        if (publisherTable != null) publisherTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+    // ── Tab 5: Measurement ──
+
+    private void initMeasurementTab() {
+        if (colUnitId != null) colUnitId.setCellValueFactory(new PropertyValueFactory<>("unitId"));
+        if (colUnitName != null) colUnitName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        if (colUnitSymbol != null) colUnitSymbol.setCellValueFactory(new PropertyValueFactory<>("symbol"));
+        if (colUnitStatus != null) colUnitStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        if (colUnitActions != null) {
+            colUnitActions.setCellFactory(param -> new TableCell<>() {
+                private final Button deleteBtn = new Button("🗑️ Delete");
+                {
+                    deleteBtn.setStyle("-fx-font-size: 10px; -fx-padding: 3 7; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+                    deleteBtn.setOnAction(e -> {
+                        MeasurementUnit u = getTableView().getItems().get(getIndex());
+                        if (u != null) {
+                            measurementService.deleteUnit(u.getUnitId());
+                            loadMeasurementTable();
+                        }
+                    });
+                }
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setGraphic(empty ? null : deleteBtn);
+                }
+            });
+        }
+    }
+
+    @FXML
+    public void toggleAddUnitForm() {
+        if (unitFormBox != null) {
+            unitFormBox.setVisible(!unitFormBox.isVisible());
+            unitFormBox.setManaged(unitFormBox.isVisible());
+        }
+    }
+
+    @FXML
+    public void cancelUnitForm() {
+        if (unitFormBox != null) {
+            unitFormBox.setVisible(false);
+            unitFormBox.setManaged(false);
+        }
+    }
+
+    @FXML
+    public void saveUnit() {
+        String name = unitNameInput != null ? unitNameInput.getText().trim() : "";
+        String sym = unitSymbolInput != null ? unitSymbolInput.getText().trim() : "";
+        if (name.isEmpty()) {
+            ToastNotification.warning(backBtn.getScene(), "Unit Name is required.");
+            return;
+        }
+        measurementService.addUnit(new MeasurementUnit(0, name, sym, "Active"));
+        cancelUnitForm();
+        loadMeasurementTable();
+    }
+
+    @FXML
+    public void loadMeasurementTable() {
+        List<MeasurementUnit> list = measurementService.getAllUnits();
+        if (unitTable != null) unitTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+    // ── Tab 6: App Settings ──
+
+    private void initAppSettingsTab() {
+        if (appCurrencyCombo != null) {
+            appCurrencyCombo.setItems(FXCollections.observableArrayList("PKR", "USD ($)", "EUR (€)", "GBP (£)", "AED", "SAR", "INR (₹)"));
+        }
+        if (appDateFormatCombo != null) {
+            appDateFormatCombo.setItems(FXCollections.observableArrayList("yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy", "dd-MMM-yyyy"));
+        }
+        if (appItemsPerPageCombo != null) {
+            appItemsPerPageCombo.setItems(FXCollections.observableArrayList(10, 15, 20, 25, 50, 100));
+        }
+        if (appLoanDaysSpinner != null) {
+            appLoanDaysSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 90, 14));
+        }
+        if (appFineRateSpinner != null) {
+            appFineRateSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 100.0, 5.0, 0.5));
+        }
+        if (appGracePeriodSpinner != null) {
+            appGracePeriodSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 30, 0));
+        }
+        if (appMaxBooksSpinner != null) {
+            appMaxBooksSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 3));
+        }
+    }
+
+    private void loadAppSettings() {
+        AppConfig cfg = AppConfig.getInstance();
+        if (appCurrencyCombo != null) appCurrencyCombo.setValue(libraryInfoService.getCurrency());
+        if (appTaxRateField != null) appTaxRateField.setText(String.format("%.2f", libraryInfoService.getTaxRate()));
+        if (appLoanDaysSpinner != null) appLoanDaysSpinner.getValueFactory().setValue(cfg.getLoanDays());
+        if (appFineRateSpinner != null) appFineRateSpinner.getValueFactory().setValue(cfg.getFineRate());
+        if (appGracePeriodSpinner != null) appGracePeriodSpinner.getValueFactory().setValue(cfg.getGracePeriod());
+        if (appMaxBooksSpinner != null) appMaxBooksSpinner.getValueFactory().setValue(cfg.getInt("library.max_books_per_member", 3));
+        if (appDateFormatCombo != null) appDateFormatCombo.setValue(cfg.getDateFormat());
+        if (appItemsPerPageCombo != null) appItemsPerPageCombo.setValue(cfg.getDefaultLimit());
+    }
+
+    @FXML
+    public void saveAppSettings() {
+        AppConfig cfg = AppConfig.getInstance();
+        if (appCurrencyCombo != null && appCurrencyCombo.getValue() != null) {
+            libraryInfoService.saveCurrency(appCurrencyCombo.getValue());
+        }
+        if (appTaxRateField != null) {
+            try {
+                double tr = Double.parseDouble(appTaxRateField.getText().trim());
+                libraryInfoService.saveTaxRate(tr);
+            } catch (Exception ignored) {}
+        }
+        if (appLoanDaysSpinner != null) cfg.set(AppConfig.KEY_LOAN_DAYS, String.valueOf(appLoanDaysSpinner.getValue()));
+        if (appFineRateSpinner != null) cfg.set(AppConfig.KEY_FINE_RATE, String.valueOf(appFineRateSpinner.getValue()));
+        if (appGracePeriodSpinner != null) cfg.set(AppConfig.KEY_GRACE_PERIOD, String.valueOf(appGracePeriodSpinner.getValue()));
+        if (appMaxBooksSpinner != null) cfg.set("library.max_books_per_member", String.valueOf(appMaxBooksSpinner.getValue()));
+        if (appDateFormatCombo != null && appDateFormatCombo.getValue() != null) cfg.set(AppConfig.KEY_DATE_FORMAT, appDateFormatCombo.getValue());
+        if (appItemsPerPageCombo != null && appItemsPerPageCombo.getValue() != null) cfg.set(AppConfig.KEY_DEFAULT_LIMIT, String.valueOf(appItemsPerPageCombo.getValue()));
+
+        cfg.save();
+        ToastNotification.success(backBtn.getScene(), "Application settings saved.");
+    }
+
+    // ── Tab 7: Account Settings ──
+
+    private void initAccountTab() {
+        loadAccountInfo();
+    }
+
+    private void loadAccountInfo() {
+        if (accountCurrentUsernameField != null) {
+            String u = SessionManager.getInstance().isLoggedIn() ? SessionManager.getInstance().getUsername() : "admin";
+            accountCurrentUsernameField.setText(u);
+        }
+    }
+
+    @FXML
+    public void updateAccountSettings() {
+        String curUsername = SessionManager.getInstance().isLoggedIn() ? SessionManager.getInstance().getUsername() : "admin";
+        User dbUser = userService.getUserByUsername(curUsername);
+        int userId = dbUser != null ? dbUser.getUserId() : 1;
+
+        String curPass = accountCurrentPasswordField != null ? accountCurrentPasswordField.getText() : "";
+        String newPass = accountNewPasswordField != null ? accountNewPasswordField.getText() : "";
+        String confPass = accountConfirmPasswordField != null ? accountConfirmPasswordField.getText() : "";
+        String newUsername = accountNewUsernameField != null ? accountNewUsernameField.getText().trim() : "";
+
+        if (curPass.isEmpty()) {
+            ToastNotification.warning(backBtn.getScene(), "Current Password is required to update account.");
+            return;
+        }
+
+        if (dbUser == null || !PasswordUtil.verify(curPass, dbUser.getPasswordHash())) {
+            ToastNotification.error(backBtn.getScene(), "Incorrect current password.");
+            return;
+        }
+
+        // Update username if requested
+        if (!newUsername.isEmpty() && !newUsername.equalsIgnoreCase(dbUser.getUsername())) {
+            boolean userOk = userService.updateUsername(userId, newUsername);
+            if (!userOk) {
+                ToastNotification.error(backBtn.getScene(), "Username may already be taken.");
+                return;
+            }
+            accountCurrentUsernameField.setText(newUsername);
+        }
+
+        // Update password if requested
+        if (!newPass.isEmpty()) {
+            if (newPass.length() < 6) {
+                ToastNotification.warning(backBtn.getScene(), "New password must be at least 6 characters long.");
+                return;
+            }
+            if (!newPass.equals(confPass)) {
+                ToastNotification.error(backBtn.getScene(), "New password and Confirm Password do not match.");
+                return;
+            }
+            boolean passOk = userService.changePassword(userId, curPass, newPass);
+            if (!passOk) {
+                ToastNotification.error(backBtn.getScene(), "Could not change password.");
+                return;
+            }
+        }
+
+        if (accountStatusLabel != null) accountStatusLabel.setText("✓ Account updated successfully.");
+        ToastNotification.success(backBtn.getScene(), "Account credentials updated successfully.");
+        if (accountCurrentPasswordField != null) accountCurrentPasswordField.clear();
+        if (accountNewPasswordField != null) accountNewPasswordField.clear();
+        if (accountConfirmPasswordField != null) accountConfirmPasswordField.clear();
+    }
+
+    // ── Tab 8: Database Backup & Restore ──
+
+    @FXML
+    public void backupDatabase() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/com/library/ui/ProfessionalDashboard.fxml"));
-            Stage stage = (Stage) backBtn.getScene().getWindow();
-            boolean wasMaximized = stage.isMaximized();
-            scene = backBtn.getScene();
-            scene.setRoot(loader.load());
+            String path = backupService.backup();
+            if (dbBackupStatusLabel != null) {
+                dbBackupStatusLabel.setText("✓ Backup created: " + new File(path).getName());
+            }
+            ToastNotification.success(backBtn.getScene(), "Safe backup created at:\n" + path);
+        } catch (Exception e) {
+            LOG.error("Backup failed: {}", e.getMessage(), e);
+            ToastNotification.error(backBtn.getScene(), "Backup failed: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void restoreDatabase() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+            "Are you sure you want to restore the database?\nThis will REPLACE all current data with the backup file!",
+            ButtonType.YES, ButtonType.NO);
+        alert.setTitle("Restore Database");
+        Optional<ButtonType> res = alert.showAndWait();
+        if (res.isEmpty() || res.get() != ButtonType.YES) return;
+
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Select SQLite Database Backup File");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Database Files (*.db, *.sqlite)", "*.db", "*.sqlite"));
+        File f = fc.showOpenDialog(null);
+        if (f != null && f.exists()) {
+            try {
+                boolean ok = backupService.restore(f.getAbsolutePath());
+                if (ok) {
+                    ToastNotification.success(backBtn.getScene(), "Database restored successfully.");
+                    loadLibraryInfo();
+                    loadStaffTable();
+                    loadCategoriesTable();
+                    loadPublishersTable();
+                } else {
+                    ToastNotification.error(backBtn.getScene(), "Could not restore database file.");
+                }
+            } catch (Exception e) {
+                ToastNotification.error(backBtn.getScene(), "Restore Error: " + e.getMessage());
+            }
+        }
+    }
+
+    // ── Tab 9: PDF & Print Settings ──
+
+    private void initPdfTab() {
+        if (pdfPaperSizeCombo != null) {
+            pdfPaperSizeCombo.setItems(FXCollections.observableArrayList(
+                "A4 — 210 × 297 mm", "Letter — 8.5 × 11 in", "Legal — 8.5 × 14 in"
+            ));
+        }
+        if (pdfLanguageCombo != null) {
+            pdfLanguageCombo.setItems(FXCollections.observableArrayList(
+                "English", "اردو (Urdu)"
+            ));
+        }
+        loadPdfSettings();
+    }
+
+    private void loadPdfSettings() {
+        if (pdfPaperSizeCombo != null) pdfPaperSizeCombo.setValue(libraryInfoService.getPdfPaperSize());
+        if (pdfLanguageCombo != null) pdfLanguageCombo.setValue(libraryInfoService.getPdfLanguage());
+    }
+
+    @FXML
+    public void savePdfSettings() {
+        if (pdfPaperSizeCombo != null && pdfPaperSizeCombo.getValue() != null) {
+            libraryInfoService.savePdfPaperSize(pdfPaperSizeCombo.getValue());
+        }
+        if (pdfLanguageCombo != null && pdfLanguageCombo.getValue() != null) {
+            libraryInfoService.savePdfLanguage(pdfLanguageCombo.getValue());
+        }
+        if (pdfStatusLabel != null) pdfStatusLabel.setText("✓ PDF & print settings saved.");
+        ToastNotification.success(backBtn.getScene(), "PDF & Print preferences saved successfully.");
+    }
+
+    // ── Navigation & Common ──
+
+    @FXML
+    public void goBack() {
+        Stage stage = (Stage) backBtn.getScene().getWindow();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/library/ui/ProfessionalDashboard.fxml"));
+            Scene scene = new Scene(loader.load(), 1280, 800);
             ThemeManager.getInstance().applyTheme(scene);
-            DashboardController dc = loader.getController();
-            if (SessionManager.getInstance().isLoggedIn())
-                dc.initSession(SessionManager.getInstance().getCurrentUser());
-            stage.setTitle(LibraCoreApp.APP_NAME + " " + LibraCoreApp.APP_VERSION + " - Dashboard");
-            if (wasMaximized) stage.setMaximized(true);
+            stage.setScene(scene);
         } catch (IOException e) {
-            ToastNotification.error(getScene(), "Navigation error: " + e.getMessage());
+            LOG.error("Failed to return to dashboard: {}", e.getMessage(), e);
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    private Scene getScene() {
-        return backBtn != null ? backBtn.getScene() : null;
+    @FXML
+    public void toggleTheme() {
+        ThemeManager.getInstance().toggle(backBtn.getScene());
+        initThemeLabel();
     }
-
-    private String nvl(String s) { return s != null ? s : ""; }
 }

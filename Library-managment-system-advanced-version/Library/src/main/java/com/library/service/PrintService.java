@@ -56,7 +56,7 @@ public class PrintService {
 
         // Transaction history
         doc.add(new Paragraph(" "));
-        Font secFont = new Font(Font.HELVETICA, 12, Font.BOLD, new Color(25, 118, 210));
+        Font secFont = new Font(Font.HELVETICA, 12, Font.BOLD, new Color(5, 150, 105));
         doc.add(new Paragraph("Issue / Return History", secFont));
         doc.add(new Paragraph(" "));
 
@@ -111,37 +111,38 @@ public class PrintService {
         addInfoRow(info, "Contact",       nvl(e.getContact()));
         addInfoRow(info, "Email",         nvl(e.getEmail()));
         addInfoRow(info, "CNIC",          nvl(e.getCnic()));
-        addInfoRow(info, "Join Date",     e.getJoinDate() != null ? e.getJoinDate().format(FMT) : "");
+        addInfoRow(info, "Address",       nvl(e.getAddress()));
         addInfoRow(info, "Status",        nvl(e.getStatus()));
-        addInfoRow(info, "Salary",        AppConfig.getInstance().getCurrency() + " " + String.format("%.2f", e.getSalary()));
+        addInfoRow(info, "Join Date",     e.getJoinDate() != null ? e.getJoinDate().format(FMT) : "");
         doc.add(info);
 
         addFooter(doc);
         doc.close();
     }
 
-    // ── Fee Slip ──────────────────────────────────────────────────────────────
+    // ── Fee / Fine Slip ───────────────────────────────────────────────────────
 
-    public void printFeeSlip(Member m, double amount, String description,
-                              OutputStream out) throws DocumentException {
-        Document doc = new Document(new Rectangle(PageSize.A4.getWidth(), 200));
+    public void printFineSlip(Member m, double amount, String reason, OutputStream out) throws DocumentException {
+        Document doc = new Document(PageSize.A5);
         PdfWriter.getInstance(doc, out);
         doc.open();
 
-        Font titleFont = new Font(Font.HELVETICA, 14, Font.BOLD, new Color(25, 118, 210));
-        Font normalFont = new Font(Font.HELVETICA, 10);
-        Font boldFont   = new Font(Font.HELVETICA, 10, Font.BOLD);
+        addLetterhead(doc, "PAYMENT RECEIPT / FINE SLIP");
 
-        doc.add(new Paragraph(AppConfig.getInstance().getLibraryName(), titleFont));
-        doc.add(new Paragraph("FEE SLIP", new Font(Font.HELVETICA, 12, Font.BOLD)));
-        doc.add(new Paragraph("Date: " + LocalDate.now().format(FMT), normalFont));
+        Font normalFont = new Font(Font.HELVETICA, 10);
+        Paragraph date = new Paragraph("Date: " + LocalDate.now().format(FMT), normalFont);
+        doc.add(date);
         doc.add(new Paragraph(" "));
 
         PdfPTable t = new PdfPTable(2);
         t.setWidthPercentage(100);
-        addInfoRow(t, "Member",      m.getName());
-        addInfoRow(t, "Member ID",   nvl(m.getStudentId()));
-        addInfoRow(t, "Description", description);
+        try { t.setWidths(new float[]{1.5f, 2.5f}); } catch (Exception ignored) {}
+
+        addInfoRow(t, "Receipt No.",  "RCP-" + System.currentTimeMillis() % 1000000);
+        addInfoRow(t, "Member Name",  m.getName());
+        addInfoRow(t, "Member ID",    nvl(m.getStudentId()));
+        addInfoRow(t, "Department",   nvl(m.getDepartment()));
+        addInfoRow(t, "Description",  reason);
         addInfoRow(t, "Amount",      AppConfig.getInstance().getCurrency() + " " + String.format("%.2f", amount));
         doc.add(t);
 
@@ -153,17 +154,24 @@ public class PrintService {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void addLetterhead(Document doc, String title) throws DocumentException {
-        AppConfig cfg = AppConfig.getInstance();
-        Font libFont   = new Font(Font.HELVETICA, 16, Font.BOLD, new Color(25, 118, 210));
+        LibraryInfo libInfo = LibraryInfoService.getInstance().getLibraryInfo();
+        Font libFont   = new Font(Font.HELVETICA, 16, Font.BOLD, new Color(5, 150, 105));
+        Font instFont  = new Font(Font.HELVETICA, 11, Font.BOLD, new Color(30, 41, 59));
         Font subFont   = new Font(Font.HELVETICA, 9, Font.NORMAL, Color.GRAY);
-        Font titleFont = new Font(Font.HELVETICA, 13, Font.BOLD);
+        Font titleFont = new Font(Font.HELVETICA, 13, Font.BOLD, new Color(6, 95, 70));
 
-        Paragraph lib = new Paragraph(cfg.getLibraryName(), libFont);
+        Paragraph lib = new Paragraph(libInfo.getLibraryName(), libFont);
         lib.setAlignment(Element.ALIGN_CENTER);
         doc.add(lib);
 
-        Paragraph addr = new Paragraph(cfg.get(AppConfig.KEY_LIBRARY_ADDRESS)
-                + " | " + cfg.get(AppConfig.KEY_LIBRARY_PHONE), subFont);
+        if (libInfo.getInstitutionName() != null && !libInfo.getInstitutionName().isBlank()) {
+            Paragraph inst = new Paragraph(libInfo.getInstitutionName(), instFont);
+            inst.setAlignment(Element.ALIGN_CENTER);
+            doc.add(inst);
+        }
+
+        String contactLine = libInfo.getAddress() + (libInfo.getContactNumber().isBlank() ? "" : " | Tel: " + libInfo.getContactNumber()) + (libInfo.getEmail().isBlank() ? "" : " | " + libInfo.getEmail());
+        Paragraph addr = new Paragraph(contactLine, subFont);
         addr.setAlignment(Element.ALIGN_CENTER);
         doc.add(addr);
 
@@ -173,7 +181,7 @@ public class PrintService {
         doc.add(t);
 
         LineSeparator line = new LineSeparator();
-        line.setLineColor(new Color(25, 118, 210));
+        line.setLineColor(new Color(5, 150, 105));
         doc.add(new Chunk(line));
         doc.add(new Paragraph(" "));
     }
@@ -193,7 +201,7 @@ public class PrintService {
         Font hf = new Font(Font.HELVETICA, 9, Font.BOLD, Color.WHITE);
         for (String h : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(h, hf));
-            cell.setBackgroundColor(new Color(25, 118, 210));
+            cell.setBackgroundColor(new Color(5, 150, 105));
             cell.setPadding(5);
             table.addCell(cell);
         }

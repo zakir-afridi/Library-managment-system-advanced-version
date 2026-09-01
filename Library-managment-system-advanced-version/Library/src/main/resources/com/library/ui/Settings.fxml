@@ -10,160 +10,472 @@
             fx:controller="com.library.controller.SettingsController"
             styleClass="main-container">
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TOP HEADER BAR — Unified Emerald Brand Gradient
+         ═══════════════════════════════════════════════════════════════════════ -->
     <top>
         <HBox styleClass="top-bar" style="-fx-background-color: linear-gradient(to right, #022c22 0%, #064e3b 35%, #059669 75%, #10b981 100%);" alignment="CENTER_LEFT" spacing="16">
             <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
             <Button fx:id="backBtn" text="← Dashboard" styleClass="top-btn" onAction="#goBack"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Text text="⚙️ System Settings &amp; Configuration" styleClass="app-title"/>
+            <VBox alignment="CENTER" spacing="1">
+                <Text text="⚙️ System Settings &amp; Configuration" styleClass="app-title" style="-fx-fill: white; -fx-font-size: 17px; -fx-font-weight: 900;"/>
+                <Label fx:id="settingsSubtitleLabel" text="Central Library — Manage Preferences, Operators &amp; Catalogs" style="-fx-text-fill: #a7f3d0; -fx-font-size: 11px;"/>
+            </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="saveBtn" text="💾 Save All" styleClass="logout-btn"
-                    style="-fx-background-color:#10b981;" onAction="#saveSettings"/>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button fx:id="themeToggleBtn" text="🌙 Theme" styleClass="top-btn" onAction="#toggleTheme"/>
+            </HBox>
         </HBox>
     </top>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         CENTER: Two-Pane Layout (Left Sub-Navigation + Right Content Area)
+         ═══════════════════════════════════════════════════════════════════════ -->
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true"
-                    style="-fx-background-color:transparent;">
-            <VBox spacing="20" style="-fx-background-color:transparent;">
-                <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+        <HBox spacing="16" style="-fx-background-color: transparent;">
+            <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
 
-                <!-- GENERAL SETTINGS -->
-                <VBox styleClass="chart-container" spacing="12">
-                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-                    <Text text="General Settings" styleClass="section-title"/>
-                    <Separator/>
-                    <GridPane hgap="16" vgap="12">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="180" prefWidth="200"/>
-                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
-                        </columnConstraints>
-                        <Label text="Library Name" GridPane.rowIndex="0"/>
-                        <TextField fx:id="libraryNameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                        <Label text="Address" GridPane.rowIndex="1"/>
-                        <TextField fx:id="libraryAddressField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        <Label text="Phone" GridPane.rowIndex="2"/>
-                        <TextField fx:id="libraryPhoneField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                        <Label text="Email" GridPane.rowIndex="3"/>
-                        <TextField fx:id="libraryEmailField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                        <Label text="Currency" GridPane.rowIndex="4"/>
-                        <ComboBox fx:id="currencyCombo" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="200"/>
-                        <Label text="Date Format" GridPane.rowIndex="5"/>
-                        <ComboBox fx:id="dateFormatCombo" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="200"/>
-                        <Label text="Items Per Page" GridPane.rowIndex="6"/>
-                        <ComboBox fx:id="itemsPerPageCombo" GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="200"/>
-                        <Label text="Default Query Limit" GridPane.rowIndex="7"/>
-                        <ComboBox fx:id="defaultLimitCombo" GridPane.columnIndex="1" GridPane.rowIndex="7" prefWidth="200"/>
-                    </GridPane>
+            <!-- LEFT: Settings Sub-Navigation Menu -->
+            <VBox prefWidth="220" minWidth="200" spacing="6" styleClass="chart-container">
+                <padding><Insets top="16" right="10" bottom="16" left="10"/></padding>
+
+                <Label text="SETTINGS MENU" style="-fx-font-size: 10px; -fx-font-weight: 800; -fx-text-fill: #059669; -fx-padding: 0 0 6 8;"/>
+
+                <Button fx:id="tabInfoBtn" text="🏛️  Information" styleClass="sidebar-btn, active" onAction="#showInfoTab"/>
+                <Button fx:id="tabStaffBtn" text="👤  Staff / Counters" styleClass="sidebar-btn" onAction="#showStaffTab"/>
+                <Button fx:id="tabCategoriesBtn" text="🏷️  Categories" styleClass="sidebar-btn" onAction="#showCategoriesTab"/>
+                <Button fx:id="tabPublishersBtn" text="🏢  Publishers" styleClass="sidebar-btn" onAction="#showPublishersTab"/>
+                <Button fx:id="tabMeasurementBtn" text="📏  Measurement" styleClass="sidebar-btn" onAction="#showMeasurementTab"/>
+                <Button fx:id="tabAppSettingsBtn" text="⚙️  App Settings" styleClass="sidebar-btn" onAction="#showAppSettingsTab"/>
+                <Button fx:id="tabAccountBtn" text="🔐  Account Settings" styleClass="sidebar-btn" onAction="#showAccountTab"/>
+                <Button fx:id="tabDatabaseBtn" text="🗄️  Database" styleClass="sidebar-btn" onAction="#showDatabaseTab"/>
+                <Button fx:id="tabPdfBtn" text="📄  PDF &amp; Print" styleClass="sidebar-btn" onAction="#showPdfTab"/>
+
+                <Region VBox.vgrow="ALWAYS"/>
+                <Separator style="-fx-opacity: 0.2;"/>
+                <VBox alignment="CENTER" spacing="4" style="-fx-padding: 6 0 0 0;">
+                    <Label text="LibraCore Pro Settings" style="-fx-font-size: 10px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                    <Label text="v3.0.0 Enterprise" style="-fx-font-size: 9px; -fx-text-fill: #94a3b8;"/>
                 </VBox>
-
-                <!-- BOOK SETTINGS -->
-                <VBox styleClass="chart-container" spacing="12">
-                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-                    <Text text="Book Settings" styleClass="section-title"/>
-                    <Separator/>
-                    <GridPane hgap="16" vgap="12">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="180" prefWidth="200"/>
-                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
-                        </columnConstraints>
-                        <Label text="Default Loan Period (days)" GridPane.rowIndex="0"/>
-                        <Spinner fx:id="loanDaysSpinner" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="150"/>
-                        <Label text="Fine Rate (per day)" GridPane.rowIndex="1"/>
-                        <Spinner fx:id="fineRateSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="150"/>
-                        <Label text="Grace Period (days)" GridPane.rowIndex="2"/>
-                        <Spinner fx:id="gracePeriodSpinner" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="150"/>
-                        <Label text="Max Books Per Student" GridPane.rowIndex="3"/>
-                        <Spinner fx:id="maxBooksSpinner" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="150"/>
-                    </GridPane>
-                </VBox>
-
-                <!-- APPEARANCE -->
-                <VBox styleClass="chart-container" spacing="12">
-                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-                    <Text text="Appearance" styleClass="section-title"/>
-                    <Separator/>
-                    <HBox spacing="16" alignment="CENTER_LEFT">
-                        <Label text="Theme:"/>
-                        <ToggleButton fx:id="themeToggle" text="Dark Mode"
-                                      onAction="#toggleTheme"
-                                      style="-fx-background-color:#1976d2; -fx-text-fill:white; -fx-background-radius:20; -fx-padding:8 20 8 20; -fx-cursor:hand;"/>
-                        <Label fx:id="themeStatusLabel" text="Current: Light Mode"
-                               style="-fx-text-fill:#757575; -fx-font-size:12px;"/>
-                    </HBox>
-                </VBox>
-
-                <!-- NOTIFICATIONS -->
-                <VBox styleClass="chart-container" spacing="12">
-                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-                    <Text text="Notifications" styleClass="section-title"/>
-                    <Separator/>
-                    <CheckBox fx:id="overdueAlertCheck" text="Enable overdue reminders"/>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="Due soon alert (days before):"/>
-                        <Spinner fx:id="dueSoonDaysSpinner" prefWidth="100"/>
-                    </HBox>
-                </VBox>
-
-                <!-- EMAIL (SMTP) SETTINGS -->
-                <VBox styleClass="chart-container" spacing="12">
-                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-                    <Text text="Email &amp; SMTP Configuration" styleClass="section-title"/>
-                    <Separator/>
-                    <GridPane hgap="16" vgap="12">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="180" prefWidth="200"/>
-                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
-                        </columnConstraints>
-                        <Label text="SMTP Host" GridPane.rowIndex="0"/>
-                        <TextField fx:id="smtpHostField" promptText="smtp.gmail.com" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                        <Label text="SMTP Port" GridPane.rowIndex="1"/>
-                        <TextField fx:id="smtpPortField" promptText="587" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        <Label text="SMTP Username" GridPane.rowIndex="2"/>
-                        <TextField fx:id="smtpUserField" promptText="library@gmail.com" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                        <Label text="App Password" GridPane.rowIndex="3"/>
-                        <PasswordField fx:id="smtpPasswordField" promptText="••••••••••••••••" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                        <Label text="From Name" GridPane.rowIndex="4"/>
-                        <TextField fx:id="emailFromNameField" promptText="LibraCore Pro" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                    </GridPane>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Button fx:id="testEmailBtn" text="✉ Test Connection" styleClass="btn btn-secondary" onAction="#testEmailConnection"/>
-                        <Label fx:id="emailStatusLabel" text="" style="-fx-font-size:12px; -fx-text-fill:#1976d2;"/>
-                    </HBox>
-                </VBox>
-
-                <!-- WEATHER WIDGET SETTINGS -->
-                <VBox styleClass="chart-container" spacing="12">
-                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-                    <Text text="Live Weather Widget" styleClass="section-title"/>
-                    <Separator/>
-                    <CheckBox fx:id="weatherEnabledCheck" text="Enable live weather widget on dashboard"/>
-                    <GridPane hgap="16" vgap="12">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="180" prefWidth="200"/>
-                            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
-                        </columnConstraints>
-                        <Label text="Default City" GridPane.rowIndex="0"/>
-                        <TextField fx:id="weatherCityField" promptText="Lahore" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    </GridPane>
-                </VBox>
-
-                <!-- BACKUP AND RESTORE -->
-                <VBox styleClass="chart-container" spacing="12">
-                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-                    <Text text="Backup and Restore" styleClass="section-title"/>
-                    <Separator/>
-                    <HBox spacing="12">
-                        <Button text="Backup Database" styleClass="btn btn-primary" onAction="#backupDatabase"/>
-                        <Button text="Restore Database" styleClass="btn btn-secondary" onAction="#restoreDatabase"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="backupStatusLabel" text=""
-                               style="-fx-text-fill:#388e3c; -fx-font-size:12px;"/>
-                    </HBox>
-                </VBox>
-
             </VBox>
-        </ScrollPane>
+
+            <!-- RIGHT: Dynamic Content Stack -->
+            <ScrollPane fitToWidth="true" fitToHeight="true" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <StackPane fx:id="contentStack" style="-fx-background-color: transparent;">
+
+                    <!-- ── TAB 1: INFORMATION ── -->
+                    <VBox fx:id="infoPane" spacing="16" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Text text="🏛️ Library Information" styleClass="section-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Displayed on Header, Slips, Invoices &amp; Reports" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                        </HBox>
+                        <Separator/>
+
+                        <GridPane hgap="16" vgap="14">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="160" prefWidth="180"/>
+                                <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <Label text="Library Name *" styleClass="field-label" GridPane.rowIndex="0"/>
+                            <TextField fx:id="infoLibraryNameField" promptText="Central Library" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                            <Label text="Institution Name *" styleClass="field-label" GridPane.rowIndex="1"/>
+                            <TextField fx:id="infoInstitutionField" promptText="University of Engineering &amp; Technology Peshawar" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                            <Label text="Email Address *" styleClass="field-label" GridPane.rowIndex="2"/>
+                            <TextField fx:id="infoEmailField" promptText="library@example.com" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                            <Label text="Contact Number *" styleClass="field-label" GridPane.rowIndex="3"/>
+                            <TextField fx:id="infoContactField" promptText="+92 91 9216796" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                            <Label text="Complete Address" styleClass="field-label" GridPane.rowIndex="4"/>
+                            <TextField fx:id="infoAddressField" promptText="University Campus, Peshawar, KPK" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                            <Label text="Official Website" styleClass="field-label" GridPane.rowIndex="5"/>
+                            <TextField fx:id="infoWebsiteField" promptText="https://uetpeshawar.edu.pk" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                        </GridPane>
+
+                        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                            <Label fx:id="infoStatusLabel" text="" style="-fx-font-size: 12px; -fx-text-fill: #059669; -fx-font-weight: bold;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="saveInfoBtn" text="💾 Save Information" styleClass="btn, btn-primary" onAction="#saveLibraryInfo"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- ── TAB 2: STAFF / COUNTERS ── -->
+                    <VBox fx:id="staffPane" spacing="14" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <VBox spacing="2">
+                                <Text text="👤 Staff / Counters Management" styleClass="section-title"/>
+                                <Label text="Manage library staff, assistant librarians, counter operators and roles." style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="addStaffToggleBtn" text="➕ Add Staff Member" styleClass="btn, btn-primary" onAction="#toggleAddStaffForm"/>
+                        </HBox>
+                        <Separator/>
+
+                        <!-- Inline Add/Edit Staff Form (Collapsible) -->
+                        <VBox fx:id="staffFormBox" spacing="12" visible="false" managed="false" style="-fx-background-color: #f8fafc; -fx-padding: 14; -fx-background-radius: 8; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-border-width: 1;">
+                            <Text fx:id="staffFormTitle" text="New Staff / Operator" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-fill: #065f46;"/>
+                            <GridPane hgap="12" vgap="10">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="33"/>
+                                    <ColumnConstraints percentWidth="33"/>
+                                    <ColumnConstraints percentWidth="34"/>
+                                </columnConstraints>
+
+                                <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <Label text="Staff Name *" styleClass="field-label"/>
+                                    <TextField fx:id="staffNameInput" promptText="Full Name"/>
+                                </VBox>
+                                <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <Label text="Role / Designation *" styleClass="field-label"/>
+                                    <ComboBox fx:id="staffRoleCombo" prefWidth="10000" promptText="Select Role"/>
+                                </VBox>
+                                <VBox spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                    <Label text="Contact Number *" styleClass="field-label"/>
+                                    <TextField fx:id="staffContactInput" promptText="+92 333 1234567"/>
+                                </VBox>
+
+                                <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <Label text="Email Address" styleClass="field-label"/>
+                                    <TextField fx:id="staffEmailInput" promptText="staff@library.edu"/>
+                                </VBox>
+                                <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <Label text="Department" styleClass="field-label"/>
+                                    <TextField fx:id="staffDeptInput" promptText="Circulation / Administration"/>
+                                </VBox>
+                                <VBox spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <Label text="Status" styleClass="field-label"/>
+                                    <ComboBox fx:id="staffStatusCombo" prefWidth="10000"/>
+                                </VBox>
+                            </GridPane>
+                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                                <Button text="✖ Cancel" styleClass="btn, btn-secondary" onAction="#cancelStaffForm"/>
+                                <Button fx:id="saveStaffBtn" text="💾 Save Staff" styleClass="btn, btn-primary" onAction="#saveStaffMember"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Search & Filter Bar -->
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <TextField fx:id="staffSearchField" promptText="🔍 Search staff by name, role, ID, email..." prefWidth="350" onKeyReleased="#searchStaff"/>
+                            <ComboBox fx:id="staffRoleFilter" prefWidth="170" onAction="#filterStaff"/>
+                            <ComboBox fx:id="staffStatusFilter" prefWidth="130" onAction="#filterStaff"/>
+                            <Button text="🔄 Refresh" styleClass="btn, btn-secondary" onAction="#loadStaffTable"/>
+                        </HBox>
+
+                        <!-- Staff Table -->
+                        <TableView fx:id="staffTable" prefHeight="320" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colStaffCode" text="Staff ID" prefWidth="100"/>
+                                <TableColumn fx:id="colStaffName" text="Name" prefWidth="170"/>
+                                <TableColumn fx:id="colStaffRole" text="Role / Designation" prefWidth="160"/>
+                                <TableColumn fx:id="colStaffContact" text="Contact" prefWidth="125"/>
+                                <TableColumn fx:id="colStaffEmail" text="Email" prefWidth="160"/>
+                                <TableColumn fx:id="colStaffStatus" text="Status" prefWidth="90"/>
+                                <TableColumn fx:id="colStaffActions" text="Actions" prefWidth="175"/>
+                            </columns>
+                            <placeholder><Label text="No staff members registered. Click '+ Add Staff Member' above."/></placeholder>
+                        </TableView>
+                    </VBox>
+
+                    <!-- ── TAB 3: CATEGORIES ── -->
+                    <VBox fx:id="categoriesPane" spacing="14" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <VBox spacing="2">
+                                <Text text="🏷️ Book Category Management" styleClass="section-title"/>
+                                <Label text="Organize library book genres, fields of study and classifications." style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="➕ Add Category" styleClass="btn, btn-primary" onAction="#toggleAddCategoryForm"/>
+                        </HBox>
+                        <Separator/>
+
+                        <!-- Category Add/Edit Form -->
+                        <VBox fx:id="categoryFormBox" spacing="10" visible="false" managed="false" style="-fx-background-color: #f8fafc; -fx-padding: 14; -fx-background-radius: 8; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-border-width: 1;">
+                            <Text fx:id="categoryFormTitle" text="New Category" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-fill: #065f46;"/>
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <VBox spacing="4" prefWidth="250">
+                                    <Label text="Category Name *" styleClass="field-label"/>
+                                    <TextField fx:id="categoryNameInput" promptText="e.g. Computer Science"/>
+                                </VBox>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Description" styleClass="field-label"/>
+                                    <TextField fx:id="categoryDescInput" promptText="Field summary or topic coverage"/>
+                                </VBox>
+                                <VBox spacing="4" prefWidth="130">
+                                    <Label text="Status" styleClass="field-label"/>
+                                    <ComboBox fx:id="categoryStatusCombo" prefWidth="10000"/>
+                                </VBox>
+                            </HBox>
+                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                                <Button text="✖ Cancel" styleClass="btn, btn-secondary" onAction="#cancelCategoryForm"/>
+                                <Button fx:id="saveCategoryBtn" text="💾 Save Category" styleClass="btn, btn-primary" onAction="#saveCategory"/>
+                            </HBox>
+                        </VBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <TextField fx:id="categorySearchField" promptText="🔍 Search categories..." prefWidth="350" onKeyReleased="#searchCategories"/>
+                            <Button text="🔄 Refresh" styleClass="btn, btn-secondary" onAction="#loadCategoriesTable"/>
+                        </HBox>
+
+                        <TableView fx:id="categoryTable" prefHeight="320" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colCatId" text="#" prefWidth="50"/>
+                                <TableColumn fx:id="colCatName" text="Category Name" prefWidth="220"/>
+                                <TableColumn fx:id="colCatDesc" text="Description" prefWidth="340"/>
+                                <TableColumn fx:id="colCatStatus" text="Status" prefWidth="100"/>
+                                <TableColumn fx:id="colCatActions" text="Actions" prefWidth="160"/>
+                            </columns>
+                            <placeholder><Label text="No categories found."/></placeholder>
+                        </TableView>
+                    </VBox>
+
+                    <!-- ── TAB 4: PUBLISHERS ── -->
+                    <VBox fx:id="publishersPane" spacing="14" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <VBox spacing="2">
+                                <Text text="🏢 Publisher Management" styleClass="section-title"/>
+                                <Label text="Maintain book publishers, academic presses and distributors." style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="➕ Add Publisher" styleClass="btn, btn-primary" onAction="#toggleAddPublisherForm"/>
+                        </HBox>
+                        <Separator/>
+
+                        <!-- Publisher Add/Edit Form -->
+                        <VBox fx:id="publisherFormBox" spacing="10" visible="false" managed="false" style="-fx-background-color: #f8fafc; -fx-padding: 14; -fx-background-radius: 8; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-border-width: 1;">
+                            <Text fx:id="publisherFormTitle" text="New Publisher" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-fill: #065f46;"/>
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <VBox spacing="4" prefWidth="220">
+                                    <Label text="Publisher Name *" styleClass="field-label"/>
+                                    <TextField fx:id="publisherNameInput" promptText="e.g. O'Reilly Media"/>
+                                </VBox>
+                                <VBox spacing="4" prefWidth="180">
+                                    <Label text="Contact / Phone" styleClass="field-label"/>
+                                    <TextField fx:id="publisherContactInput" promptText="+1 800 000 0000"/>
+                                </VBox>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Address / Location" styleClass="field-label"/>
+                                    <TextField fx:id="publisherAddressInput" promptText="City, Country"/>
+                                </VBox>
+                            </HBox>
+                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                                <Button text="✖ Cancel" styleClass="btn, btn-secondary" onAction="#cancelPublisherForm"/>
+                                <Button fx:id="savePublisherBtn" text="💾 Save Publisher" styleClass="btn, btn-primary" onAction="#savePublisher"/>
+                            </HBox>
+                        </VBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <TextField fx:id="publisherSearchField" promptText="🔍 Search publishers..." prefWidth="350" onKeyReleased="#searchPublishers"/>
+                            <Button text="🔄 Refresh" styleClass="btn, btn-secondary" onAction="#loadPublishersTable"/>
+                        </HBox>
+
+                        <TableView fx:id="publisherTable" prefHeight="320" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colPubId" text="#" prefWidth="50"/>
+                                <TableColumn fx:id="colPubName" text="Publisher Name" prefWidth="230"/>
+                                <TableColumn fx:id="colPubContact" text="Contact" prefWidth="160"/>
+                                <TableColumn fx:id="colPubAddress" text="Address" prefWidth="250"/>
+                                <TableColumn fx:id="colPubStatus" text="Status" prefWidth="90"/>
+                                <TableColumn fx:id="colPubActions" text="Actions" prefWidth="160"/>
+                            </columns>
+                            <placeholder><Label text="No publishers registered."/></placeholder>
+                        </TableView>
+                    </VBox>
+
+                    <!-- ── TAB 5: MEASUREMENT ── -->
+                    <VBox fx:id="measurementPane" spacing="14" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <VBox spacing="2">
+                                <Text text="📏 Measurement &amp; Quantity Units" styleClass="section-title"/>
+                                <Label text="Configure standard physical book units: Copy, Set, Volume, Unit." style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="➕ Add Unit" styleClass="btn, btn-primary" onAction="#toggleAddUnitForm"/>
+                        </HBox>
+                        <Separator/>
+
+                        <!-- Unit Add Form -->
+                        <HBox fx:id="unitFormBox" spacing="12" alignment="CENTER_LEFT" visible="false" managed="false" style="-fx-background-color: #f8fafc; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-border-width: 1;">
+                            <VBox spacing="4" prefWidth="200">
+                                <Label text="Unit Name *" styleClass="field-label"/>
+                                <TextField fx:id="unitNameInput" promptText="e.g. Volume"/>
+                            </VBox>
+                            <VBox spacing="4" prefWidth="120">
+                                <Label text="Symbol" styleClass="field-label"/>
+                                <TextField fx:id="unitSymbolInput" promptText="vol"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="✖ Cancel" styleClass="btn, btn-secondary" onAction="#cancelUnitForm"/>
+                            <Button text="💾 Save Unit" styleClass="btn, btn-primary" onAction="#saveUnit"/>
+                        </HBox>
+
+                        <TableView fx:id="unitTable" prefHeight="320" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colUnitId" text="#" prefWidth="60"/>
+                                <TableColumn fx:id="colUnitName" text="Unit Name" prefWidth="250"/>
+                                <TableColumn fx:id="colUnitSymbol" text="Symbol" prefWidth="150"/>
+                                <TableColumn fx:id="colUnitStatus" text="Status" prefWidth="120"/>
+                                <TableColumn fx:id="colUnitActions" text="Actions" prefWidth="140"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+
+                    <!-- ── TAB 6: APP SETTINGS / GENERAL ── -->
+                    <VBox fx:id="appSettingsPane" spacing="16" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Text text="⚙️ General Application Settings" styleClass="section-title"/>
+                        <Separator/>
+
+                        <GridPane hgap="16" vgap="14">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="200" prefWidth="230"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <Label text="Currency Symbol" styleClass="field-label" GridPane.rowIndex="0"/>
+                            <ComboBox fx:id="appCurrencyCombo" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                            <Label text="Default Tax Rate (%)" styleClass="field-label" GridPane.rowIndex="1"/>
+                            <TextField fx:id="appTaxRateField" promptText="0.00" prefWidth="200" maxWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                            <Label text="Default Loan Period (days)" styleClass="field-label" GridPane.rowIndex="2"/>
+                            <Spinner fx:id="appLoanDaysSpinner" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                            <Label text="Fine Rate (per day)" styleClass="field-label" GridPane.rowIndex="3"/>
+                            <Spinner fx:id="appFineRateSpinner" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                            <Label text="Grace Period (days)" styleClass="field-label" GridPane.rowIndex="4"/>
+                            <Spinner fx:id="appGracePeriodSpinner" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                            <Label text="Max Books Per Member" styleClass="field-label" GridPane.rowIndex="5"/>
+                            <Spinner fx:id="appMaxBooksSpinner" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                            <Label text="Date Format" styleClass="field-label" GridPane.rowIndex="6"/>
+                            <ComboBox fx:id="appDateFormatCombo" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+
+                            <Label text="Items Per Page" styleClass="field-label" GridPane.rowIndex="7"/>
+                            <ComboBox fx:id="appItemsPerPageCombo" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+                        </GridPane>
+
+                        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                            <Button fx:id="saveAppSettingsBtn" text="💾 Save App Settings" styleClass="btn, btn-primary" onAction="#saveAppSettings"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- ── TAB 7: ACCOUNT SETTINGS ── -->
+                    <VBox fx:id="accountPane" spacing="16" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Text text="🔐 Account &amp; Security Settings" styleClass="section-title"/>
+                        <Separator/>
+
+                        <GridPane hgap="16" vgap="14">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="180" prefWidth="200"/>
+                                <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <Label text="Current Username" styleClass="field-label" GridPane.rowIndex="0"/>
+                            <TextField fx:id="accountCurrentUsernameField" editable="false" style="-fx-background-color: #f1f5f9;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                            <Label text="New Username" styleClass="field-label" GridPane.rowIndex="1"/>
+                            <TextField fx:id="accountNewUsernameField" promptText="Leave blank if unchanged" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                            <Label text="Current Password *" styleClass="field-label" GridPane.rowIndex="2"/>
+                            <PasswordField fx:id="accountCurrentPasswordField" promptText="Enter existing password" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                            <Label text="New Password" styleClass="field-label" GridPane.rowIndex="3"/>
+                            <PasswordField fx:id="accountNewPasswordField" promptText="Min 6 characters" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                            <Label text="Confirm New Password" styleClass="field-label" GridPane.rowIndex="4"/>
+                            <PasswordField fx:id="accountConfirmPasswordField" promptText="Re-type new password" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                            <Label text="Recovery Key" styleClass="field-label" GridPane.rowIndex="5"/>
+                            <TextField fx:id="accountRecoveryKeyField" promptText="Universal master recovery key (optional)" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                        </GridPane>
+
+                        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                            <Label fx:id="accountStatusLabel" text="" style="-fx-font-size: 12px;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="updateAccountBtn" text="💾 Update Account" styleClass="btn, btn-primary" onAction="#updateAccountSettings"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- ── TAB 8: DATABASE ── -->
+                    <VBox fx:id="databasePane" spacing="16" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Text text="🗄️ Database Management &amp; Persistence" styleClass="section-title"/>
+                        <Separator/>
+
+                        <VBox spacing="12" style="-fx-background-color: #f8fafc; -fx-padding: 16; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-border-width: 1;">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Text text="📦 Database Export / Backup" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-fill: #065f46;"/>
+                            </HBox>
+                            <Label text="Creates a complete, safe timestamped copy of your SQLite database (including books, members, transactions, staff, and settings) in the backups folder." wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 11.5px;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Button text="📤 Export / Backup Database" styleClass="btn, btn-primary" onAction="#backupDatabase"/>
+                                <Label fx:id="dbBackupStatusLabel" text="" style="-fx-text-fill: #059669; -fx-font-weight: bold; -fx-font-size: 11.5px;"/>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="12" style="-fx-background-color: #fef2f2; -fx-padding: 16; -fx-background-radius: 8; -fx-border-color: #fecaca; -fx-border-radius: 8; -fx-border-width: 1;">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Text text="⚠ Database Import / Restore" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-fill: #dc2626;"/>
+                            </HBox>
+                            <Label text="Restores database from a previous .db backup. WARNING: This replaces all current catalog, circulation, and member records. Confirmation required." wrapText="true" style="-fx-text-fill: #991b1b; -fx-font-size: 11.5px;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Button text="📥 Import / Restore Database" styleClass="btn, btn-danger" onAction="#restoreDatabase"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- ── TAB 9: PDF & PRINT SETTINGS ── -->
+                    <VBox fx:id="pdfPane" spacing="16" visible="false" managed="false" styleClass="chart-container">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Text text="📄 PDF &amp; Print Document Configuration" styleClass="section-title"/>
+                        <Separator/>
+
+                        <GridPane hgap="16" vgap="14">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="180" prefWidth="200"/>
+                                <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <Label text="Paper Size *" styleClass="field-label" GridPane.rowIndex="0"/>
+                            <ComboBox fx:id="pdfPaperSizeCombo" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                            <Label text="Document Language *" styleClass="field-label" GridPane.rowIndex="1"/>
+                            <ComboBox fx:id="pdfLanguageCombo" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                            <Label text="Supported Document Types" styleClass="field-label" GridPane.rowIndex="2"/>
+                            <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                <CheckBox fx:id="pdfIssueSlipCheck" text="Book Issue Slip (Includes Member, Book, Handled By, Due Date)" selected="true"/>
+                                <CheckBox fx:id="pdfReturnSlipCheck" text="Book Return Slip (Includes Fine Balance &amp; Received By)" selected="true"/>
+                                <CheckBox fx:id="pdfReceiptCheck" text="Library Receipt (Fine collection &amp; Membership dues)" selected="true"/>
+                                <CheckBox fx:id="pdfReportCheck" text="Library Report (Analytics, Overdue, Inventory PDF)" selected="true"/>
+                                <CheckBox fx:id="pdfMemberReportCheck" text="Member Report (Borrowing history &amp; Clearance)" selected="true"/>
+                            </VBox>
+                        </GridPane>
+
+                        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                            <Label fx:id="pdfStatusLabel" text="" style="-fx-font-size: 12px; -fx-text-fill: #059669; -fx-font-weight: bold;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="savePdfBtn" text="💾 Save PDF Settings" styleClass="btn, btn-primary" onAction="#savePdfSettings"/>
+                        </HBox>
+                    </VBox>
+
+                </StackPane>
+            </ScrollPane>
+        </HBox>
     </center>
 
 </BorderPane>

@@ -43,8 +43,9 @@
                     <Button text="🔄" styleClass="top-btn" onAction="#handleRefresh"/>
                 </HBox>
 
-                <!-- Stats row -->
-                <HBox spacing="20" alignment="CENTER_LEFT">
+                <!-- Stats row & Actions -->
+                <HBox spacing="14" alignment="CENTER_LEFT">
+                    <Button text="➕ Add Book" styleClass="btn, btn-primary" onAction="#resetForm"/>
                     <Label fx:id="totalLabel"     text="Total: 0"     style="-fx-font-weight:bold;"/>
                     <Label fx:id="availableLabel" text="Available: 0" style="-fx-text-fill:#388e3c; -fx-font-weight:bold;"/>
                     <Label fx:id="issuedLabel"    text="Issued: 0"    style="-fx-text-fill:#f57c00; -fx-font-weight:bold;"/>

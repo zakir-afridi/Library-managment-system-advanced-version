@@ -261,7 +261,9 @@ public class BookController {
                 "All Status", "Available", "Issued", "Overdue", "Lost", "Damaged", "Archived"));
         statusFilter.setValue("All Status");
 
-        List<String> cats = bookService.getAllCategories();
+        List<String> cats = new com.library.service.CategoryService().getActiveCategoryNames();
+        if (cats.isEmpty()) cats = bookService.getAllCategories();
+
         categoryFilter.setItems(FXCollections.observableArrayList());
         categoryFilter.getItems().add("All Categories");
         categoryFilter.getItems().addAll(cats);

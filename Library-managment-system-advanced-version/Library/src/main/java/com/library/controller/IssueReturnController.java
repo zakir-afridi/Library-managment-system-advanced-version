@@ -93,7 +93,7 @@ public class IssueReturnController {
     @FXML private DatePicker dueDatePicker;
     @FXML private Spinner<Integer> issuePeriodSpinner;
     @FXML private TextField  fineAmountField;
-    @FXML private TextField  issuedByField;
+    @FXML private ComboBox<String> issuedByCombo;
     @FXML private ComboBox<String> transactionTypeCombo;
     @FXML private TextArea   transactionNotesArea;
 
@@ -104,9 +104,10 @@ public class IssueReturnController {
     @FXML private Button printReceiptBtn;
 
     // ── Services ──────────────────────────────────────────────────────────────
-    private final BookService        bookService   = new BookService();
-    private final MemberService      memberService = new MemberService();
-    private final TransactionService txService     = new TransactionService();
+    private final BookService        bookService        = new BookService();
+    private final MemberService      memberService      = new MemberService();
+    private final TransactionService txService          = new TransactionService();
+    private final EmployeeService    employeeService    = new EmployeeService();
 
     private Member  selectedMember;
     private Book    selectedBook;
@@ -119,6 +120,7 @@ public class IssueReturnController {
         setupIssuedBooksTable();
         setupBookSearchTable();
         setupTransactionDefaults();
+        loadStaffOperators();
 
         // Wire operation toggle
         operationToggleGroup.selectedToggleProperty().addListener(
@@ -127,10 +129,36 @@ public class IssueReturnController {
         // Wire spinner to auto-update due date
         issuePeriodSpinner.valueProperty().addListener(
                 (obs, old, nw) -> updateDueDate());
+    }
 
-        // Set logged-in user
-        if (SessionManager.getInstance().isLoggedIn())
-            issuedByField.setText(SessionManager.getInstance().getUsername());
+    private void loadStaffOperators() {
+        if (issuedByCombo == null) return;
+        List<Employee> staffList = employeeService.getAllEmployees(1, 100);
+        ObservableList<String> items = FXCollections.observableArrayList();
+        for (Employee emp : staffList) {
+            if ("Active".equalsIgnoreCase(emp.getStatus())) {
+                items.add(emp.getName() + " — " + emp.getDesignation() + " (" + emp.getEmployeeCode() + ")");
+            }
+        }
+        if (items.isEmpty()) {
+            items.add("Admin — Administrator (EP00000001)");
+            items.add("Main Desk Operator — Counter (EP00000002)");
+        }
+        issuedByCombo.setItems(items);
+
+        // Select matching user or first
+        String currentUsername = SessionManager.getInstance().isLoggedIn() ? SessionManager.getInstance().getUsername() : "admin";
+        boolean selected = false;
+        for (String item : items) {
+            if (item.toLowerCase().contains(currentUsername.toLowerCase())) {
+                issuedByCombo.setValue(item);
+                selected = true;
+                break;
+            }
+        }
+        if (!selected && !items.isEmpty()) {
+            issuedByCombo.setValue(items.get(0));
+        }
     }
 
     // ── Table setup ───────────────────────────────────────────────────────────
@@ -363,14 +391,17 @@ public class IssueReturnController {
             return;
         }
 
-        String issuedBy = issuedByField.getText().trim();
+        String issuedBy = (issuedByCombo != null && issuedByCombo.getValue() != null && !issuedByCombo.getValue().isBlank())
+                ? issuedByCombo.getValue().trim()
+                : (SessionManager.getInstance().isLoggedIn() ? SessionManager.getInstance().getUsername() : "Admin");
+
         String error = txService.issueBook(
                 selectedBook.getBookId(), selectedMember.getStdId(), issuedBy);
 
         if (error.isEmpty()) {
             ToastNotification.success(backBtn.getScene(),
                     "✅ Book issued: " + selectedBook.getBookName()
-                    + " → " + selectedMember.getName());
+                    + " → " + selectedMember.getName() + " (Handled by: " + issuedBy + ")");
             if (andNew) clearAll();
             else refreshData();
         } else {
@@ -397,10 +428,13 @@ public class IssueReturnController {
         dialog.setContentText("Book condition:");
 
         dialog.showAndWait().ifPresent(condition -> {
-            double fine = txService.returnBook(tx.getTransactionId(), condition,
-                    SessionManager.getInstance().getUsername());
+            String handledBy = (issuedByCombo != null && issuedByCombo.getValue() != null && !issuedByCombo.getValue().isBlank())
+                    ? issuedByCombo.getValue().trim()
+                    : (SessionManager.getInstance().isLoggedIn() ? SessionManager.getInstance().getUsername() : "Admin");
+
+            double fine = txService.returnBook(tx.getTransactionId(), condition, handledBy);
             if (fine >= 0) {
-                String msg = "Book returned successfully.";
+                String msg = "Book returned successfully (Handled by: " + handledBy + ").";
                 if (fine > 0) msg += " Fine: " + AppConfig.getInstance().getCurrency()
                         + " " + String.format("%.2f", fine);
                 ToastNotification.success(backBtn.getScene(), msg);
@@ -418,9 +452,13 @@ public class IssueReturnController {
             return;
         }
         int days = AppConfig.getInstance().getLoanDays();
-        String result = txService.renewBook(selected.getTransactionId(), days, SessionManager.getInstance().getUsername());
+        String handledBy = (issuedByCombo != null && issuedByCombo.getValue() != null && !issuedByCombo.getValue().isBlank())
+                ? issuedByCombo.getValue().trim()
+                : (SessionManager.getInstance().isLoggedIn() ? SessionManager.getInstance().getUsername() : "Admin");
+
+        String result = txService.renewBook(selected.getTransactionId(), days, handledBy);
         if (result.isEmpty()) {
-            ToastNotification.success(backBtn.getScene(), "Loan renewed for " + days + " additional days.");
+            ToastNotification.success(backBtn.getScene(), "Loan renewed for " + days + " additional days (Handled by: " + handledBy + ").");
             refreshData();
         } else {
             ToastNotification.error(backBtn.getScene(), result);

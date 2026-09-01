@@ -119,6 +119,9 @@ public class Transaction {
     public String    getIssuedBy()               { return issuedBy; }
     public void      setIssuedBy(String v)       { this.issuedBy = v; }
 
+    public String    getHandledBy()              { return issuedBy; }
+    public void      setHandledBy(String v)      { this.issuedBy = v; }
+
     // Legacy alias for old code that used IssueRecord
     public int       getBorrowId()               { return transactionId; }
     public void      setBorrowId(int v)          { this.transactionId = v; }

@@ -237,15 +237,20 @@ public class ReportService {
 
     private void addHeader(Document doc, String title, String subtitle)
             throws DocumentException {
-        AppConfig cfg = AppConfig.getInstance();
-        Font libFont   = new Font(Font.HELVETICA, 10, Font.NORMAL, Color.GRAY);
-        Font titleFont = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(25, 118, 210));
+        com.library.model.LibraryInfo libInfo = LibraryInfoService.getInstance().getLibraryInfo();
+        Font libFont   = new Font(Font.HELVETICA, 12, Font.BOLD, new Color(5, 150, 105));
+        Font instFont  = new Font(Font.HELVETICA, 10, Font.BOLD, new Color(30, 41, 59));
+        Font titleFont = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(6, 95, 70));
         Font subFont   = new Font(Font.HELVETICA, 10, Font.ITALIC, Color.GRAY);
 
-        String address = cfg.get(AppConfig.KEY_LIBRARY_ADDRESS);
-        doc.add(new Paragraph(cfg.getLibraryName(), libFont));
-        if (address != null && !address.isBlank())
-            doc.add(new Paragraph(address, libFont));
+        Paragraph lib = new Paragraph(libInfo.getLibraryName(), libFont);
+        doc.add(lib);
+        if (libInfo.getInstitutionName() != null && !libInfo.getInstitutionName().isBlank()) {
+            doc.add(new Paragraph(libInfo.getInstitutionName(), instFont));
+        }
+        if (libInfo.getAddress() != null && !libInfo.getAddress().isBlank()) {
+            doc.add(new Paragraph(libInfo.getAddress() + (libInfo.getContactNumber().isBlank() ? "" : " | Tel: " + libInfo.getContactNumber()), subFont));
+        }
         doc.add(new Paragraph(" "));
 
         Paragraph t = new Paragraph(title, titleFont);
@@ -276,7 +281,7 @@ public class ReportService {
         Font hFont = new Font(Font.HELVETICA, 10, Font.BOLD, Color.WHITE);
         for (String h : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(h, hFont));
-            cell.setBackgroundColor(new Color(25, 118, 210));
+            cell.setBackgroundColor(new Color(5, 150, 105));
             cell.setPadding(6);
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(cell);

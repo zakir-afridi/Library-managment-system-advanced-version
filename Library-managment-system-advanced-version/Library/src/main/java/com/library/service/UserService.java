@@ -113,6 +113,20 @@ public class UserService {
         }
     }
 
+    public boolean updateUsername(int userId, String newUsername) {
+        if (newUsername == null || newUsername.isBlank()) return false;
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "UPDATE users SET username=? WHERE user_id=?")) {
+            ps.setString(1, newUsername.trim());
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOG.error("Error updating username: {}", e.getMessage());
+            return false;
+        }
+    }
+
     public boolean unlockUser(int userId) {
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(

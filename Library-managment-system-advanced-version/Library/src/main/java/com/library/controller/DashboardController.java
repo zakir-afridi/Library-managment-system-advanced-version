@@ -54,6 +54,9 @@ public class DashboardController {
     @FXML private Button refreshBtn;
     @FXML private Button logoutBtn;
     @FXML private Button sidebarToggleBtn;
+    @FXML private Label footerLibraryName;
+    @FXML private Label footerInstitutionName;
+    @FXML private Label sidebarLibraryNameLabel;
 
     // ── Navigation buttons ────────────────────────────────────────────────────
     @FXML private Button dashboardBtn;
@@ -132,12 +135,28 @@ public class DashboardController {
         setupTimeHorizon();
         setupTable();
         setupSearch();
+        setupDynamicLibraryInfo();
         setActiveButton(dashboardBtn);
         loadDashboardAsync();
         if (AppConfig.getInstance().getBoolean(AppConfig.KEY_WEATHER_ENABLED, true)) {
             loadWeatherAsync();
         }
         if (rootPane != null) dashboardCenter = rootPane.getCenter();
+    }
+
+    private void setupDynamicLibraryInfo() {
+        updateLibraryLabels(com.library.service.LibraryInfoService.getInstance().getLibraryInfo());
+        com.library.service.LibraryInfoService.getInstance().addChangeListener(this::updateLibraryLabels);
+    }
+
+    private void updateLibraryLabels(com.library.model.LibraryInfo info) {
+        if (info == null) return;
+        Platform.runLater(() -> {
+            if (appTitleText != null) appTitleText.setText(info.getLibraryName());
+            if (footerLibraryName != null) footerLibraryName.setText(info.getLibraryName());
+            if (footerInstitutionName != null) footerInstitutionName.setText(info.getInstitutionName());
+            if (sidebarLibraryNameLabel != null) sidebarLibraryNameLabel.setText(info.getLibraryName());
+        });
     }
 
     private void setupTimeHorizon() {
@@ -163,8 +182,9 @@ public class DashboardController {
         if (userLabel != null)
             userLabel.setText("Welcome, " + user.getUsername()
                     + "  [" + user.getRole() + "]");
+        com.library.model.LibraryInfo info = com.library.service.LibraryInfoService.getInstance().getLibraryInfo();
         if (appTitleText != null)
-            appTitleText.setText(LibraCoreApp.APP_NAME);
+            appTitleText.setText(info.getLibraryName());
 
         // Hide write-only controls for VIEWER role
         if (User.ROLE_VIEWER.equals(user.getRole())) {

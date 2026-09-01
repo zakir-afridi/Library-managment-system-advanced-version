@@ -20,7 +20,7 @@ public class Main {
 
         System.out.println("==================================================");
         System.out.println(" 🚀 Launching LibraCore Pro v3.0.0 (Enterprise)");
-        System.out.println(" 🔑 Default login:  admin / admin");
+        System.out.println(" 🔑 Default login:  admin| admin");
         System.out.println("==================================================");
 
         String javaHome = System.getProperty("java.home");

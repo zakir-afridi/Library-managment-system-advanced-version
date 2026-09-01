@@ -195,6 +195,37 @@ public class DatabaseConnection {
                 )
             """);
 
+            // ── categories ─────────────────────────────────────────────────
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS categories (
+                    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name        TEXT NOT NULL UNIQUE,
+                    description TEXT,
+                    status      TEXT NOT NULL DEFAULT 'Active'
+                )
+            """);
+
+            // ── publishers ─────────────────────────────────────────────────
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS publishers (
+                    publisher_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name         TEXT NOT NULL UNIQUE,
+                    contact      TEXT,
+                    address      TEXT,
+                    status       TEXT NOT NULL DEFAULT 'Active'
+                )
+            """);
+
+            // ── measurement_units ──────────────────────────────────────────
+            s.execute("""
+                CREATE TABLE IF NOT EXISTS measurement_units (
+                    unit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name    TEXT NOT NULL UNIQUE,
+                    symbol  TEXT,
+                    status  TEXT NOT NULL DEFAULT 'Active'
+                )
+            """);
+
             // ── activity_log ───────────────────────────────────────────────
             s.execute("""
                 CREATE TABLE IF NOT EXISTS activity_log (
@@ -283,11 +314,14 @@ public class DatabaseConnection {
             s.execute("CREATE INDEX IF NOT EXISTS idx_emp_status     ON employees(status)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_cache_isbn     ON book_metadata_cache(isbn)");
             s.execute("CREATE INDEX IF NOT EXISTS idx_email_status   ON email_queue(status, attempts)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name)");
+            s.execute("CREATE INDEX IF NOT EXISTS idx_publishers_name ON publishers(name)");
         }
 
         runMigrations(c);
         seedDefaultAdmin(c);
         seedLegacyAdmin(c);
+        seedSettingsAndCatalogs(c);
         DataSeeder.seedIfEmpty(c);
     }
 
@@ -300,6 +334,7 @@ public class DatabaseConnection {
             "ALTER TABLE users        ADD COLUMN locked_until TEXT",
             "ALTER TABLE books        ADD COLUMN cover_url TEXT",
             "ALTER TABLE reservations ADD COLUMN expires_at TEXT",
+            "ALTER TABLE transactions ADD COLUMN handled_by TEXT",
             // v2 legacy safety
             "ALTER TABLE members   ADD COLUMN archived_date TEXT",
             "ALTER TABLE books     ADD COLUMN archived_date TEXT",
@@ -321,6 +356,102 @@ public class DatabaseConnection {
     }
 
     // ── Seed ──────────────────────────────────────────────────────────────────
+
+    private static void seedSettingsAndCatalogs(Connection c) throws SQLException {
+        // Seed default library information & settings
+        String[][] defaultSettings = {
+            {"library.name", "Central Library"},
+            {"library.institution", "University of Engineering & Technology Peshawar"},
+            {"library.email", "library@uetpeshawar.edu.pk"},
+            {"library.phone", "+92 91 9216796"},
+            {"library.address", "University Campus, Peshawar, Khyber Pakhtunkhwa"},
+            {"library.website", "https://uetpeshawar.edu.pk"},
+            {"library.currency", "PKR"},
+            {"library.taxRate", "0.00"},
+            {"pdf.paperSize", "A4 — 210 × 297 mm"},
+            {"pdf.language", "English"}
+        };
+        try (PreparedStatement ps = c.prepareStatement(
+                "INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)")) {
+            for (String[] kv : defaultSettings) {
+                ps.setString(1, kv[0]);
+                ps.setString(2, kv[1]);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+
+        // Seed default categories
+        String[][] defaultCats = {
+            {"Computer Science", "Programming, Systems, Software & Computing theory"},
+            {"Software Engineering", "Architecture, clean code, design patterns & testing"},
+            {"Artificial Intelligence", "Machine learning, neural networks & computer vision"},
+            {"Data Science", "Data analysis, statistics, big data & mining"},
+            {"Mathematics", "Calculus, linear algebra, discrete math & analysis"},
+            {"Physics", "Mechanics, electrodynamics, quantum physics & optics"},
+            {"Business", "Startups, entrepreneurship, finance & corporate management"},
+            {"Finance", "Personal finance, investment, economics & accounting"},
+            {"Literature", "Fiction, classics, poetry & drama"},
+            {"History", "World history, archaeological studies & civilisations"},
+            {"Philosophy", "Ethics, logic, epistemology & political philosophy"},
+            {"Medicine", "Physiology, anatomy, pathology & pharmacology"},
+            {"Engineering", "Electrical, mechanical, civil & chemical engineering"}
+        };
+        try (PreparedStatement ps = c.prepareStatement(
+                "INSERT OR IGNORE INTO categories (name, description, status) VALUES (?, ?, 'Active')")) {
+            for (String[] cat : defaultCats) {
+                ps.setString(1, cat[0]);
+                ps.setString(2, cat[1]);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+
+        // Seed default publishers
+        String[][] defaultPubs = {
+            {"O'Reilly Media", "+1 (707) 827-7000", "Sebastopol, CA, USA"},
+            {"Addison-Wesley", "+1 (800) 824-7799", "Boston, MA, USA"},
+            {"MIT Press", "+1 (617) 253-5646", "Cambridge, MA, USA"},
+            {"Prentice Hall", "+1 (800) 922-0579", "Upper Saddle River, NJ, USA"},
+            {"Pearson", "+44 20 7010 2000", "London, United Kingdom"},
+            {"Wiley", "+1 (201) 748-6000", "Hoboken, NJ, USA"},
+            {"Springer Nature", "+49 6221 487 0", "Heidelberg, Germany"},
+            {"Oxford University Press", "+44 1865 556767", "Oxford, United Kingdom"},
+            {"Cambridge University Press", "+44 1223 358331", "Cambridge, United Kingdom"},
+            {"McGraw-Hill", "+1 (800) 338-3987", "New York, NY, USA"},
+            {"Elsevier", "+31 20 485 2222", "Amsterdam, Netherlands"},
+            {"No Starch Press", "+1 (415) 863-9900", "San Francisco, CA, USA"},
+            {"Penguin Classics", "+44 20 7139 3000", "London, United Kingdom"}
+        };
+        try (PreparedStatement ps = c.prepareStatement(
+                "INSERT OR IGNORE INTO publishers (name, contact, address, status) VALUES (?, ?, ?, 'Active')")) {
+            for (String[] pub : defaultPubs) {
+                ps.setString(1, pub[0]);
+                ps.setString(2, pub[1]);
+                ps.setString(3, pub[2]);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+
+        // Seed default measurement units
+        String[][] defaultUnits = {
+            {"Copy", "cpy"},
+            {"Volume", "vol"},
+            {"Set", "set"},
+            {"Book Unit", "unit"},
+            {"Bundle", "bdl"}
+        };
+        try (PreparedStatement ps = c.prepareStatement(
+                "INSERT OR IGNORE INTO measurement_units (name, symbol, status) VALUES (?, ?, 'Active')")) {
+            for (String[] u : defaultUnits) {
+                ps.setString(1, u[0]);
+                ps.setString(2, u[1]);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+    }
 
     private static void seedDefaultAdmin(Connection c) throws SQLException {
         try (Statement s = c.createStatement();

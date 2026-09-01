@@ -150,8 +150,8 @@
                   <Spinner fx:id="issuePeriodSpinner" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                   <Label text="Fine Amount" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
                   <TextField fx:id="fineAmountField" promptText="0.00" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                  <Label text="Issued By" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                  <TextField fx:id="issuedByField" text="Admin" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                  <Label text="Handled By / Operator" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                  <ComboBox fx:id="issuedByCombo" editable="true" promptText="Select Staff / Counter Operator" styleClass="form-field" prefWidth="10000" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                   <Label text="Transaction Type" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
                   <ComboBox fx:id="transactionTypeCombo" styleClass="form-field" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
                </GridPane>
