@@ -16,7 +16,7 @@
             <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
             <Text fx:id="appTitleText" text="LibraCore Pro" styleClass="app-title"/>
             <Text fx:id="moduleText" text="— Dashboard"
-                  style="-fx-font-size:13px; -fx-fill:rgba(255,255,255,0.7);"/>
+                  style="-fx-font-size:13px; -fx-fill:rgba(255,255,255,0.75);"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="overdueAlertLabel" text="0 Overdue"
                    style="-fx-background-color:#dc2626; -fx-text-fill:white;
@@ -27,26 +27,46 @@
                     styleClass="top-btn" style="-fx-font-size:14px;"/>
             <Label fx:id="userLabel" text="Welcome, Admin" styleClass="user-label"/>
             <Button fx:id="refreshBtn" text="🔄 Refresh" styleClass="top-btn" onAction="#handleRefresh"/>
-            <Button fx:id="logoutBtn" text="🚪 Logout" styleClass="logout-btn" onAction="#handleLogout"/>
         </HBox>
     </top>
 
     <left>
-        <VBox styleClass="sidebar" prefWidth="220" minWidth="180" spacing="4">
-            <padding><Insets top="20" bottom="20" left="8" right="8"/></padding>
-            <Label text="NAVIGATION" styleClass="sidebar-header"/>
-            <Button fx:id="dashboardBtn"   text="📊  Dashboard"      styleClass="sidebar-btn" onAction="#showDashboard"/>
-            <Button fx:id="booksBtn"       text="📚  Books"           styleClass="sidebar-btn" onAction="#showBooks"/>
-            <Button fx:id="membersBtn"     text="👥  Members"         styleClass="sidebar-btn" onAction="#showMembers"/>
-            <Button fx:id="issueReturnBtn" text="🔄  Issue / Return"  styleClass="sidebar-btn" onAction="#showIssueReturn"/>
-            <Button fx:id="employeesBtn"   text="👤  Employees"       styleClass="sidebar-btn" onAction="#showEmployees"/>
-            <Button fx:id="archiveBtn"     text="📦  Archive"         styleClass="sidebar-btn" onAction="#showArchive"/>
-            <Button fx:id="reportsBtn"     text="📈  Reports"         styleClass="sidebar-btn" onAction="#showReports"/>
-            <Button fx:id="settingsBtn"    text="⚙️  Settings"        styleClass="sidebar-btn" onAction="#showSettings"/>
+        <VBox styleClass="sidebar" prefWidth="220" minWidth="180" spacing="2">
+            <padding><Insets top="0" bottom="0" left="0" right="0"/></padding>
+
+            <!-- Brand header -->
+            <VBox styleClass="sidebar-brand" alignment="CENTER" spacing="2">
+                <padding><Insets top="20" right="12" bottom="16" left="12"/></padding>
+                <Text text="📚" style="-fx-font-size:28px;"/>
+                <Text text="LibraCore Pro" styleClass="sidebar-brand-title"/>
+                <Text text="Library Management" styleClass="sidebar-brand-sub"/>
+            </VBox>
+
+            <VBox spacing="2" style="-fx-padding:0 8 0 8;">
+                <Label text="MAIN MENU" styleClass="sidebar-header"/>
+                <Button fx:id="dashboardBtn"   text="📊  Dashboard"      styleClass="sidebar-btn" onAction="#showDashboard"/>
+                <Button fx:id="booksBtn"       text="📚  Books"           styleClass="sidebar-btn" onAction="#showBooks"/>
+                <Button fx:id="membersBtn"     text="👥  Members"         styleClass="sidebar-btn" onAction="#showMembers"/>
+                <Button fx:id="issueReturnBtn" text="🔄  Issue / Return"  styleClass="sidebar-btn" onAction="#showIssueReturn"/>
+                <Button fx:id="employeesBtn"   text="👤  Employees"       styleClass="sidebar-btn" onAction="#showEmployees"/>
+
+                <Label text="MANAGEMENT" styleClass="sidebar-header" style="-fx-padding:10 6 2 6;"/>
+                <Button fx:id="archiveBtn"     text="📦  Archive"         styleClass="sidebar-btn" onAction="#showArchive"/>
+                <Button fx:id="reportsBtn"     text="📈  Reports"         styleClass="sidebar-btn" onAction="#showReports"/>
+                <Button fx:id="settingsBtn"    text="⚙️  Settings"        styleClass="sidebar-btn" onAction="#showSettings"/>
+            </VBox>
+
             <Region VBox.vgrow="ALWAYS"/>
-            <Separator style="-fx-opacity:0.3;"/>
-            <Button fx:id="sidebarLogoutBtn" text="🚪  Logout" styleClass="logout-btn"
-                    maxWidth="Infinity" onAction="#handleLogout"/>
+
+            <!-- Logout at bottom -->
+            <VBox styleClass="sidebar-footer" spacing="8">
+                <padding><Insets top="12" right="12" bottom="16" left="12"/></padding>
+                <Separator style="-fx-opacity:0.25;"/>
+                <Button fx:id="sidebarLogoutBtn" text="🚪  Logout"
+                        styleClass="sidebar-logout-btn"
+                        maxWidth="Infinity" prefHeight="38"
+                        onAction="#handleLogout"/>
+            </VBox>
         </VBox>
     </left>
 
